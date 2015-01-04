@@ -77,7 +77,7 @@ func WeatherHandler(w http.ResponseWriter, req *http.Request) {
 
 	log.Printf("RAW /weather POST: %s", string(body))
 	geoLocation := new(structures.JsonGeoLocationRequest)
-	json.Unmarshal([]byte(structures.TestGeoLocationPost), &geoLocation)
+	json.Unmarshal([]byte(body), &geoLocation)
 
 	latString := strconv.FormatFloat(float64(geoLocation.Params.Lat), 'f', 15, 32)
 	lngString := strconv.FormatFloat(float64(geoLocation.Params.Lng), 'f', 15, 32)
