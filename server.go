@@ -69,7 +69,7 @@ func DateHandler(w http.ResponseWriter, req *http.Request) {
 
 func WeatherHandler(w http.ResponseWriter, req *http.Request) {
 	// handle JSON POST request
-	//body := string(structures.TestGeoLocationPost)
+	//body := string(structures.TestGeoLocationPost) // in case you are testing :)
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
 		panic("ioutil.ReadAll")
