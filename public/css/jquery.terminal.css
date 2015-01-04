@@ -1,0 +1,82 @@
+.terminal .clipboard {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    opacity: 0.01;
+    filter: alpha(opacity = 0.01);
+    filter: progid:DXImageTransform.Microsoft.Alpha(opacity=0.01);
+    width: 2px;
+}
+.cmd > .clipboard {
+    position: fixed;
+}
+.terminal {
+    padding: 10px;
+    position: relative;
+    overflow: hidden;
+}
+.cmd {
+    padding: 0;
+    margin: 0;
+    height: 1.3em;
+}
+.terminal .terminal-output div {
+    display: block;
+}
+.terminal {
+    font-family: FreeMono, monospace;
+    color: lime;
+    font-size: 16px;
+    line-height: 14px;
+    height: 75%;
+    width: 45%;
+    position: absolute;
+    top: 5%;
+    left: 5%;
+    border: 1px solid transparent;
+    padding:5px;
+}
+.terminal:hover {
+    opacity:1.0; 
+    border: 1px solid #333;
+    background-color:rgba(0, 0, 0, 0.3);
+}
+.terminal .terminal-output div span {
+    display: inline-block;
+}
+.terminal .cmd span {
+    display: inline-block;
+}
+.terminal .cmd span.inverted {
+    background-color: lime;
+    color: #000;
+}
+.terminal div::-moz-selection, .terminal span::-moz-selection {
+    background-color: #aaa;
+    color: #000;
+}
+.terminal div::selection, .terminal span::selection {
+    background-color: #aaa;
+    color: #000;
+}
+.terminal .terminal-output div.error, .terminal .terminal-output div.error div {
+    color: yellow;
+    background-color:gray;
+}
+.tilda {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100%;
+    z-index: 1100;
+}
+.clear {
+    clear: both;
+}
+.terminal a {
+    color: lime;
+}
+.terminal a:hover {
+    font-weight:bold;
+    color: #E06C1F;
+}

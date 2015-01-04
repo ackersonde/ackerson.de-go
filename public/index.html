@@ -1,0 +1,91 @@
+<!DOCTYPE HTML>
+<html>
+
+<head>
+    <meta charset="UTF-8" />
+    <title>Offworld</title>
+    <link rel="stylesheet" href="css/jquery.terminal.css" />
+    <link rel="stylesheet" href="http://code.jquery.com/ui/1.9.0/themes/base/jquery-ui.css" rel="stylesheet" />
+    <link rel="stylesheet" href="css/offworld.css" />
+
+    <script type="text/javascript">
+      var _gaq = _gaq || [];
+      _gaq.push(['_setAccount', 'UA-35450644-1']);
+      _gaq.push (['_gat._anonymizeIp']);
+      _gaq.push(['_trackPageview']);
+
+      (function() {
+        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
+        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
+        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
+      })();
+    </script>
+</head>
+
+<body>
+    <section>
+        <div id="term1"></div>
+        <div id="links">
+            <a href="javascript:mvvRoute('München, Hauptbahnhof', 'Schwabhausen');"><img src="images/schwab.gif" width="32px" alt="Train home" title="Train home"></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:showPopup('mvv');"><img src="images/bahn.png" width="32px"></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:mvvRoute('Schwabhausen', 'München, Hauptbahnhof');"><img src="images/munich.png" width="32px" alt="Train to Munich" title="Train to Munich"></a>
+        </div>
+        <!-- HIDDEN / POP-UP DIVS -->
+        <div class="framePopup ui-widget-content" id="drivePopup">
+            <p class="border">&nbsp;</p>
+            <a class="closePopupButton" href="javascript:popupClose('drivePopup');"><img class="closePopupIcon" src="images/close_button.png"></a>
+            <div>
+              <label for="address" style="font-weight:bold;font-size:20px;margin:10px;">Destination:</label>
+              <input id="address" type="textbox" value="">
+              <input type="button" class="map_directions_button" value="Directions" onclick="getDrivingDirections()">
+            </div>
+            <div id="map_canvas"></div>
+            <div id="map_details">
+              <div id="home_location" style="display:inline;"></div>
+              <div id="directions" style="overflow:auto;height:85%;clear:both;"></div>
+            </div>
+        </div>
+
+        <div class="framePopup ui-widget-content" id="weatherPopup">
+            <p class="border">&nbsp;</p>
+            <a class="closePopupButton" href="javascript:popupClose('weatherPopup');"><img class="closePopupIcon" src="images/close_button.png"></a>
+            <div id="weatherreport">
+                <div id="currentweather" style="float:left; clear:both;margin-top:-25px;margin-left:10px;">
+                </div>
+                <div id="forecastweather" style="float:left; clear:both;">
+                </div>
+            </div>
+        </div>
+
+        <div class="framePopup ui-widget-content" id="mvvPopup">
+            <p class="border">&nbsp;</p>
+            <a class="closePopupButton" href="javascript:popupClose('mvvPopup');"><img class="closePopupIcon" src="images/close_button.png"></a>
+            <iframe id="iframeMVV" seamless="seamless" src="http://efa.mvv-muenchen.de/mobile/XSLT_TRIP_REQUEST2?language=de"></iframe>
+        </div>
+
+        <div class="framePopup ui-widget-content" id="mvvRoutePopup">
+            <p class="border">&nbsp;</p>
+            <a class="closePopupButton" href="javascript:popupClose('mvvRoutePopup');"><img class="closePopupIcon" src="images/close_button.png"></a>
+            <iframe id="iframeMVVRoute" seamless="seamless" src=""></iframe>
+        </div>
+    </section>
+
+    <footer>
+        <div id="footerLeft">
+            <a href="http://about.me/danackerson">Dan Ackerson</a>&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="https://www.facebook.com/kerstin.ackerson">Kerstin</a>&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="https://www.facebook.com/sebastian.ackerson">Sebastian</a>&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="impressum.html">Impressum</a>
+        </div>
+        <div id="footerRight">Background: <a href="http://imgur.com/N7Bnl">"The beauty of space."</a></div>
+    </footer>
+
+    <script src="js/jquery-2.0.3.min.js"></script>
+    <script src="http://code.jquery.com/ui/1.10.3/jquery-ui.min.js"></script>
+    <script src="js/jquery.mousewheel.js"></script>
+    <script src="js/jquery.terminal-0.7.0.min.js"></script>
+    <script src="js/offworld.js"></script>
+    <script src="js/offworld_google_maps.js"></script>
+    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCYSvbMmRRoyCCl0sh4zrKOujwZ3DU4ee0&sensor=true&callback=init_googlemaps"></script>
+    
+</body>
+
+</html>

@@ -1,0 +1,160 @@
+html {
+    background: url(http://i.imgur.com/N7Bnl.jpg) no-repeat center center fixed;
+    /*background: url(http://i.imgur.com/8Ie6E.jpg) no-repeat center center fixed; <a href="http://imgur.com/8Ie6E">"Ice lake on Mars."</a>*/
+    -webkit-background-size: cover;
+    -moz-background-size: cover;
+    -o-background-size: cover;
+    background-size: cover;
+    color:white;
+    background-color:black;
+}
+a {
+    color:white;
+    text-decoration:none;
+}
+a:hover {
+    color:#E06C1F;
+}
+header,section,article,aside,footer{
+    display: block;
+}
+footer{
+    position:absolute;
+    bottom:5px;
+    right:5px;
+    width:100%;
+    color:white;
+    font-size:12px;
+}
+input#address {
+    width: 20em;
+    font-size:18px;
+}
+#footerLeft {
+    float:left;
+    padding-left:5px;
+    margin-left:5px;
+    opacity:0.2;
+}
+#footerLeft:hover {
+    opacity:1.0;
+}
+#footerRight {
+    float:right;
+    opacity:0.2;
+}
+#footerRight:hover {
+    opacity:1.0;
+}
+img.closePopupIcon {
+  width: 28px;
+  height: 28px;
+}
+a.closePopupButton {
+    float:right; 
+    position:relative; 
+    top:-24px; 
+    right:-14px;
+}
+#links {
+    float:right;
+    margin: 38px;
+    width: 45%;
+}
+div.framePopup {
+  display: none;
+  position: absolute;
+  top:80px;
+  left:80px;
+  width: 80%;
+  height:75%;
+  background: #eeeeee;
+  color: #000000;
+  border: 1px solid #1a1a1a;
+  font-size: 90%;
+}
+div#drivePopup {
+    background: white;
+    height:90%;
+    top:20px;
+}
+div#mvvRoutePopup {
+    background: white;
+    width:70%;
+    height:90%;
+    top:20px;
+    left:280px;
+}
+div#mvvPopup {
+    background: #B2C900;
+    width: 30%;
+    height: 50%;
+    left:480px;
+}
+div#weatherPopup {
+    background: white;
+    width: 50%;
+    height: 65%;
+    left:580px;
+    top:20px;
+}
+p.border { 
+    background-image: url(../images/border.png);
+    height:10px;
+    margin:0; cursor: move; 
+}
+div#map_canvas {
+    width:75%; 
+    height:91%; 
+    float:left; 
+    clear:none;
+}
+div#map_details {
+    width:24%; 
+    height:91%; 
+    float:right; 
+    clear:none; 
+    border: 1px solid gray; 
+    margin-right:5px;
+}
+iframe#iframeMVV {
+    width:100%;
+    height:100%;
+    position:absolute;
+}
+iframe#iframeMVVRoute {
+    width:100%;
+    height:100%;
+    position:absolute;
+}
+.map_directions_button {
+    -moz-box-shadow:inset 0px 1px 0px 0px #bbdaf7;
+    -webkit-box-shadow:inset 0px 1px 0px 0px #bbdaf7;
+    box-shadow:inset 0px 1px 0px 0px #bbdaf7;
+    background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #79bbff), color-stop(1, #378de5) );
+    background:-moz-linear-gradient( center top, #79bbff 5%, #378de5 100% );
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#79bbff', endColorstr='#378de5');
+    background-color:#79bbff;
+    -moz-border-radius:6px;
+    -webkit-border-radius:6px;
+    border-radius:6px;
+    border:1px solid #84bbf3;
+    display:inline-block;
+    color:#ffffff;
+    font-family:arial;
+    font-size:15px;
+    font-weight:bold;
+    padding:6px 24px;
+    text-decoration:none;
+    text-shadow:1px 1px 0px #528ecc;
+}
+.map_directions_button:hover {
+    background:-webkit-gradient( linear, left top, left bottom, color-stop(0.05, #378de5), color-stop(1, #79bbff) );
+    background:-moz-linear-gradient( center top, #378de5 5%, #79bbff 100% );
+    filter:progid:DXImageTransform.Microsoft.gradient(startColorstr='#378de5', endColorstr='#79bbff');
+    background-color:#378de5;
+}
+.map_directions_button:active {
+    position:relative;
+    top:1px;
+}
