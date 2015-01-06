@@ -8,7 +8,8 @@ Using the Dockerfile above:
 
 Automatic startup on CoreOS:
 ```
-sudo vi -r /etc/systemd/system/ackerson-de.service
+$ docker stop ackerson.de
+$ sudo vi -r /etc/systemd/system/ackerson-de.service
 [Unit]
 Description=AckersonHomepage
 After=docker.service
@@ -20,12 +21,12 @@ ExecStart=/usr/bin/docker start ackerson.de
 
 [Install]
 WantedBy=multi-user.target
+
+$ sudo systemctl enable /etc/systemd/system/ackerson-de.service
+$ sudo systemctl start ackerson-de.service
+$ sudo reboot
 ```
 
-0. docker stop ackerson.de
-0. sudo systemctl enable /etc/systemd/system/ackerson-de.service
-0. sudo systemctl start ackerson-de.service
-0. sudo reboot
-0. docker logs ackerson.de
-0. journalctl -f -u ackerson-de.service
-0. curl http://ackerson.de
+Final check:
+
+`curl http://ackerson.de`
