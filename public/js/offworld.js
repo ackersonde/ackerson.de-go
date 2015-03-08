@@ -29,12 +29,18 @@ function mvvRoute(origin, destination) {
   var id = 1;
   var greeting = "Welcome Offworld (type help)";
   var drive_msg = "[[g;#FFFF00;]drive] <DESTINATION>: google directions from your location\r\n\r\n";
-  var weather_msg = "[[g;#FFFF00;]weather]: show local weather forecast (popup window!)\r\n\r\n";
+  var weather_msg = "[[g;#FFFF00;]weather]: show weather forecast\r\n\r\n";
   var mvv_msg = "[[g;#FFFF00;]mvv]: access Munich's public transportation\r\n\r\n";
   var whoami_msg = "[[g;#FFFF00;]whoami]: your browser info and IP address\r\n\r\n";
   var date_msg = "[[g;#FFFF00;]date]: my server date/time\r\n\r\n";
+  var sw_msg = "[[g;#FFFF00;]sw]: Schwabhausen weather \r\n\r\n";
   var clear_msg = "[[g;#FFFF00;]clear]: clear this terminal screen\r\n\r\n";
-  var help = drive_msg + weather_msg + mvv_msg + whoami_msg + date_msg + clear_msg;
+  var help = drive_msg + weather_msg + mvv_msg + whoami_msg + date_msg + sw_msg + clear_msg;
+
+  // TODO 'wp' (write poetry) => window.open('https://draftin.com/api')
+  // TODO 'poems' (see poems) => window.open('/poems') 
+  // => curl -u dan@ackerson.de:<pass> https://draftin.com/api/v1/documents.json
+  // => filter by folder_id='20624' ('WRITINGS')
 
   $( "#mvvPopup" ).draggable({ handle: "p.border" });
   $( "#drivePopup" ).draggable({ handle: "p.border" });
@@ -85,6 +91,11 @@ function mvvRoute(origin, destination) {
             showPopup(commands[0]);
             break;
 
+          case 'sw':
+            schwabhausen_weather = 'http://www.wunderground.com/cgi-bin/findweather/getForecast?query=48.300000,11.350000&ID=IBAYERNS22';
+            window.open(schwabhausen_weather);
+            break;
+ 
           case 'weather':
             getPosition();
             break;
@@ -176,7 +187,7 @@ function mvvRoute(origin, destination) {
                     <span style='float:left;'>"+forecast[i]['date']['weekday_short']+",&nbsp;"+forecast[i]['date']['monthname']+" "+forecast[i]['date']['day']+"</span>\
                     <div style='float:left;clear:left;margin-right:5px;'>\
                         <span style='font-weight:bold;'>"+forecast[i]['low']['celsius']+"&nbsp;&#8451;</span>\
-                        <img src="+forecast[i]['icon_url']+" width='44' height='44' alt="+forecast[i]['conditions']+">\
+                        <img src='"+forecast[i]['icon_url']+"' width='44' height='44' alt='"+forecast[i]['conditions']+"'>\
                         <span style='font-weight:bold;'>"+forecast[i]['high']['celsius']+"&nbsp;&#8451;</span>\
                     </div>";
                     if (i+1 < forecast.length) {
@@ -190,8 +201,8 @@ function mvvRoute(origin, destination) {
                 <div id='weatherreport'>\
                     <div style='float:left;margin-left:10px;'>\
                         <div>\
-                            <a target='_blank' href="+current['ob_url']+">\
-                            <img src="+current['icon_url']+" width='44' height='44' alt="+current['weather']+">\
+                            <a target='_blank' href='"+current['ob_url']+"'>\
+                            <img src='"+current['icon_url']+"' width='44' height='44' alt='"+current['weather']+"'>\
                             </a>\
                         </div>\
                         <div style='margin-left:-10px;'>"+current['weather']+"</div>\

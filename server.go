@@ -98,7 +98,7 @@ func WeatherHandler(w http.ResponseWriter, req *http.Request) {
 			log.Printf("%s", err)
 		}
 		json.Unmarshal([]byte(currentWeatherJSON), &currentWeather)
-		//log.Printf("%s\n", string(currentWeather))
+		log.Printf("%s\n", currentWeather)
 	}
 
 	currentForecast := new(structures.CurrentWeatherForecast)
