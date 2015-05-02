@@ -9,18 +9,23 @@
 0. http://localhost:3001 (now code and gin builds in the background)
 
 # Building
-Using the Dockerfile above:
-
+0. cd ~/dev/danackerson/ackerson.de-go/
 0. docker build -t="blauerdrachen/ackerson.de" --no-cache .
 0. docker login
 0. docker push blauerdrachen/ackerson.de
-0. docker run -d -p 80:3001 --name="ackerson.de" blauerdrachen/ackerson.de
+0. docker run -d -p 80:3001 -v /opt:/opt --name="ackerson.de" blauerdrachen/ackerson.de
 0. curl http://ackerson.de/
 
 # Running
 Automatic startup on CoreOS:
 ```
 $ docker stop ackerson.de
+$ sudo vi /opt/creds.txt
+mongo=mongodb://XYZ.mongolab.com:123/abc
+secret=[secret]
+wunderground=[api]
+poem=[param]
+
 $ sudo vi -r /etc/systemd/system/ackerson-de.service
 [Unit]
 Description=AckersonHomepage
