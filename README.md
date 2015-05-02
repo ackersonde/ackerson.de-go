@@ -4,6 +4,7 @@
 0. go get github.com/goincremental/negroni-session
 0. go get gopkg.in/mgo.v2
 0. cd ~/dev/danackerson/ackerson.de-go/
+0. vi /opt/creds.txt (with appropriate values!)
 0. `gin` (launch app refresher for dev)
 0. http://localhost:3001 (now code and gin builds in the background)
 
