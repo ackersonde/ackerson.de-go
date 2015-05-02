@@ -33,7 +33,7 @@ type JsonGeoLocationRequest struct {
 // b. feed result into http://mholt.github.io/json-to-go/
 // c. copy/paste struct and exchange GIVEMEANAME with CurrentWeather* name
 
-// SAMPLE: http://api.wunderground.com/api/c5060046bbda0736/forecast/q/48.3003338,11.356706099999997.json
+// SAMPLE: http://api.wunderground.com/api/xyz/forecast/q/48.3003338,11.356706099999997.json
 type CurrentWeatherForecast struct {
 	Response struct {
 		Version        string `json:"version"`
@@ -134,7 +134,7 @@ type CurrentWeatherForecast struct {
 	} `json:"forecast"`
 }
 
-// SAMPLE: http://api.wunderground.com/api/c5060046bbda0736/conditions/q/48.3003338,11.356706099999997.json
+// SAMPLE: http://api.wunderground.com/api/xyz/conditions/q/48.3003338,11.356706099999997.json
 type CurrentWeatherConditions struct {
 	Response struct {
 		Version string `json:"version"`

@@ -41,9 +41,9 @@ func main() {
 			session := sessions.GetSession(r)
 			pass := session.Get("pass")
 
-			if pass == nil && r.FormValue("sesam") != "taco" {
+			if pass == nil && r.FormValue("sesam") != poem {
 				http.NotFound(w, r)
-			} else if r.FormValue("sesam") == "taco" || pass != nil {
+			} else if r.FormValue("sesam") == poem || pass != nil {
   			session.Set("pass", "true")
 
   			PoemsHandler(w, r)
@@ -63,17 +63,24 @@ func main() {
 
 var mongo string
 var secret string
+var poem string
+var wunderground string
 
 func readInCreds() {
 	content, _ := ioutil.ReadFile("/opt/creds.txt")
 	lines := strings.Split(string(content), "\n")
 	for _, line := range lines {
 		values := strings.Split(string(line), "=")
-		if values[0] == "mongo" {
-			mongo = values[1]
-		} else if values[0] == "secret" {
-			secret = values[1]
-		}
+		switch values[0] {
+	    case "mongo":
+	      mongo = values[1]
+	    case "secret":
+	      secret = values[1]
+	    case "poem":
+	      poem = values[1]
+	    case "wunderground":
+	      wunderground = values[1]
+    }
   }
 }
 
@@ -149,8 +156,8 @@ func WeatherHandler(w http.ResponseWriter, req *http.Request) {
 	lngString := strconv.FormatFloat(float64(geoLocation.Params.Lng), 'f', 15, 32)
 
 	// call wunderground API for Conditions & Forecast
-	conditionsURI := "http://api.wunderground.com/api/c5060046bbda0736/conditions/q/"
-	forecastURI := "http://api.wunderground.com/api/c5060046bbda0736/forecast/q/"
+	conditionsURI := "http://api.wunderground.com/api/" + wunderground + "/conditions/q/"
+	forecastURI := "http://api.wunderground.com/api/" + wunderground + "/forecast/q/"
 	locationParams := latString + "," + lngString + ".json"
 
 	currentWeather := new(structures.CurrentWeatherConditions)
