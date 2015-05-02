@@ -12,10 +12,12 @@ ENV GOPATH /root/gocode
 
 # install ackerson.de
 RUN go get github.com/codegangsta/negroni
+RUN go get github.com/goincremental/negroni-session
+RUN go get gopkg.in/mgo.v2
 RUN git clone https://github.com/danackerson/ackerson.de-go.git /root/gocode/src/github.com/danackerson/ackerson.de-go/
 WORKDIR /root/gocode/src/github.com/danackerson/ackerson.de-go
 RUN go build server.go
-EXPOSE 3000
+EXPOSE 3001
 
 # execute ackerson.de
 ENTRYPOINT ["/root/gocode/src/github.com/danackerson/ackerson.de-go/server"]

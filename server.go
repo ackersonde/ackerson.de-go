@@ -2,8 +2,12 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"github.com/codegangsta/negroni"
 	"github.com/danackerson/ackerson.de-go/structures"
+	"github.com/goincremental/negroni-sessions"
+  "github.com/goincremental/negroni-sessions/cookiestore"
+  "gopkg.in/mgo.v2"
 	"io/ioutil"
 	"log"
 	"net"
@@ -32,10 +36,72 @@ func main() {
 			WeatherHandler(w, r)
 		}
 	})
+	mux.HandleFunc("/poems", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "GET" {
+			session := sessions.GetSession(r)
+			pass := session.Get("pass")
+
+			if pass == nil && r.FormValue("sesam") != "taco" {
+				http.NotFound(w, r)
+			} else if r.FormValue("sesam") == "taco" || pass != nil {
+  			session.Set("pass", "true")
+
+  			PoemsHandler(w, r)
+  		}
+		}
+	})
 
 	n := negroni.Classic()
+
+	readInCreds()
+
+	store := cookiestore.New([]byte(secret))  
+  n.Use(sessions.Sessions("gurkherpaderp", store))
 	n.UseHandler(mux)
-	n.Run(":3000")
+	n.Run(":3001")
+}
+
+var mongo string
+var secret string
+
+func readInCreds() {
+	content, _ := ioutil.ReadFile("/opt/creds.txt")
+	lines := strings.Split(string(content), "\n")
+	for _, line := range lines {
+		values := strings.Split(string(line), "=")
+		if values[0] == "mongo" {
+			mongo = values[1]
+		} else if values[0] == "secret" {
+			secret = values[1]
+		}
+  }
+}
+
+func loadWritings(w http.ResponseWriter) ([](structures.Writing)) {
+	writings := [](structures.Writing){}
+	session, err := mgo.Dial(mongo)
+
+  if err != nil {
+  	fmt.Fprintf(w, err.Error())
+  } else {
+	  defer session.Close()
+	  session.SetMode(mgo.Monotonic, true)
+	  c := session.DB("ackersonde").C("writings")
+
+	  iter := c.Find(nil).Iter()
+	  iter.All(&writings)
+		session.Close()
+	}
+
+	return writings
+}
+
+func PoemsHandler(w http.ResponseWriter, req *http.Request) {
+	writings := loadWritings(w)
+  for _, writing := range writings {
+    fmt.Fprintf(w, "%1.0f: %s", writing.ID, writing.Content)
+    fmt.Fprintf(w, "\r\n")
+  }
 }
 
 func GetIP(r *http.Request) string {

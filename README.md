@@ -1,11 +1,22 @@
+# Installation and Development
+0. go get github.com/codegangsta/gin
+0. go get github.com/codegangsta/negroni
+0. go get github.com/goincremental/negroni-session
+0. go get gopkg.in/mgo.v2
+0. cd ~/dev/danackerson/ackerson.de-go/
+0. `gin` (launch app refresher for dev)
+0. http://localhost:3001 (now code and gin builds in the background)
+
+# Building
 Using the Dockerfile above:
 
 0. docker build -t="blauerdrachen/ackerson.de" --no-cache .
 0. docker login
 0. docker push blauerdrachen/ackerson.de
-0. docker run -d -p 80:3000 --name="ackerson.de" blauerdrachen/ackerson.de
+0. docker run -d -p 80:3001 --name="ackerson.de" blauerdrachen/ackerson.de
 0. curl http://ackerson.de/
 
+# Running
 Automatic startup on CoreOS:
 ```
 $ docker stop ackerson.de

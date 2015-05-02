@@ -1,5 +1,20 @@
 package structures
 
+// DraftIn: https://draftin.com/documents/69898?token=5fjKKlZ0-AeBzqj_RAftAGdzRzl9VBfBHj5wpSWm_gU
+// JSON2struct: https://mervine.net/json2struct
+type Writing struct {
+	Content     string  `json:"content"`
+	ContentHtml string  `json:"content_html"`
+	CreatedAt   string  `json:"created_at"`
+	ID          float64 `json:"id"`
+	Name        string  `json:"name"`
+	UpdatedAt   string  `json:"updated_at"`
+	User        struct {
+		Email string  `json:"email"`
+		ID    float64 `json:"id"`
+	} `json:"user"`
+}
+
 var TestGeoLocationPost string = `{"jsonrpc":"2.0","method":"post","params":{"lat":48.3003496,"lng":11.356716099999971},"id":14}`
 
 type JsonGeoLocationRequest struct {
