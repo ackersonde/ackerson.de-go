@@ -6,12 +6,13 @@ import (
 	"github.com/codegangsta/negroni"
 	"github.com/danackerson/ackerson.de-go/structures"
 	"github.com/goincremental/negroni-sessions"
-  "github.com/goincremental/negroni-sessions/cookiestore"
-  "gopkg.in/mgo.v2"
+	"github.com/goincremental/negroni-sessions/cookiestore"
+	"gopkg.in/mgo.v2"
 	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
+	"os"
 	"strconv"
 	"strings"
 	"time"
@@ -44,10 +45,10 @@ func main() {
 			if pass == nil && r.FormValue("sesam") != poem {
 				http.NotFound(w, r)
 			} else if r.FormValue("sesam") == poem || pass != nil {
-  			session.Set("pass", "true")
+				session.Set("pass", "true")
 
-  			PoemsHandler(w, r)
-  		}
+				PoemsHandler(w, r)
+			}
 		}
 	})
 
@@ -55,8 +56,8 @@ func main() {
 
 	readInCreds()
 
-	store := cookiestore.New([]byte(secret))  
-  n.Use(sessions.Sessions("gurkherpaderp", store))
+	store := cookiestore.New([]byte(secret))
+	n.Use(sessions.Sessions("gurkherpaderp", store))
 	n.UseHandler(mux)
 	n.Run(":3001")
 }
@@ -68,35 +69,48 @@ var wunderground string
 
 func readInCreds() {
 	content, _ := ioutil.ReadFile("/opt/creds.txt")
-	lines := strings.Split(string(content), "\n")
-	for _, line := range lines {
-		values := strings.Split(string(line), "=")
-		switch values[0] {
-	    case "mongo":
-	      mongo = values[1]
-	    case "secret":
-	      secret = values[1]
-	    case "poem":
-	      poem = values[1]
-	    case "wunderground":
-	      wunderground = values[1]
-    }
-  }
+	if content == nil {
+		// try reading creds from ENV
+		mongo = os.Getenv("ackMongo")
+		secret = os.Getenv("ackSecret")
+		poem = os.Getenv("ackPoems")
+		wunderground = os.Getenv("ackWunder")
+	} else {
+		lines := strings.Split(string(content), "\n")
+		for _, line := range lines {
+			values := strings.Split(string(line), "=")
+			switch values[0] {
+			case "mongo":
+				mongo = values[1]
+			case "secret":
+				secret = values[1]
+			case "poem":
+				poem = values[1]
+			case "wunderground":
+				wunderground = values[1]
+			}
+		}
+	}
+
+	log.Printf("%s", mongo)
+	log.Printf("%s", secret)
+	log.Printf("%s", poem)
+	log.Printf("%s", wunderground)
 }
 
-func loadWritings(w http.ResponseWriter) ([](structures.Writing)) {
+func loadWritings(w http.ResponseWriter) [](structures.Writing) {
 	writings := [](structures.Writing){}
 	session, err := mgo.Dial(mongo)
 
-  if err != nil {
-  	fmt.Fprintf(w, err.Error())
-  } else {
-	  defer session.Close()
-	  session.SetMode(mgo.Monotonic, true)
-	  c := session.DB("ackersonde").C("writings")
+	if err != nil {
+		fmt.Fprintf(w, err.Error())
+	} else {
+		defer session.Close()
+		session.SetMode(mgo.Monotonic, true)
+		c := session.DB("ackersonde").C("writings")
 
-	  iter := c.Find(nil).Iter()
-	  iter.All(&writings)
+		iter := c.Find(nil).Iter()
+		iter.All(&writings)
 		session.Close()
 	}
 
@@ -105,10 +119,10 @@ func loadWritings(w http.ResponseWriter) ([](structures.Writing)) {
 
 func PoemsHandler(w http.ResponseWriter, req *http.Request) {
 	writings := loadWritings(w)
-  for _, writing := range writings {
-    fmt.Fprintf(w, "%1.0f: %s", writing.ID, writing.Content)
-    fmt.Fprintf(w, "\r\n")
-  }
+	for _, writing := range writings {
+		fmt.Fprintf(w, "%1.0f: %s", writing.ID, writing.Content)
+		fmt.Fprintf(w, "\r\n")
+	}
 }
 
 func GetIP(r *http.Request) string {
