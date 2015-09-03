@@ -1,6 +1,21 @@
-test:
-  pre:
-    - go run server.go & disown
+machine:
+  services:
+    - docker
+
+dependencies:
   override:
-    - sleep 5
-    - curl -v http://localhost:3001/
+    - docker info
+    - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+    - docker build -t blauerdrachen/ackersondego:vc$CIRCLE_BUILD_NUM .
+    - docker push danackerson/ackersondego:vc$CIRCLE_BUILD_NUM
+
+test:
+  override:
+    - docker run -d -p 80:3001 -v /opt:/opt -e ackSecret=$ackSecret -e ackPoems=$ackPoem -e ackWunder=$ackWunder -e ackMongo=$ackMongo --name ackerson.de blauerdrachen/ackerson.de:vc$CIRCLE_BUILD_NUM; sleep 10
+    - curl --retry 10 --retry-delay 5 -v http://localhost/nginx_status
+
+deployment:
+  hub:
+    branch: master
+    commands:
+      - docker push blauerdrachen/ackerson.de:vc$CIRCLE_BUILD_NUM
