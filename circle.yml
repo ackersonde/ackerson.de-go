@@ -1,5 +1,5 @@
 test:
   override:
-    - go run server.go & disown
+    - nohup go run server.go &
     - sleep 5
     - curl -v http://localhost:3001/
