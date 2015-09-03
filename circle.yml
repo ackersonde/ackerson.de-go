@@ -1,4 +1,5 @@
 test:
   override:
     - go run server.go & disown
-    - curl --retry 10 --retry-delay 5 -v http://localhost:3001/
+    - sleep 5
+    - curl -v http://localhost:3001/
