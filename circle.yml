@@ -19,3 +19,6 @@ deployment:
     branch: master
     commands:
       - docker push blauerdrachen/ackerson.de:vc$CIRCLE_BUILD_NUM
+  release:
+    commands:
+      - ./deploy.sh
