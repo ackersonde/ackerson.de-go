@@ -2,8 +2,6 @@ FROM phusion/baseimage
 ENV HOME /root
 # Use baseimage-docker's init process.
 CMD ["/sbin/my_init"]
-RUN apt-get update
-RUN apt-get upgrade -y
 
 # install Go
 RUN apt-get install -y golang git
