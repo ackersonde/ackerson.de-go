@@ -1,6 +1,6 @@
 #!/bin/bash
 
-ssh core@ackerson.de <<-'ENDSSH'
+ssh core@ackerson.de CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM <<-'ENDSSH'
 	docker pull blauerdrachen/ackerson.de:vc$CIRCLE_BUILD_NUM
 	if [ $? -eq 0 ]
 	then
