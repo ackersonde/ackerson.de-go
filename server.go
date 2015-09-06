@@ -74,35 +74,11 @@ var wunderground string
 var version string
 
 func readInCreds() {
-	content, _ := ioutil.ReadFile("/opt/creds.txt")
-	if content == nil {
-		// try reading creds from ENV
-		mongo = os.Getenv("ackMongo")
-		secret = os.Getenv("ackSecret")
-		poem = os.Getenv("ackPoems")
-		wunderground = os.Getenv("ackWunder")
-		version = os.Getenv("CIRCLE_BUILD_NUM")
-	} else {
-		lines := strings.Split(string(content), "\n")
-		for _, line := range lines {
-			values := strings.Split(string(line), "=")
-			switch values[0] {
-			case "mongo":
-				mongo = values[1]
-			case "secret":
-				secret = values[1]
-			case "poem":
-				poem = values[1]
-			case "wunderground":
-				wunderground = values[1]
-			}
-		}
-	}
-
-	log.Printf("%s", mongo)
-	log.Printf("%s", secret)
-	log.Printf("%s", poem)
-	log.Printf("%s", wunderground)
+	mongo = os.Getenv("ackMongo")
+	secret = os.Getenv("ackSecret")
+	poem = os.Getenv("ackPoems")
+	wunderground = os.Getenv("ackWunder")
+	version = os.Getenv("CIRCLE_BUILD_NUM")
 }
 
 func loadWritings(w http.ResponseWriter) [](structures.Writing) {
@@ -144,11 +120,9 @@ func WhoAmIHandler(w http.ResponseWriter, req *http.Request) {
 	s := []string{"[[g;#FFFF00;]Your IP:] " + GetIP(req), "[[g;#FFFF00;]Your Browser:] " + req.UserAgent()}
 	rawData := strings.Join(s, "\r\n")
 	rawDataJson := map[string]string{"whoami": rawData}
-
 	for header, value := range req.Header {
 		log.Printf("%s: %s", header, value)
 	}
-
 	data, _ := json.Marshal(rawDataJson)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
