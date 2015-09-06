@@ -21,4 +21,4 @@ deployment:
       - docker push blauerdrachen/ackerson.de:vc$CIRCLE_BUILD_NUM
       - ssh core@ackerson.de CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM docker pull blauerdrachen/ackerson.de:vc$CIRCLE_BUILD_NUM
       - ssh core@ackerson.de docker rm -f ackerson.de; true
-      - ssh core@ackerson.de CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM ackSecret=$ackSecret ackMongo=$ackMongo ackPoems=$ackPoems ackWunder=$ackWunder docker run -d -p 80:3001 --userland-proxy=false -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM -e ackSecret=$ackSecret -e ackPoems=$ackPoems -e ackWunder=$ackWunder -e ackMongo=$ackMongo --name ackerson.de blauerdrachen/ackerson.de:vc$CIRCLE_BUILD_NUM
+      - ssh core@ackerson.de CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM ackSecret=$ackSecret ackMongo=$ackMongo ackPoems=$ackPoems ackWunder=$ackWunder docker run -d -p 80:3001 -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM -e ackSecret=$ackSecret -e ackPoems=$ackPoems -e ackWunder=$ackWunder -e ackMongo=$ackMongo --name ackerson.de blauerdrachen/ackerson.de:vc$CIRCLE_BUILD_NUM
