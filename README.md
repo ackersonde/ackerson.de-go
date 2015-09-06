@@ -1,3 +1,5 @@
+[![Circle CI](https://circleci.com/gh/danackerson/ackerson.de-go.svg?style=shield&circle-token=3ad6694a5592b15aef77eeb7051a7b6c61d1c56f)](https://circleci.com/gh/danackerson/ackerson.de-go)
+
 # Installation and Development
 0. go get github.com/codegangsta/gin
 0. go get github.com/codegangsta/negroni
