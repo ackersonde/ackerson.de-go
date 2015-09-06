@@ -32,6 +32,11 @@ func main() {
 			WhoAmIHandler(w, r)
 		}
 	})
+	mux.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "POST" {
+			VersionHandler(w, r)
+		}
+	})
 	mux.HandleFunc("/weather", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "POST" {
 			WeatherHandler(w, r)
@@ -66,6 +71,7 @@ var mongo string
 var secret string
 var poem string
 var wunderground string
+var version string
 
 func readInCreds() {
 	content, _ := ioutil.ReadFile("/opt/creds.txt")
@@ -75,6 +81,7 @@ func readInCreds() {
 		secret = os.Getenv("ackSecret")
 		poem = os.Getenv("ackPoems")
 		wunderground = os.Getenv("ackWunder")
+		version = os.Getenv("CIRCLE_BUILD_NUM")
 	} else {
 		lines := strings.Split(string(content), "\n")
 		for _, line := range lines {
@@ -126,9 +133,9 @@ func PoemsHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func GetIP(r *http.Request) string {
-	if ipProxy := r.Header.Get("X-FORWARDED-FOR"); len(ipProxy) > 0 {
-		return ipProxy
-	}
+	//if ipProxy := r.Header.Get("X-FORWARDED-FOR"); len(ipProxy) > 0 {
+	//	return ipProxy
+	//}
 	ip, _, _ := net.SplitHostPort(r.RemoteAddr)
 	return ip
 }
@@ -138,7 +145,21 @@ func WhoAmIHandler(w http.ResponseWriter, req *http.Request) {
 	rawData := strings.Join(s, "\r\n")
 	rawDataJson := map[string]string{"whoami": rawData}
 
+	for header, value := range req.Header {
+		log.Printf("%s: %s", header, value)
+	}
+
 	data, _ := json.Marshal(rawDataJson)
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+	w.Write(data)
+}
+
+func VersionHandler(w http.ResponseWriter, req *http.Request) {
+	v_string := "[[g;#FFFF00;]ackerson.de build " + version + "]"
+	v := map[string]string{"version": v_string}
+
+	data, _ := json.Marshal(v)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
 	w.Write(data)

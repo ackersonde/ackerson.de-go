@@ -33,9 +33,10 @@ function mvvRoute(origin, destination) {
   var mvv_msg = "[[g;#FFFF00;]mvv]: access Munich's public transportation\r\n\r\n";
   var whoami_msg = "[[g;#FFFF00;]whoami]: your browser info and IP address\r\n\r\n";
   var date_msg = "[[g;#FFFF00;]date]: my server date/time\r\n\r\n";
+  var version_msg = "[[g;#FFFF00;]version]: build of this website\r\n\r\n";
   var sw_msg = "[[g;#FFFF00;]sw]: Schwabhausen weather \r\n\r\n";
   var clear_msg = "[[g;#FFFF00;]clear]: clear this terminal screen\r\n\r\n";
-  var help = drive_msg + weather_msg + mvv_msg + whoami_msg + date_msg + sw_msg + clear_msg;
+  var help = drive_msg + weather_msg + mvv_msg + whoami_msg + date_msg + sw_msg + version_msg + clear_msg;
 
   // TODO 'wp' (write poetry) => window.open('https://draftin.com/api')
   // TODO 'poems' (see poems) => window.open('/poems') 
@@ -71,6 +72,7 @@ function mvvRoute(origin, destination) {
             break;
 
           case 'date':
+          case 'version':
           case 'whoami':
             simpleAjaxCall(command, "query-param");
             break;
