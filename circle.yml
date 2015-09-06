@@ -22,4 +22,4 @@ deployment:
       - ssh core@ackerson.de DOCKER_EMAIL=$DOCKER_EMAIL DOCKER_USER=$DOCKER_USER DOCKER_PASS=$DOCKER_PASS docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
       - ssh core@ackerson.de CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM docker pull blauerdrachen/ackerson.de:vc$CIRCLE_BUILD_NUM
       - ssh core@ackerson.de docker rm -f ackerson.de; true
-      - ssh core@ackerson.de CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM ackSecret=$ackSecret ackMongo=$ackMongo ackPoems=$ackPoems ackWunder=$ackWunder docker run -d -p 80:3001 --net=host -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM -e ackSecret=$ackSecret -e ackPoems=$ackPoems -e ackWunder=$ackWunder -e ackMongo=$ackMongo --name ackerson.de blauerdrachen/ackerson.de:vc$CIRCLE_BUILD_NUM
+      - ssh core@ackerson.de CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM NEGRONI_PORT=80 ackSecret=$ackSecret ackMongo=$ackMongo ackPoems=$ackPoems ackWunder=$ackWunder docker run -d --net=host -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM -e NEGRONI_PORT=$NEGRONI_PORT -e ackSecret=$ackSecret -e ackPoems=$ackPoems -e ackWunder=$ackWunder -e ackMongo=$ackMongo --name ackerson.de blauerdrachen/ackerson.de:vc$CIRCLE_BUILD_NUM

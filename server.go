@@ -64,7 +64,7 @@ func main() {
 	store := cookiestore.New([]byte(secret))
 	n.Use(sessions.Sessions("gurkherpaderp", store))
 	n.UseHandler(mux)
-	n.Run(":3001")
+	n.Run(":" + port)
 }
 
 var mongo string
@@ -72,6 +72,7 @@ var secret string
 var poem string
 var wunderground string
 var version string
+var port string
 
 func readInCreds() {
 	mongo = os.Getenv("ackMongo")
@@ -79,6 +80,11 @@ func readInCreds() {
 	poem = os.Getenv("ackPoems")
 	wunderground = os.Getenv("ackWunder")
 	version = os.Getenv("CIRCLE_BUILD_NUM")
+	port = os.Getenv("NEGRONI_PORT")
+
+	if port == "" {
+		port = "3001"
+	}
 }
 
 func loadWritings(w http.ResponseWriter) [](structures.Writing) {
