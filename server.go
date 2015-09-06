@@ -136,8 +136,8 @@ func WhoAmIHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func VersionHandler(w http.ResponseWriter, req *http.Request) {
-	v_string := "[[g;#FFFF00;]ackerson.de build " + version + "]"
-	v := map[string]string{"version": v_string}
+	build_url := "https://circleci.com/gh/danackerson/ackerson.de-go/" + version
+	v := map[string]string{"version": build_url, "build": version}
 
 	data, _ := json.Marshal(v)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")

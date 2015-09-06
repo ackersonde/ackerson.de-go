@@ -97,7 +97,7 @@ function mvvRoute(origin, destination) {
             schwabhausen_weather = 'http://www.wunderground.com/cgi-bin/findweather/getForecast?query=48.300000,11.350000&ID=IBAYERNS22';
             window.open(schwabhausen_weather);
             break;
- 
+
           case 'weather':
             getPosition();
             break;
@@ -176,7 +176,11 @@ function mvvRoute(origin, destination) {
         if (data.error) {
           term.error(data.error.message);
         } else {
-          if (command == 'weather') {
+          if (command == 'version') {
+            term.echo("[[g;#FFFF00;]ackerson.de build " + data['build'] + "]")
+            window.open(data['version']);
+          }
+          else if (command == 'weather') {
             showPopup(command);
             var forecast = data['forecastday']['forecast']['simpleforecast']['forecastday'];
             var current = data['current']['current_observation']
