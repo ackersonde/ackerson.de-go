@@ -20,9 +20,9 @@ function mvvRoute(origin, destination) {
     "&locationServerActive=1&name_origin="+origin+"&itdDateDay="+day+"&type_origin=any"+
     "&name_destination="+destination+"&itdTimeMinute="+minute+"&Session=0&stateless=1"+
     "&SpEncId=0&itdDateYear="+year;
-  $('#iframeMVVRoute').attr('src', url);
 
-  showPopup('mvvRoute');
+  var win = window.open(url, '_blank');
+  win.focus();
 }
 
 (function($) {
@@ -30,20 +30,18 @@ function mvvRoute(origin, destination) {
   var greeting = "Welcome Offworld (type help)";
   var drive_msg = "[[g;#FFFF00;]drive] <DESTINATION>: google directions from your location\r\n\r\n";
   var weather_msg = "[[g;#FFFF00;]weather]: show weather forecast\r\n\r\n";
-  var mvv_msg = "[[g;#FFFF00;]mvv]: access Munich's public transportation\r\n\r\n";
   var whoami_msg = "[[g;#FFFF00;]whoami]: your browser info and IP address\r\n\r\n";
   var date_msg = "[[g;#FFFF00;]date]: my server date/time\r\n\r\n";
   var version_msg = "[[g;#FFFF00;]version]: build of this website\r\n\r\n";
   var sw_msg = "[[g;#FFFF00;]sw]: Schwabhausen weather \r\n\r\n";
   var clear_msg = "[[g;#FFFF00;]clear]: clear this terminal screen\r\n\r\n";
-  var help = drive_msg + weather_msg + mvv_msg + whoami_msg + date_msg + sw_msg + version_msg + clear_msg;
+  var help = drive_msg + weather_msg + whoami_msg + date_msg + sw_msg + version_msg + clear_msg;
 
   // TODO 'wp' (write poetry) => window.open('https://draftin.com/api')
-  // TODO 'poems' (see poems) => window.open('/poems') 
+  // TODO 'poems' (see poems) => window.open('/poems')
   // => curl -u dan@ackerson.de:<pass> https://draftin.com/api/v1/documents.json
   // => filter by folder_id='20624' ('WRITINGS')
 
-  $( "#mvvPopup" ).draggable({ handle: "p.border" });
   $( "#drivePopup" ).draggable({ handle: "p.border" });
   $( "#weatherPopup" ).draggable({ handle: "p.border" });
 
@@ -89,12 +87,8 @@ function mvvRoute(origin, destination) {
             getDrivingDirections();
             break;
 
-          case 'mvv':
-            showPopup(commands[0]);
-            break;
-
           case 'sw':
-            schwabhausen_weather = 'http://www.wunderground.com/cgi-bin/findweather/getForecast?query=48.300000,11.350000&ID=IBAYERNS22';
+            schwabhausen_weather = '//www.wunderground.com/cgi-bin/findweather/getForecast?query=48.300000,11.350000&ID=IBAYERNS22';
             window.open(schwabhausen_weather);
             break;
 

@@ -3,11 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"github.com/codegangsta/negroni"
-	"github.com/danackerson/ackerson.de-go/structures"
-	"github.com/goincremental/negroni-sessions"
-	"github.com/goincremental/negroni-sessions/cookiestore"
-	"gopkg.in/mgo.v2"
 	"io/ioutil"
 	"log"
 	"net"
@@ -16,6 +11,12 @@ import (
 	"strconv"
 	"strings"
 	"time"
+
+	"github.com/codegangsta/negroni"
+	"github.com/danackerson/ackerson.de-go/structures"
+	"github.com/goincremental/negroni-sessions"
+	"github.com/goincremental/negroni-sessions/cookiestore"
+	"gopkg.in/mgo.v2"
 )
 
 func main() {

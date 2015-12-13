@@ -1,6 +1,5 @@
 html {
-    background: url(http://i.imgur.com/N7Bnl.jpg) no-repeat center center fixed;
-    /*background: url(http://i.imgur.com/8Ie6E.jpg) no-repeat center center fixed; <a href="http://imgur.com/8Ie6E">"Ice lake on Mars."</a>*/
+    background: url(//i.imgur.com/N7Bnl.jpg) no-repeat center center fixed;
     -webkit-background-size: cover;
     -moz-background-size: cover;
     -o-background-size: cover;
@@ -51,9 +50,9 @@ img.closePopupIcon {
   height: 28px;
 }
 a.closePopupButton {
-    float:right; 
-    position:relative; 
-    top:-24px; 
+    float:right;
+    position:relative;
+    top:-24px;
     right:-14px;
 }
 #links {
@@ -98,23 +97,23 @@ div#weatherPopup {
     left:580px;
     top:20px;
 }
-p.border { 
+p.border {
     background-image: url(../images/border.png);
     height:10px;
-    margin:0; cursor: move; 
+    margin:0; cursor: move;
 }
 div#map_canvas {
-    width:75%; 
-    height:91%; 
-    float:left; 
+    width:75%;
+    height:91%;
+    float:left;
     clear:none;
 }
 div#map_details {
-    width:24%; 
-    height:91%; 
-    float:right; 
-    clear:none; 
-    border: 1px solid gray; 
+    width:24%;
+    height:91%;
+    float:right;
+    clear:none;
+    border: 1px solid gray;
     margin-right:5px;
 }
 iframe#iframeMVV {

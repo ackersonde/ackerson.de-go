@@ -9,6 +9,9 @@
     <link rel="stylesheet" href="css/offworld.css" />
 
     <script type="text/javascript">
+      if (location.hostname == 'ackerson.de' && window.location.protocol != "https:")
+        window.location.href = "https:" + window.location.href.substring(window.location.protocol.length);
+
       var _gaq = _gaq || [];
       _gaq.push(['_setAccount', 'UA-35450644-1']);
       _gaq.push (['_gat._anonymizeIp']);
@@ -26,7 +29,7 @@
     <section>
         <div id="term1"></div>
         <div id="links">
-            <a href="javascript:mvvRoute('München, Hauptbahnhof', 'Schwabhausen');"><img src="images/schwab.gif" width="32px" alt="Train home" title="Train home"></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:showPopup('mvv');"><img src="images/bahn.png" width="32px"></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:mvvRoute('Schwabhausen', 'München, Hauptbahnhof');"><img src="images/munich.png" width="32px" alt="Train to Munich" title="Train to Munich"></a>
+            <a href="javascript:mvvRoute('München, Hauptbahnhof', 'Schwabhausen');"><img src="images/schwab.gif" width="32px" alt="Train home" title="Train home"></a>&nbsp;&nbsp;&nbsp;&nbsp;<a href="javascript:mvvRoute('Schwabhausen', 'München, Hauptbahnhof');"><img src="images/munich.png" width="32px" alt="Train to Munich" title="Train to Munich"></a>
         </div>
         <!-- HIDDEN / POP-UP DIVS -->
         <div class="framePopup ui-widget-content" id="drivePopup">
@@ -70,20 +73,20 @@
 
     <footer>
         <div id="footerLeft">
-            <a href="http://about.me/danackerson">Dan Ackerson</a>&nbsp;&nbsp;&nbsp;&nbsp;
+            <a href="https://about.me/danackerson">Dan Ackerson</a>&nbsp;&nbsp;&nbsp;&nbsp;
             <a href="impressum.html">Impressum</a>
         </div>
-        <div id="footerRight">Background: <a href="http://imgur.com/N7Bnl">"The beauty of space."</a></div>
+        <div id="footerRight">Background: <a href="https://imgur.com/N7Bnl">"The beauty of space."</a></div>
     </footer>
 
     <script src="js/jquery-2.1.3.min.js"></script>
-    <script src="http://code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
+    <script src="//code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
     <script src="js/jquery.mousewheel-min.js"></script>
     <script src="js/jquery.terminal-0.7.0.min.js"></script>
     <script src="js/offworld.js"></script>
     <script src="js/offworld_google_maps.js"></script>
-    <script type="text/javascript" src="http://maps.googleapis.com/maps/api/js?key=AIzaSyCYSvbMmRRoyCCl0sh4zrKOujwZ3DU4ee0&sensor=true&callback=init_googlemaps"></script>
-    
+    <script type="text/javascript" src="//maps.googleapis.com/maps/api/js?key=AIzaSyCYSvbMmRRoyCCl0sh4zrKOujwZ3DU4ee0&sensor=true&callback=init_googlemaps"></script>
+
 </body>
 
 </html>
