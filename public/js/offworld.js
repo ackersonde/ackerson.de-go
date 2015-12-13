@@ -1,10 +1,10 @@
 function popupClose(id) {
   $('#' + id).hide();
 }
+
 function showPopup(id) {
   $('#' + id + 'Popup').fadeIn('slow');
 }
-$( "#mvvRoutePopup").draggable({ handle: "p.border" });
 
 function mvvRoute(origin, destination) {
   var d = new Date();

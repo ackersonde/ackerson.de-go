@@ -77,19 +77,6 @@ div#drivePopup {
     height:90%;
     top:20px;
 }
-div#mvvRoutePopup {
-    background: white;
-    width:70%;
-    height:90%;
-    top:20px;
-    left:280px;
-}
-div#mvvPopup {
-    background: #B2C900;
-    width: 30%;
-    height: 50%;
-    left:480px;
-}
 div#weatherPopup {
     background: white;
     width: 50%;

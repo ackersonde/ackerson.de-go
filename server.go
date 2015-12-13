@@ -116,11 +116,13 @@ func PoemsHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 func GetIP(r *http.Request) string {
-	//if ipProxy := r.Header.Get("X-FORWARDED-FOR"); len(ipProxy) > 0 {
-	//	return ipProxy
-	//}
-	ip, _, _ := net.SplitHostPort(r.RemoteAddr)
-	return ip
+	ip := r.Header.Get("X-Forwarded-For")
+	if len(ip) <= 0 {
+		ip, _, _ := net.SplitHostPort(r.RemoteAddr)
+		return ip
+	} else {
+		return ip
+	}
 }
 
 func WhoAmIHandler(w http.ResponseWriter, req *http.Request) {
