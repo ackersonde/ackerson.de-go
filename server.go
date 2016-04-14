@@ -65,9 +65,11 @@ func main() {
 			date := time.Now().AddDate(0, 0, -1)
 			date1 := r.URL.Query().Get("date1")
 			if date1 != "" {
-				i, _ := strconv.Atoi(r.URL.Query().Get("offset"))
+				date1 = strings.TrimLeft(date1, "year_")
 				log.Print(date1)
-				monthDayString, err := time.Parse("year_2006/month_01/day_02", date1)
+
+				i, _ := strconv.Atoi(r.URL.Query().Get("offset"))
+				monthDayString, err := time.Parse("2006/month_01/day_02", date1)
 				if err != nil {
 					log.Print(err)
 				}
@@ -238,11 +240,7 @@ func WeatherHandler(w http.ResponseWriter, req *http.Request) {
 
 // GameHandler is now commented
 func GameHandler(w http.ResponseWriter, req *http.Request, gameDate time.Time) {
-	yesterday := gameDate
-	yearString := "year_" + strconv.Itoa(yesterday.Year())
-	// Reference date: Mon Jan 2 15:04:05 MST 2006
-	monthDayString := yesterday.Format("/month_01/day_02")
-	dates := yearString + monthDayString
+	dates := "year_" + gameDate.Format("2006/month_01/day_02")
 
 	log.Print(dates)
 	games := make(map[int][]string)
