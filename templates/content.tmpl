@@ -1,0 +1,52 @@
+{{ template "header" }}
+
+<!--<div id="searchRangeDiv"></div>-->
+
+<section id="panel" style="display: table; background-color: white; text-align:center;">
+  <div style="display: table-row; padding:10px;">
+    <div style="display: table-cell;padding:5px;"><a href="?date1={{$.Date}}&offset=-1"><img class="prevNext" id="prev" alt="Prev" title="Prev" src="images/img_trans.gif"></a></div>
+    <div style="display: table-cell;padding:5px;">Games from {{ $.Date }}</div>
+    <div style="display: table-cell;padding:5px;"><a href="?date1={{$.Date}}&offset=1"><img class="prevNext" id="next" alt="Next" title="Next" src="images/img_trans.gif"></a></div>
+  </div>
+</section>
+
+<section id="panel" style="display: table; background-color: white; text-align:center;">
+  {{ range $key, $value := .Games }}
+  <div style="display: table-row; padding:10px;">
+    {{ $title := index $value 0}}
+    {{ $away_id := index $value 1}}
+    {{ $away_abbrev := index $value 2}}
+    {{ $home_id := index $value 3}}
+    {{ $home_abbrev := index $value 4}}
+    {{ $id := index $value 5}}
+    <div style="display: table-cell;padding:5px;">
+      <img class="logo" id="logo{{ $away_id }}" src="images/img_trans.gif">
+    </div>
+    <div style="display:table-cell;padding:5px;text-align:center;vertical-align:middle;"><a target="_blank" href="http://m.mlb.com/video/v{{$id}}/condensed-game-{{$away_abbrev}}{{$home_abbrev}}">{{ $away_abbrev }}@{{ $home_abbrev }}</a></div>
+    <div style="display:table-cell;padding:5px;">
+      <img class="logo" id="logo{{ $home_id }}" src="images/img_trans.gif">
+    </div>
+  </div>
+  {{ end }}
+</section>
+
+<!--
+<script defer="">
+  webix.ui({
+    container:"searchRangeDiv",
+    view:"form", scroll:false, id:"gameSearchRange", elements:[
+      { view:"datepicker", label:"Start date", name:"start", stringResult:true, format:"%d %M %Y", width:250 },
+      { view:"datepicker", label:"End date", name:"end", stringResult:true, format:"%d %M %Y", width:250 },
+      { view:"button", type:"form", value:"Submit data", click:function(){
+        webix.message("<pre>"+JSON.stringify(this.getParentView().getValues(),0,1)+"</pre>");
+      }}
+    ]
+  });
+
+  $$('gameSearchRange').setValues({
+    start:"2016-04-03",
+    end:new Date(2016,3,10)
+  });
+</script>
+-->
+{{ template "footer" }}
