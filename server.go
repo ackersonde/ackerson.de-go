@@ -66,7 +66,12 @@ func main() {
 			date1 := r.URL.Query().Get("date1")
 			if date1 != "" {
 				i, _ := strconv.Atoi(r.URL.Query().Get("offset"))
-				date = date.AddDate(0, 0, i)
+				log.Print(date1)
+				monthDayString, err := time.Parse("year_2006/month_01/day_02", date1)
+				if err != nil {
+					log.Print(err)
+				}
+				date = monthDayString.AddDate(0, 0, i)
 			}
 			GameHandler(w, r, date)
 		}
