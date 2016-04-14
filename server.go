@@ -232,8 +232,8 @@ func WeatherHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 // GameHandler is now commented
-func GameHandler(w http.ResponseWriter, req *http.Request, gameDay time.Time) {
-	yesterday := gameDay
+func GameHandler(w http.ResponseWriter, req *http.Request, gameDate time.Time) {
+	yesterday := gameDate
 	// Reference date: Mon Jan 2 15:04:05 MST 2006
 	dates := yesterday.Format("year_2006/month_01/day_02")
 
