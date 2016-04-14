@@ -1,7 +1,7 @@
 .logo {
   width: 195px;
   height: 162px;
-  background-image: url(../images/mlb-logos.png);
+  background-image: url(/images/mlb-logos.png);
   zoom:0.2;
   -moz-transform:scale(0.2);
   -moz-transform-origin: 0 0;
@@ -10,7 +10,7 @@
   background-position: 1200px 835px;
 }
 #logo145 { /*Chicago Whitesox*/
-  background-position: 1000px 835px; 
+  background-position: 1000px 835px;
 }
 #logo117 { /*Houston Astros*/
   background-position: 800px 835px;
