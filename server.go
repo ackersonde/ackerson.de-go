@@ -66,14 +66,14 @@ func main() {
 			date1 := r.URL.Query().Get("date1")
 			if date1 != "" {
 				date1 = strings.TrimLeft(date1, "year_")
-				log.Print(date1)
-
-				i, _ := strconv.Atoi(r.URL.Query().Get("offset"))
-				monthDayString, err := time.Parse("2006/month_01/day_02", date1)
+				location, _ := time.LoadLocation("UTC")
+				monthDayString, err := time.ParseInLocation("2006/month_01/day_02", date1, location)
 				if err != nil {
 					log.Print(err)
+				} else {
+					i, _ := strconv.Atoi(r.URL.Query().Get("offset"))
+					date = monthDayString.AddDate(0, 0, i)
 				}
-				date = monthDayString.AddDate(0, 0, i)
 			}
 			GameHandler(w, r, date)
 		}
@@ -241,35 +241,27 @@ func WeatherHandler(w http.ResponseWriter, req *http.Request) {
 // GameHandler is now commented
 func GameHandler(w http.ResponseWriter, req *http.Request, gameDate time.Time) {
 	dates := "year_" + gameDate.Format("2006/month_01/day_02")
-
-	log.Print(dates)
 	games := make(map[int][]string)
 	games = SearchMLBGames(dates, games)
 
 	// prepare response page
 	r := render.New(render.Options{
-		IsDevelopment: true,
+		IsDevelopment: false,
 	})
 
-	r.HTML(w, http.StatusOK, "content", GameDay{Date: dates, Games: games})
+	readableDates := gameDate.Format("Mon Jan _2 2006")
+	r.HTML(w, http.StatusOK, "content", GameDay{Date: dates, ReadableDate: readableDates, Games: games})
 }
 
 // GameDay is now commented
 type GameDay struct {
-	Date  string
-	Games map[int][]string
+	Date         string
+	ReadableDate string
+	Games        map[int][]string
 }
 
 // SearchMLBGames is now commented
 func SearchMLBGames(dates string, games map[int][]string) map[int][]string {
-	// http://gd2.mlb.com/components/game/mlb/year_2016/month_03/day_21/grid_ce.xml
-	// 11 games here - 0 condensed
-
-	// http://gd2.mlb.com/components/game/mlb/year_2016/month_03/day_21/grid_ce.xml
-	// total of 13 games here - but only 1 condensed!
-
-	// http://gd2.mlb.com/components/game/mlb/year_2016/month_03/day_30/grid_ce.xml
-	// total of X games: 6 condensed
 	domain := "http://gd2.mlb.com/components/game/mlb/"
 	suffix := "/grid_ce.xml"
 	url := domain + dates + suffix

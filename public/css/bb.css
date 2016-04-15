@@ -1,21 +1,31 @@
-html { 
-  background: url(../images/baseball-field-loud.jpg) no-repeat center center fixed; 
+html {
+  background: url(../images/baseball-field-loud.jpg) no-repeat center center fixed;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
 }
+#homeplate {
+  position: absolute;
+  bottom: 8%;
+  right: 12%;
+  height: 100px;
+  width: 150px;
+  background-color: transparent;
+  color: white;
+  font-weight: bolder;
+}
 #panel {
-    display: inline-block;
-    position: relative;
-    top: 0;
-    bottom: 0;
-    left: 0;
-    right: 0;
-    width: 25%;
-    height: 50%;
-    margin: auto;
-    background-color: #f3f3f3
+  display: inline-block;
+  position: relative;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 25%;
+  height: 50%;
+  margin: auto;
+  background-color: #f3f3f3
 }
 .prevNext {
   width: 157px;
@@ -28,5 +38,5 @@ html {
   background-position: 0px 0px;
 }
 #next { /*Chicago Whitesox*/
-  background-position: 160px 0px; 
+  background-position: 160px 0px;
 }
