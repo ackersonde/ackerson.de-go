@@ -248,10 +248,10 @@ func GameHandler(w http.ResponseWriter, req *http.Request, gameDate time.Time, h
 
 	// prepare response page
 	r := render.New(render.Options{
-		IsDevelopment: true,
+		IsDevelopment: false,
 	})
 
-	readableDates := gameDate.Format("Mon Jan _2 2006")
+	readableDates := gameDate.Format("Mon, Jan _2 2006")
 	r.HTML(w, http.StatusOK, "content", GameDay{Date: dates, ReadableDate: readableDates, Games: games})
 }
 
@@ -348,36 +348,36 @@ func LookupTeamInfo(homePageMap map[int]Team, teamIDS string) (string, string) {
 func InitHomePageMap() map[int]Team {
 	homePageMap := make(map[int]Team)
 
-	homePageMap[110] = Team{"Baltimore Orioles", "http://bo"}
-	homePageMap[145] = Team{"Chicago Whitesox", "http://cw"}
-	homePageMap[117] = Team{"Houston Astros", "http://ha"}
-	homePageMap[144] = Team{"Atlanta Braves", "http://ab"}
-	homePageMap[112] = Team{"Chicago Cubs", "http://cc"}
-	homePageMap[109] = Team{"Arizona Diamond Backs", "http://adb"}
-	homePageMap[111] = Team{"Boston Red Sox", "http://brs"}
-	homePageMap[114] = Team{"Cleveland Indians", "http://ci"}
-	homePageMap[108] = Team{"Los Angeles Angels", "http://bo"}
-	homePageMap[146] = Team{"Miami Marlins", "http://cw"}
-	homePageMap[113] = Team{"Cincinnati Reds", "http://bo"}
-	homePageMap[115] = Team{"Colorado Rockies", "http://bo"}
-	homePageMap[147] = Team{"New York Yankees", "http://nyy"}
-	homePageMap[116] = Team{"Detroit Tigers", "http://dt"}
-	homePageMap[133] = Team{"Oakland Athletics", "http://oa"}
-	homePageMap[121] = Team{"New York Mets", "http://nym"}
-	homePageMap[158] = Team{"Milwaukee Brewers", "http://mb"}
-	homePageMap[119] = Team{"LA Dodgers", "http://lad"}
-	homePageMap[139] = Team{"Tampa Bay Rays", "http://tbr"}
-	homePageMap[118] = Team{"Kansas City Royals", "http://kcr"}
-	homePageMap[136] = Team{"Seattle Mariners", "http://sm"}
-	homePageMap[143] = Team{"Philadelphia Phillies", "http://pp"}
-	homePageMap[138] = Team{"St Louis Cardinals", "http://slc"}
-	homePageMap[135] = Team{"San Diego Padres", "http://sdp"}
-	homePageMap[141] = Team{"Toronto Blue Jays", "http://tbj"}
-	homePageMap[142] = Team{"Minnesota Twins", "http://mt"}
-	homePageMap[140] = Team{"Texas Rangers", "http://tr"}
-	homePageMap[120] = Team{"Washington Nationals", "http://wn"}
-	homePageMap[134] = Team{"Pittsburgh Pirates", "http://pp"}
-	homePageMap[137] = Team{"San Francisco Giants", "http://sfg"}
+	homePageMap[110] = Team{"Baltimore Orioles", "http://m.orioles.mlb.com/roster"}
+	homePageMap[145] = Team{"Chicago Whitesox", "http://m.whitesox.mlb.com/roster"}
+	homePageMap[117] = Team{"Houston Astros", "http://m.astros.mlb.com/roster"}
+	homePageMap[144] = Team{"Atlanta Braves", "http://m.braves.mlb.com/roster"}
+	homePageMap[112] = Team{"Chicago Cubs", "http://m.cubs.mlb.com/roster"}
+	homePageMap[109] = Team{"Arizona Diamond Backs", "http://m.dbacks.mlb.com/roster"}
+	homePageMap[111] = Team{"Boston Red Sox", "http://m.redsox.mlb.com/roster"}
+	homePageMap[114] = Team{"Cleveland Indians", "http://m.indians.mlb.com/roster"}
+	homePageMap[108] = Team{"Los Angeles Angels", "http://m.angels.mlb.com/roster"}
+	homePageMap[146] = Team{"Miami Marlins", "http://m.marlins.mlb.com/roster"}
+	homePageMap[113] = Team{"Cincinnati Reds", "http://m.reds.mlb.com/roster"}
+	homePageMap[115] = Team{"Colorado Rockies", "http://www.rockies.com/roster"}
+	homePageMap[147] = Team{"New York Yankees", "http://m.yankees.mlb.com/roster"}
+	homePageMap[116] = Team{"Detroit Tigers", "http://www.tigers.com/roster"}
+	homePageMap[133] = Team{"Oakland Athletics", "http://m.athletics.mlb.com/roster"}
+	homePageMap[121] = Team{"New York Mets", "http://m.mets.mlb.com/roster"}
+	homePageMap[158] = Team{"Milwaukee Brewers", "http://m.brewers.mlb.com/roster"}
+	homePageMap[119] = Team{"LA Dodgers", "http://m.dodgers.mlb.com/roster"}
+	homePageMap[139] = Team{"Tampa Bay Rays", "http://m.rays.mlb.com/roster"}
+	homePageMap[118] = Team{"Kansas City Royals", "http://m.royals.mlb.com/roster"}
+	homePageMap[136] = Team{"Seattle Mariners", "http://m.mariners.mlb.com/roster"}
+	homePageMap[143] = Team{"Philadelphia Phillies", "http://m.phillies.mlb.com/roster"}
+	homePageMap[138] = Team{"St Louis Cardinals", "http://m.cardinals.mlb.com/roster"}
+	homePageMap[135] = Team{"San Diego Padres", "http://m.padres.mlb.com/roster"}
+	homePageMap[141] = Team{"Toronto Blue Jays", "http://m.bluejays.mlb.com/roster"}
+	homePageMap[142] = Team{"Minnesota Twins", "http://m.twins.mlb.com/roster"}
+	homePageMap[140] = Team{"Texas Rangers", "http://m.rangers.mlb.com/roster"}
+	homePageMap[120] = Team{"Washington Nationals", "http://m.nationals.mlb.com/roster"}
+	homePageMap[134] = Team{"Pittsburgh Pirates", "http://m.pirates.mlb.com/roster"}
+	homePageMap[137] = Team{"San Francisco Giants", "http://m.giants.mlb.com/roster"}
 
 	return homePageMap
 }

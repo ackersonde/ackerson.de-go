@@ -23,11 +23,11 @@
     {{ $home_abbrev := index $value 7}}
     {{ $id := index $value 8}}
     <div style="display: table-cell;padding:5px;">
-      <a href="{{ $away_hp }}" title="{{ $away_team }}"><img class="logo" id="logo{{ $away_id }}" src="images/img_trans.gif"></a>
+      <a href="{{ $away_hp }}" title="{{ $away_team }}" target="_blank"><img class="logo" id="logo{{ $away_id }}" src="images/img_trans.gif"></a>
     </div>
     <div style="display:table-cell;padding:5px;text-align:center;vertical-align:middle;"><a target="_blank" href="http://m.mlb.com/video/v{{$id}}/condensed-game-{{$away_abbrev}}{{$home_abbrev}}">{{ $away_abbrev }}@{{ $home_abbrev }}</a></div>
     <div style="display:table-cell;padding:5px;">
-      <a href="{{ $home_hp }}" title="{{ $home_team }}"><img class="logo" id="logo{{ $home_id }}" src="images/img_trans.gif"></a>
+      <a href="{{ $home_hp }}" title="{{ $home_team }}" target="_blank"><img class="logo" id="logo{{ $home_id }}" src="images/img_trans.gif"></a>
     </div>
   </div>
   {{ end }}
