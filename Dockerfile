@@ -16,9 +16,11 @@ RUN apk del git go && \
   rm -rf $GOPATH/pkg && \
   rm -rf $GOPATH/bin && \
   rm -rf $GOPATH/src/gopkg.in && \
-  rm -rf $GOPATH/src/github.com/goincremental && \
+  rm -rf $GOPATH/src/github.com/clbanning && \
   rm -rf $GOPATH/src/github.com/codegangsta && \
+  rm -rf $GOPATH/src/github.com/goincremental && \
   rm -rf $GOPATH/src/github.com/gorilla && \
+  rm -rf $GOPATH/src/github.com/unrolled && \
   rm -rf /var/cache/apk/*
 
 EXPOSE 3001

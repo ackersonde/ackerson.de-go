@@ -24,6 +24,8 @@ import (
 func main() {
 	mux := http.NewServeMux()
 	post := "POST"
+	homePageMap := InitHomePageMap()
+
 	// handlers
 	mux.HandleFunc("/date", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == post {
@@ -75,7 +77,7 @@ func main() {
 					date = monthDayString.AddDate(0, 0, i)
 				}
 			}
-			GameHandler(w, r, date)
+			GameHandler(w, r, date, homePageMap)
 		}
 	})
 
@@ -239,14 +241,14 @@ func WeatherHandler(w http.ResponseWriter, req *http.Request) {
 }
 
 // GameHandler is now commented
-func GameHandler(w http.ResponseWriter, req *http.Request, gameDate time.Time) {
+func GameHandler(w http.ResponseWriter, req *http.Request, gameDate time.Time, homePageMap map[int]Team) {
 	dates := "year_" + gameDate.Format("2006/month_01/day_02")
 	games := make(map[int][]string)
-	games = SearchMLBGames(dates, games)
+	games = SearchMLBGames(dates, games, homePageMap)
 
 	// prepare response page
 	r := render.New(render.Options{
-		IsDevelopment: false,
+		IsDevelopment: true,
 	})
 
 	readableDates := gameDate.Format("Mon Jan _2 2006")
@@ -261,7 +263,7 @@ type GameDay struct {
 }
 
 // SearchMLBGames is now commented
-func SearchMLBGames(dates string, games map[int][]string) map[int][]string {
+func SearchMLBGames(dates string, games map[int][]string, homePageMap map[int]Team) map[int][]string {
 	domain := "http://gd2.mlb.com/components/game/mlb/"
 	suffix := "/grid_ce.xml"
 	url := domain + dates + suffix
@@ -313,15 +315,16 @@ func SearchMLBGames(dates string, games map[int][]string) map[int][]string {
 				continue
 			}
 		}
-		// create file to hold csv data sets
-		title := aGameVal["-calendar_event_id"].(string)
-		awayTeamID := aGameVal["-away_team_id"].(string)
-		awayAbbrev := aGameVal["-away_name_abbrev"].(string)
-		homeTeamID := aGameVal["-home_team_id"].(string)
-		homeAbbrev := aGameVal["-home_name_abbrev"].(string)
 
 		if gameID != "" {
-			games[k] = []string{title, awayTeamID, awayAbbrev, homeTeamID, homeAbbrev, gameID, dates}
+			awayTeamID := aGameVal["-away_team_id"].(string)
+			awayTeamName, awayTeamHomePage := LookupTeamInfo(homePageMap, awayTeamID)
+			awayAbbrev := aGameVal["-away_name_abbrev"].(string)
+
+			homeTeamID := aGameVal["-home_team_id"].(string)
+			homeTeamName, homeTeamHomePage := LookupTeamInfo(homePageMap, homeTeamID)
+			homeAbbrev := aGameVal["-home_name_abbrev"].(string)
+			games[k] = []string{awayTeamName, awayTeamHomePage, awayTeamID, awayAbbrev, homeTeamName, homeTeamHomePage, homeTeamID, homeAbbrev, gameID, dates}
 		}
 	}
 
@@ -329,4 +332,52 @@ func SearchMLBGames(dates string, games map[int][]string) map[int][]string {
 	log.Println("Condensed games:", condensedGames)
 
 	return games
+}
+
+type Team struct {
+    Name, HomePage string
+}
+
+// LookupTeamInfo is now commented
+func LookupTeamInfo(homePageMap map[int]Team, teamIDS string) (string, string) {
+	teamID, _ := strconv.Atoi(teamIDS)
+	return homePageMap[teamID].Name, homePageMap[teamID].HomePage
+}
+
+// InitHomePageMap is now commented
+func InitHomePageMap() map[int]Team {
+	homePageMap := make(map[int]Team)
+
+	homePageMap[110] = Team{"Baltimore Orioles", "http://bo"}
+	homePageMap[145] = Team{"Chicago Whitesox", "http://cw"}
+	homePageMap[117] = Team{"Houston Astros", "http://ha"}
+	homePageMap[144] = Team{"Atlanta Braves", "http://ab"}
+	homePageMap[112] = Team{"Chicago Cubs", "http://cc"}
+	homePageMap[109] = Team{"Arizona Diamond Backs", "http://adb"}
+	homePageMap[111] = Team{"Boston Red Sox", "http://brs"}
+	homePageMap[114] = Team{"Cleveland Indians", "http://ci"}
+	homePageMap[108] = Team{"Los Angeles Angels", "http://bo"}
+	homePageMap[146] = Team{"Miami Marlins", "http://cw"}
+	homePageMap[113] = Team{"Cincinnati Reds", "http://bo"}
+	homePageMap[115] = Team{"Colorado Rockies", "http://bo"}
+	homePageMap[147] = Team{"New York Yankees", "http://nyy"}
+	homePageMap[116] = Team{"Detroit Tigers", "http://dt"}
+	homePageMap[133] = Team{"Oakland Athletics", "http://oa"}
+	homePageMap[121] = Team{"New York Mets", "http://nym"}
+	homePageMap[158] = Team{"Milwaukee Brewers", "http://mb"}
+	homePageMap[119] = Team{"LA Dodgers", "http://lad"}
+	homePageMap[139] = Team{"Tampa Bay Rays", "http://tbr"}
+	homePageMap[118] = Team{"Kansas City Royals", "http://kcr"}
+	homePageMap[136] = Team{"Seattle Mariners", "http://sm"}
+	homePageMap[143] = Team{"Philadelphia Phillies", "http://pp"}
+	homePageMap[138] = Team{"St Louis Cardinals", "http://slc"}
+	homePageMap[135] = Team{"San Diego Padres", "http://sdp"}
+	homePageMap[141] = Team{"Toronto Blue Jays", "http://tbj"}
+	homePageMap[142] = Team{"Minnesota Twins", "http://mt"}
+	homePageMap[140] = Team{"Texas Rangers", "http://tr"}
+	homePageMap[120] = Team{"Washington Nationals", "http://wn"}
+	homePageMap[134] = Team{"Pittsburgh Pirates", "http://pp"}
+	homePageMap[137] = Team{"San Francisco Giants", "http://sfg"}
+
+	return homePageMap
 }

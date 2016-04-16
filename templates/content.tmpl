@@ -13,18 +13,21 @@
 <section id="panel" style="display: table; background-color: white; text-align:center;">
   {{ range $key, $value := .Games }}
   <div style="display: table-row; padding:10px;">
-    {{ $title := index $value 0}}
-    {{ $away_id := index $value 1}}
-    {{ $away_abbrev := index $value 2}}
-    {{ $home_id := index $value 3}}
-    {{ $home_abbrev := index $value 4}}
-    {{ $id := index $value 5}}
+    {{ $away_team := index $value 0}}
+    {{ $away_hp := index $value 1}}
+    {{ $away_id := index $value 2}}
+    {{ $away_abbrev := index $value 3}}
+    {{ $home_team := index $value 4}}
+    {{ $home_hp := index $value 5}}
+    {{ $home_id := index $value 6}}
+    {{ $home_abbrev := index $value 7}}
+    {{ $id := index $value 8}}
     <div style="display: table-cell;padding:5px;">
-      <img class="logo" id="logo{{ $away_id }}" src="images/img_trans.gif">
+      <a href="{{ $away_hp }}" title="{{ $away_team }}"><img class="logo" id="logo{{ $away_id }}" src="images/img_trans.gif"></a>
     </div>
     <div style="display:table-cell;padding:5px;text-align:center;vertical-align:middle;"><a target="_blank" href="http://m.mlb.com/video/v{{$id}}/condensed-game-{{$away_abbrev}}{{$home_abbrev}}">{{ $away_abbrev }}@{{ $home_abbrev }}</a></div>
     <div style="display:table-cell;padding:5px;">
-      <img class="logo" id="logo{{ $home_id }}" src="images/img_trans.gif">
+      <a href="{{ $home_hp }}" title="{{ $home_team }}"><img class="logo" id="logo{{ $home_id }}" src="images/img_trans.gif"></a>
     </div>
   </div>
   {{ end }}
