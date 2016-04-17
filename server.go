@@ -248,7 +248,7 @@ func GameHandler(w http.ResponseWriter, req *http.Request, gameDate time.Time, h
 
 	// prepare response page
 	r := render.New(render.Options{
-		IsDevelopment: true,
+		IsDevelopment: false,
 	})
 
 	readableDates := gameDate.Format("Mon, Jan _2 2006")
