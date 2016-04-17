@@ -1,98 +1,104 @@
 .logo {
-  width: 195px;
-  height: 162px;
+  width: 1205px;
+  height: 840px;
   background-image: url(/images/mlb-logos.png);
-  zoom:0.2;
-  -moz-transform:scale(0.2);
-  -moz-transform-origin: 0 0;
+  background-position: 0px 0px;
+  background-repeat:no-repeat;
+  display:inline-block;
+  vertical-align:text-bottom;
 }
-#logo110 { /*Baltimore Orioles*/
-  background-position: 1200px 835px;
+.logo-small {
+  width: 36px;
+  height: 32px;
+  background-size:241px 168px;
 }
-#logo145 { /*Chicago Whitesox*/
-  background-position: 1000px 835px;
+.logo110 { /*Baltimore Orioles*/
+  background-position: -3px -1px;
 }
-#logo117 { /*Houston Astros*/
-  background-position: 800px 835px;
+.logo145 { /*Chicago Whitesox*/
+  background-position: -44px -1px;
 }
-#logo144 { /*Atlanta Braves*/
-  background-position: 600px 835px;
+.logo117 { /*Houston Astros*/
+  background-position: -83px -1px;
 }
-#logo112 { /*Chicago Cubs*/
-  background-position: 400px 835px;
+.logo144 { /*Atlanta Braves*/
+  background-position: -123px -1px;
 }
-#logo109 { /*Arizona Diamond Backs*/
-  background-position: 200px 835px;
+.logo112 { /*Chicago Cubs*/
+  background-position: -163px -1px;
 }
-#logo111 { /*Boston Red Sox*/
-  background-position: 1200px 668px;
+.logo109 { /*Arizona Diamond Backs*/
+  background-position: -204px -1px;
 }
-#logo114 { /*Cleveland Indians*/
-  background-position: 1000px 668px;
+.logo111 { /*Boston Red Sox*/
+  background-position: -3px -35px;
 }
-#logo108 { /*Los Angeles Angels*/
-  background-position: 800px 668px;
+.logo114 { /*Cleveland Indians*/
+  background-position: -44px -35px;
 }
-#logo146 { /*Miami Marlins*/
-  background-position: 600px 668px;
+.logo108 { /*Los Angeles Angels*/
+  background-position: -83px -35px;
 }
-#logo113 { /*Cincinnati Reds*/
-  background-position: 400px 668px;
+.logo146 { /*Miami Marlins*/
+  background-position: -123px -35px;
 }
-#logo115 { /*Colorado Rockies*/
-  background-position: 200px 668px;
+.logo113 { /*Cincinnati Reds*/
+  background-position: -163px -35px;
 }
-#logo147 { /*New York Yankees*/
-  background-position: 1200px 501px;
+.logo115 { /*Colorado Rockies*/
+  background-position: -204px -35px;
 }
-#logo116 { /*Detroit Tigers*/
-  background-position: 1000px 501px;
+.logo147 { /*New York Yankees*/
+  background-position: -3px -68px;
 }
-#logo133 { /*Oakland Athletics*/
-  background-position: 800px 501px;
+.logo116 { /*Detroit Tigers*/
+  background-position: -44px -68px;
 }
-#logo121 { /*New York Mets*/
-  background-position: 600px 501px;
+.logo133 { /*Oakland Athletics*/
+  background-position: -83px -68px;
 }
-#logo158 { /*Milwaukee Brewers*/
-  background-position: 400px 501px;
+.logo121 { /*New York Mets*/
+  background-position: -123px -68px;
 }
-#logo119 { /*LA Dodgers*/
-  background-position: 200px 501px;
+.logo158 { /*Milwaukee Brewers*/
+  background-position: -163px -68px;
 }
-#logo139 { /* Tampa Bay Rays*/
-  background-position: 1200px 334px;
+.logo119 { /*LA Dodgers*/
+  background-position: -204px -68px;
 }
-#logo118 { /*Kansas City Royals*/
-  background-position: 1000px 334px;
+.logo139 { /* Tampa Bay Rays*/
+  background-position: -3px -102px;
 }
-#logo136 { /*Seattle Mariners*/
-  background-position: 800px 334px;
+.logo118 { /*Kansas City Royals*/
+  background-position: -44px -102px;
 }
-#logo143 { /*Philadelphia Phillies*/
-  background-position: 600px 334px;
+.logo136 { /*Seattle Mariners*/
+  background-position: -83px -102px;
 }
-#logo138 { /*St Louis Cardinals*/
-  background-position: 400px 334px;
+.logo143 { /*Philadelphia Phillies*/
+  background-position: -123px -102px;
 }
-#logo135 { /*San Diego Padres*/
-  background-position: 200px 334px;
+.logo138 { /*St Louis Cardinals*/
+  background-position: -163px -102px;
 }
-#logo141 { /*Toronto Blue Jays*/
-  background-position: 1200px 167px;
+.logo135 { /*San Diego Padres*/
+  background-position: -204px -102px;
 }
-#logo142 { /*Minnesota Twins*/
-  background-position: 1000px 167px;
+.logo141 { /*Toronto Blue Jays*/
+  background-position: -3px -134px;
 }
-#logo140 { /*Texas Rangers*/
-  background-position: 800px 167px;
+.logo142 { /*Minnesota Twins*/
+  background-position: -44px -134px;
 }
-#logo120 { /*Washington Nationals*/
-  background-position: 600px 167px;
+.logo140 { /*Texas Rangers*/
+  background-position: -83px -134px;
 }
-#logo134 { /*Pittsburgh Pirates*/
-  background-position: 400px 167px;
+.logo120 { /*Washington Nationals*/
+  background-position: -123px -134px;
 }
-#logo137 { /*San Francisco Giants*/
-  background-position: 200px 167px;
+.logo134 { /*Pittsburgh Pirates*/
+  background-position: -163px -134px;
+}
+.logo137 { /*San Francisco Giants*/
+  background-position: -204px -134px;
 }

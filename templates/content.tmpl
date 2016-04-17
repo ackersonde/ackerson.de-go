@@ -4,9 +4,9 @@
 
 <section id="panel" style="display: table; background-color: white; text-align:center;">
   <div style="display: table-row; padding:10px;">
-    <div style="display: table-cell;padding:5px;"><a href="?date1={{$.Date}}&offset=-1"><img class="prevNext" id="prev" alt="Prev" title="Prev" src="images/img_trans.gif"></a></div>
+    <div style="display: table-cell;padding:5px;"><a href="?date1={{$.Date}}&offset=-1"><img class="selectors prev-resized" alt="Prev" title="Prev" src="images/img_trans.gif"></a></div>
     <div style="display: table-cell;padding:5px;"><a href="http://www.mlb.com/mediacenter/">MLB</a> Games from<br>{{ $.ReadableDate }}</div>
-    <div style="display: table-cell;padding:5px;"><a href="?date1={{$.Date}}&offset=1"><img class="prevNext" id="next" alt="Next" title="Next" src="images/img_trans.gif"></a></div>
+    <div style="display: table-cell;padding:5px;"><a href="?date1={{$.Date}}&offset=1"><img class="selectors next-resized" alt="Next" title="Next" src="images/img_trans.gif"></a></div>
   </div>
 </section>
 
@@ -23,11 +23,11 @@
     {{ $home_abbrev := index $value 7}}
     {{ $id := index $value 8}}
     <div style="display: table-cell;padding:5px;">
-      <a href="{{ $away_hp }}" title="{{ $away_team }}" target="_blank"><img class="logo" id="logo{{ $away_id }}" src="images/img_trans.gif"></a>
+      <a href="{{ $away_hp }}" title="{{ $away_team }}" target="_blank"><img class="logo logo-small logo{{ $away_id }}" src="images/img_trans.gif"></a>
     </div>
     <div style="display:table-cell;padding:5px;text-align:center;vertical-align:middle;"><a target="_blank" href="http://m.mlb.com/video/v{{$id}}/condensed-game-{{$away_abbrev}}{{$home_abbrev}}">{{ $away_abbrev }}@{{ $home_abbrev }}</a></div>
     <div style="display:table-cell;padding:5px;">
-      <a href="{{ $home_hp }}" title="{{ $home_team }}" target="_blank"><img class="logo" id="logo{{ $home_id }}" src="images/img_trans.gif"></a>
+      <a href="{{ $home_hp }}" title="{{ $home_team }}" target="_blank"><img class="logo logo-small logo{{ $home_id }}" src="images/img_trans.gif"></a>
     </div>
   </div>
   {{ end }}

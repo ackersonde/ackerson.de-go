@@ -27,16 +27,25 @@ html {
   margin: auto;
   background-color: #f3f3f3
 }
-.prevNext {
-  width: 157px;
-  background: url(../images/prevNext.png) 0 0;
-  zoom:0.1;
-  -moz-transform:scale(0.2);
-  -moz-transform-origin: 0 0;
-}
-#prev { /*Baltimore Orioles*/
+.selectors {
+  width: 320px;
+  height: 157px;
+  background-image: url(../images/prevNext.png);
   background-position: 0px 0px;
+  background-repeat:no-repeat;
+  display:inline-block;
+  vertical-align:text-bottom;
 }
-#next { /*Chicago Whitesox*/
-  background-position: 160px 0px;
+.prev-resized{
+  width:16px;
+  height:16px;
+  background-position:0px 0px;
+  background-size:32px 16px;
 }
+.next-resized{
+  width:16px;
+  height:16px;
+  background-position:-16px 0px;
+  background-size:32px 16px;
+}
+
