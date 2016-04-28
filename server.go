@@ -62,23 +62,41 @@ func main() {
 		}
 	})
 
-	mux.HandleFunc("/bb", func(w http.ResponseWriter, r *http.Request) {
+	mux.HandleFunc("/bbDay", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
 			date := time.Now().AddDate(0, 0, -1)
 			date1 := r.URL.Query().Get("date1")
 			if date1 != "" {
+				log.Print("wtf: " + date1)
 				date1 = strings.TrimLeft(date1, "year_")
 				location, _ := time.LoadLocation("UTC")
 				monthDayString, err := time.ParseInLocation("2006/month_01/day_02", date1, location)
+				log.Print("found: " + monthDayString.Format(time.RFC3339))
 				if err != nil {
 					log.Print(err)
 				} else {
 					i, _ := strconv.Atoi(r.URL.Query().Get("offset"))
 					date = monthDayString.AddDate(0, 0, i)
+					log.Print("searching for: " + date.Format(time.RFC3339))
 				}
 			}
 			GameHandler(w, r, date, homePageMap)
 		}
+	})
+
+	mux.HandleFunc("/bb", func(w http.ResponseWriter, req *http.Request) {
+		// prepare response page
+		date := time.Now().AddDate(0, 0, -1)
+		dates := "year_" + date.Format("2006/month_01/day_02")
+		readableDates := date.Format("Mon, Jan _2 2006")
+		games := make(map[int][]string)
+		games = SearchMLBGames(dates, games, homePageMap)
+
+		r := render.New(render.Options{
+			Layout:        "content",
+			IsDevelopment: false,
+		})
+		r.HTML(w, http.StatusOK, "mlbResponse", GameDay{Date: dates, ReadableDate: readableDates, Games: games})
 	})
 
 	n := negroni.Classic()
@@ -252,7 +270,7 @@ func GameHandler(w http.ResponseWriter, req *http.Request, gameDate time.Time, h
 	})
 
 	readableDates := gameDate.Format("Mon, Jan _2 2006")
-	r.HTML(w, http.StatusOK, "content", GameDay{Date: dates, ReadableDate: readableDates, Games: games})
+	r.HTML(w, http.StatusOK, "mlbResponse", GameDay{Date: dates, ReadableDate: readableDates, Games: games})
 }
 
 // GameDay is now commented
@@ -334,8 +352,9 @@ func SearchMLBGames(dates string, games map[int][]string, homePageMap map[int]Te
 	return games
 }
 
+// Team is now commented
 type Team struct {
-    Name, HomePage string
+	Name, HomePage string
 }
 
 // LookupTeamInfo is now commented

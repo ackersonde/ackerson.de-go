@@ -1,0 +1,32 @@
+<div id="responseBB">
+  <section id="panel" style="display: table; background-color: white; text-align:center;">
+    <div style="display: table-row; padding:10px;">
+      <div style="display: table-cell;padding:5px;"><a href="javascript:fetchGames('{{$.Date}}', -1);"><img class="selectors prev-resized" alt="Prev" title="Prev" src="images/img_trans.gif"></a></div>
+      <div style="display: table-cell;padding:5px;"><a href="http://www.mlb.com/mediacenter/">MLB</a> Games from<br><span id='searchDate'>{{ $.ReadableDate }}</span></div>
+      <div style="display: table-cell;padding:5px;"><a href="javascript:fetchGames('{{$.Date}}', 1);"><img class="selectors next-resized" alt="Next" title="Next" src="images/img_trans.gif"></a></div>
+    </div>
+  </section>
+
+  <section id="panel" style="display: table; background-color: white; text-align:center;">
+    {{ range $key, $value := .Games }}
+    <div style="display: table-row; padding:10px;">
+      {{ $away_team := index $value 0}}
+      {{ $away_hp := index $value 1}}
+      {{ $away_id := index $value 2}}
+      {{ $away_abbrev := index $value 3}}
+      {{ $home_team := index $value 4}}
+      {{ $home_hp := index $value 5}}
+      {{ $home_id := index $value 6}}
+      {{ $home_abbrev := index $value 7}}
+      {{ $id := index $value 8}}
+      <div style="display: table-cell;padding:5px;">
+        <a href="{{ $away_hp }}" title="{{ $away_team }}" target="_blank"><img class="logo logo-small logo{{ $away_id }}" src="images/img_trans.gif"></a>
+      </div>
+      <div style="display:table-cell;padding:5px;text-align:center;vertical-align:middle;"><a target="_blank" href="http://m.mlb.com/video/v{{$id}}/condensed-game-{{$away_abbrev}}{{$home_abbrev}}">{{ $away_abbrev }}@{{ $home_abbrev }}</a></div>
+      <div style="display:table-cell;padding:5px;">
+        <a href="{{ $home_hp }}" title="{{ $home_team }}" target="_blank"><img class="logo logo-small logo{{ $home_id }}" src="images/img_trans.gif"></a>
+      </div>
+    </div>
+  {{ end }}
+  </section>
+</div>
