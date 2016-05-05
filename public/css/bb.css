@@ -5,6 +5,9 @@ html {
   -o-background-size: cover;
   background-size: cover;
 }
+#responseBB {
+  margin-top: 50px;
+}
 #homeplate {
   position: absolute;
   bottom: 8%;

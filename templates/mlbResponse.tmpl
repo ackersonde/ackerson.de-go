@@ -7,14 +7,9 @@
     </div>
   </section>
 
-<video autoplay>
-  <source src="http://mediadownloads.mlb.com/mlbam/mp4/2016/05/05/659287783/1462426099155/asset_2500K.mp4" type="video/mp4">
-Your browser does not support the video tag.
-</video>
-
   <section id="panel" style="display: table; background-color: white; text-align:center;">
     {{ range $key, $value := .Games }}
-    <div style="display: table-row; padding:10px;">
+    <div style="display: table-row; margin-top: 20px;">
       {{ $away_team := index $value 0}}
       {{ $away_hp := index $value 1}}
       {{ $away_id := index $value 2}}
@@ -24,13 +19,17 @@ Your browser does not support the video tag.
       {{ $home_id := index $value 6}}
       {{ $home_abbrev := index $value 7}}
       {{ $id := index $value 8}}
+      {{ $game_url := index $value 10}}
       <div style="display: table-cell;padding:5px;">
         <a href="{{ $away_hp }}" title="{{ $away_team }}" target="_blank"><img class="logo logo-small logo{{ $away_id }}" src="images/img_trans.gif"></a>
       </div>
-      <div style="display:table-cell;padding:5px;text-align:center;vertical-align:middle;"><a target="_blank" href="http://m.mlb.com/video/v{{$id}}/condensed-game-{{$away_abbrev}}{{$home_abbrev}}">{{ $away_abbrev }}@{{ $home_abbrev }}</a></div>
+      <div style="display:table-cell;padding:5px;text-align:center;vertical-align:middle;"><a target="_blank" href="/bbStream?url={{ $game_url }}">{{ $away_abbrev }}@{{ $home_abbrev }}</a></div>
       <div style="display:table-cell;padding:5px;">
         <a href="{{ $home_hp }}" title="{{ $home_team }}" target="_blank"><img class="logo logo-small logo{{ $home_id }}" src="images/img_trans.gif"></a>
       </div>
+      <!--<div style="display:table-cell;padding:5px;text-align:center;vertical-align:middle;">
+        <a target="_blank" href="http://m.mlb.com/video/v{{$id}}/condensed-game-{{$away_abbrev}}{{$home_abbrev}}"><img src="images/link_external.png"/></a>
+      </div>-->
     </div>
   {{ end }}
   </section>

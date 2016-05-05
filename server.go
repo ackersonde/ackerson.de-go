@@ -62,6 +62,16 @@ func main() {
 		}
 	})
 
+	mux.HandleFunc("/bbStream", func(w http.ResponseWriter, r *http.Request) {
+		URL := r.URL.Query().Get("url")
+		log.Print("render URL: " + URL)
+
+		render := render.New(render.Options{
+			IsDevelopment: false,
+		})
+		render.HTML(w, http.StatusOK, "stream", URL)
+	})
+
 	mux.HandleFunc("/bbDay", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
 			date := time.Now().AddDate(0, 0, -1)
@@ -80,6 +90,7 @@ func main() {
 					log.Print("searching for: " + date.Format(time.RFC3339))
 				}
 			}
+			w.Header().Set("Cache-Control", "max-age=18144000")
 			GameHandler(w, r, date, homePageMap)
 		}
 	})
@@ -96,6 +107,8 @@ func main() {
 			Layout:        "content",
 			IsDevelopment: false,
 		})
+
+		w.Header().Set("Cache-Control", "max-age=18144000")
 		r.HTML(w, http.StatusOK, "mlbResponse", GameDay{Date: dates, ReadableDate: readableDates, Games: games})
 	})
 
@@ -270,6 +283,8 @@ func GameHandler(w http.ResponseWriter, req *http.Request, gameDate time.Time, h
 	})
 
 	readableDates := gameDate.Format("Mon, Jan _2 2006")
+
+
 	r.HTML(w, http.StatusOK, "mlbResponse", GameDay{Date: dates, ReadableDate: readableDates, Games: games})
 }
 
@@ -342,7 +357,11 @@ func SearchMLBGames(dates string, games map[int][]string, homePageMap map[int]Te
 			homeTeamID := aGameVal["-home_team_id"].(string)
 			homeTeamName, homeTeamHomePage := LookupTeamInfo(homePageMap, homeTeamID)
 			homeAbbrev := aGameVal["-home_name_abbrev"].(string)
-			games[k] = []string{awayTeamName, awayTeamHomePage, awayTeamID, awayAbbrev, homeTeamName, homeTeamHomePage, homeTeamID, homeAbbrev, gameID, dates}
+
+			detailURL := "http://m.mlb.com/gen/multimedia/detail" + generateDetailURL(gameID)
+			gameURL := fetchGameURL(detailURL, "FLASH_2500K_1280X720")
+
+			games[k] = []string{awayTeamName, awayTeamHomePage, awayTeamID, awayAbbrev, homeTeamName, homeTeamHomePage, homeTeamID, homeAbbrev, gameID, dates, gameURL}
 		}
 	}
 
@@ -350,6 +369,44 @@ func SearchMLBGames(dates string, games map[int][]string, homePageMap map[int]Te
 	log.Println("Condensed games:", condensedGames)
 
 	return games
+}
+
+// fetchGameURL is now commented
+func fetchGameURL(detailURL string, desiredQuality string) string {
+	gameURL := "MickeyMouse.mp4"
+
+	resp, err := http.Get(detailURL)
+	if err != nil {
+		log.Print(err)
+	}
+	defer resp.Body.Close()
+	xml, err := ioutil.ReadAll(resp.Body)
+	m, err := mxj.NewMapXml(xml)
+
+	URLs, err := m.ValuesForKey("url")
+	if err != nil {
+		log.Fatal("err:", err.Error())
+		return ""
+	}
+
+	// now just manipulate Map entries returned as []interface{} array.
+	for _, v := range URLs {
+		aGameVal, _ := v.(map[string]interface{})
+		if aGameVal["-playback_scenario"].(string) == desiredQuality {
+			return aGameVal["#text"].(string)
+		}
+	}
+
+	return gameURL
+}
+
+// generateDetailURL is now commented
+func generateDetailURL(gameID string) string {
+	// given gameID 605442983 return "/9/8/3/605442983.xml"
+	return 	"/" + gameID[len(gameID)-3:len(gameID)-2] + 
+					"/" + gameID[len(gameID)-2:len(gameID)-1] + 
+					"/" + gameID[len(gameID)-1:] + 
+					"/" + gameID + ".xml"
 }
 
 // Team is now commented
