@@ -1,0 +1,28 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+      <meta charset="UTF-8" />
+      <title>MLB Games from {{ $.Date }}</title>
+  </head>
+  <body>
+    <video id="myVideo" poster="http://files.fbcoverstreet.com/content/XPZWV7doOc5eurn4sdrUJ6lp4NhZz3var3IAYXoRv8MnoBtwrN8ETXRamscIZDyU.jpg" autoplay controls onended="run();">   
+      <source id="ss" src="{{ $.Game1URL }}" type='video/mp4'>
+    </video>
+
+    <script>
+        video_count = 1;
+        videoPlayer = document.getElementById("ss");        
+        video=document.getElementById("myVideo");
+        //video_list = ['http://demosthenes.info/assets/videos/lake.mp4','http://demosthenes.info/assets/videos/mountain.mp4']
+        video_list = {{ $.BallgameVideoURLs }}
+
+        function run(){
+          video_count++;
+          if (video_count == {{ $.BallgameCount }}) return;
+          videoPlayer.setAttribute("src", video_list[video_count-1]);
+          video.load();
+          video.play();
+       }
+    </script>
+  </body>
+</html>

@@ -72,6 +72,28 @@ func main() {
 		render.HTML(w, http.StatusOK, "stream", URL)
 	})
 
+	mux.HandleFunc("/bbAll", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == "GET" {
+			date := time.Now().AddDate(0, 0, -1)
+			date1 := r.URL.Query().Get("date1")
+			if date1 != "" {
+				date1 = strings.TrimLeft(date1, "year_")
+				location, _ := time.LoadLocation("UTC")
+				monthDayString, err := time.ParseInLocation("2006/month_01/day_02", date1, location)
+				log.Print("found: " + monthDayString.Format(time.RFC3339))
+				if err != nil {
+					log.Print(err)
+				} else {
+					i, _ := strconv.Atoi(r.URL.Query().Get("offset"))
+					date = monthDayString.AddDate(0, 0, i)
+					log.Print("searching for: " + date.Format(time.RFC3339))
+				}
+			}
+			w.Header().Set("Cache-Control", "max-age=10800")
+			DayHandler(w, r, date, homePageMap)
+		}
+	})
+
 	mux.HandleFunc("/bbDay", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
 			date := time.Now().AddDate(0, 0, -1)
@@ -90,7 +112,7 @@ func main() {
 					log.Print("searching for: " + date.Format(time.RFC3339))
 				}
 			}
-			w.Header().Set("Cache-Control", "max-age=18144000")
+			w.Header().Set("Cache-Control", "max-age=10800")
 			GameHandler(w, r, date, homePageMap)
 		}
 	})
@@ -108,7 +130,7 @@ func main() {
 			IsDevelopment: false,
 		})
 
-		w.Header().Set("Cache-Control", "max-age=18144000")
+		w.Header().Set("Cache-Control", "max-age=10800")
 		r.HTML(w, http.StatusOK, "mlbResponse", GameDay{Date: dates, ReadableDate: readableDates, Games: games})
 	})
 
@@ -269,6 +291,38 @@ func WeatherHandler(w http.ResponseWriter, req *http.Request) {
 	data, _ := json.Marshal(code)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Write(data)
+}
+
+// DayHandler is now commented
+func DayHandler(w http.ResponseWriter, req *http.Request, gameDate time.Time, homePageMap map[int]Team) {
+	dates := "year_" + gameDate.Format("2006/month_01/day_02")
+	games := make(map[int][]string)
+	games = SearchMLBGames(dates, games, homePageMap)
+
+	// prepare response page
+	r := render.New(render.Options{
+		IsDevelopment: true,
+	})
+	
+	var game_urls []string
+	for _, stringArray := range games {
+    game_urls = append(game_urls, stringArray[10])
+  }
+	readableDates := gameDate.Format("Mon, Jan _2 2006")
+
+	r.HTML(w, http.StatusOK, "playlist", AllGames{
+		Date: readableDates, 
+		Game1URL: game_urls[0], 
+		BallgameVideoURLs: game_urls, 
+		BallgameCount: len(games) })
+}
+
+// AllGames is now commented
+type AllGames struct {
+	Date         			string
+	Game1URL		 			string
+	BallgameVideoURLs []string
+	BallgameCount     int
 }
 
 // GameHandler is now commented
