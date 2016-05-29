@@ -86,7 +86,6 @@ func main() {
 				} else {
 					i, _ := strconv.Atoi(r.URL.Query().Get("offset"))
 					date = monthDayString.AddDate(0, 0, i)
-					log.Print("searching for: " + date.Format(time.RFC3339))
 				}
 			}
 			w.Header().Set("Cache-Control", "max-age=10800")
@@ -99,17 +98,14 @@ func main() {
 			date := time.Now().AddDate(0, 0, -1)
 			date1 := r.URL.Query().Get("date1")
 			if date1 != "" {
-				log.Print("wtf: " + date1)
 				date1 = strings.TrimLeft(date1, "year_")
 				location, _ := time.LoadLocation("UTC")
 				monthDayString, err := time.ParseInLocation("2006/month_01/day_02", date1, location)
-				log.Print("found: " + monthDayString.Format(time.RFC3339))
 				if err != nil {
 					log.Print(err)
 				} else {
 					i, _ := strconv.Atoi(r.URL.Query().Get("offset"))
 					date = monthDayString.AddDate(0, 0, i)
-					log.Print("searching for: " + date.Format(time.RFC3339))
 				}
 			}
 			w.Header().Set("Cache-Control", "max-age=10800")
@@ -359,6 +355,7 @@ func SearchMLBGames(dates string, games map[int][]string, homePageMap map[int]Te
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Print(err)
+		return nil
 	}
 	defer resp.Body.Close()
 	xml, err := ioutil.ReadAll(resp.Body)
