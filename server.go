@@ -8,6 +8,7 @@ import (
 	"net"
 	"net/http"
 	"os"
+	"sort"
 	"strconv"
 	"strings"
 	"time"
@@ -304,19 +305,20 @@ func DayHandler(w http.ResponseWriter, req *http.Request, gameDate time.Time, ho
 	for _, stringArray := range games {
     game_urls = append(game_urls, stringArray[10])
   }
+  sort.Strings(game_urls)
 	readableDates := gameDate.Format("Mon, Jan _2 2006")
 
 	r.HTML(w, http.StatusOK, "playlist", AllGames{
 		Date: readableDates, 
-		Game1URL: game_urls[0], 
-		BallgameVideoURLs: game_urls, 
+		VideoCountStorage: gameDate.Format("2006-01-02"), 
+		BallgameVideoURLs: game_urls,
 		BallgameCount: len(games) })
 }
 
 // AllGames is now commented
 type AllGames struct {
 	Date         			string
-	Game1URL		 			string
+	VideoCountStorage	string
 	BallgameVideoURLs []string
 	BallgameCount     int
 }
@@ -333,7 +335,6 @@ func GameHandler(w http.ResponseWriter, req *http.Request, gameDate time.Time, h
 	})
 
 	readableDates := gameDate.Format("Mon, Jan _2 2006")
-
 
 	r.HTML(w, http.StatusOK, "mlbResponse", GameDay{Date: dates, ReadableDate: readableDates, Games: games})
 }

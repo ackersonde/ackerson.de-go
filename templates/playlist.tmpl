@@ -1,28 +1,49 @@
 <!DOCTYPE HTML>
 <html>
   <head>
-      <meta charset="UTF-8" />
-      <title>MLB Games from {{ $.Date }}</title>
-  </head>
-  <body>
-    <video id="myVideo" poster="http://files.fbcoverstreet.com/content/XPZWV7doOc5eurn4sdrUJ6lp4NhZz3var3IAYXoRv8MnoBtwrN8ETXRamscIZDyU.jpg" autoplay controls onended="run();">   
-      <source id="ss" src="{{ $.Game1URL }}" type='video/mp4'>
-    </video>
+    <meta charset="UTF-8" />
+    <title>MLB Games from {{ $.Date }}</title>
+    <script type="text/javascript">
+        var video_count;
+        var storage_key = "video_count_{{ $.VideoCountStorage }}";
+        if (!localStorage.getItem(storage_key)) {
+          localStorage.setItem(storage_key, 1);
+          video_count = 1;
+        } else {
+          video_count = localStorage.getItem(storage_key)
+        }
 
-    <script>
-        video_count = 1;
-        videoPlayer = document.getElementById("ss");        
-        video=document.getElementById("myVideo");
-        //video_list = ['http://demosthenes.info/assets/videos/lake.mp4','http://demosthenes.info/assets/videos/mountain.mp4']
         video_list = {{ $.BallgameVideoURLs }}
 
+        function init_video_player() {
+          load_video(video_count);
+        }
+
         function run(){
-          video_count++;
-          if (video_count == {{ $.BallgameCount }}) return;
-          videoPlayer.setAttribute("src", video_list[video_count-1]);
+          localStorage.setItem(storage_key, parseInt(localStorage.getItem(storage_key)) + 1);
+          video_count = localStorage.getItem(storage_key)
+
+          if (video_count >= {{ $.BallgameCount }} ) {
+            localStorage.setItem(storage_key, 1);
+            video_count = 1
+          }
+
+          load_video(video_count);
+       }
+
+       function load_video(index) {
+          videoPlayer = document.getElementById("ss");  
+          videoPlayer.setAttribute("src", video_list[index - 1]);
+
+          video=document.getElementById("myVideo");
           video.load();
           video.play();
-       }
+        }
     </script>
+  </head>
+  <body onload="init_video_player()">
+    <video id="myVideo" poster="http://files.fbcoverstreet.com/content/XPZWV7doOc5eurn4sdrUJ6lp4NhZz3var3IAYXoRv8MnoBtwrN8ETXRamscIZDyU.jpg" controls onended="run();">
+      <source id="ss" type="video/mp4">
+    </video>
   </body>
 </html>
