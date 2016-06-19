@@ -32,6 +32,6 @@ function fetchGames(currentDate, offset) {
     }
   }
 
-  xmlhttp.open("GET", "/bbDay?date1=" + date1 + "&offset=" + offset, true);
+  xmlhttp.open("GET", "/bbAjaxDay?date1=" + date1 + "&offset=" + offset, true);
   xmlhttp.send();
 }
