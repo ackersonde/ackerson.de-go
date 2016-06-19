@@ -22,24 +22,10 @@ type AllGames struct {
 
 // PlayAllGamesOfDayHandler is now commented
 func PlayAllGamesOfDayHandler(w http.ResponseWriter, req *http.Request, homePageMap map[int]Team) AllGames {
-	gameDate := time.Now().AddDate(0, 0, -1)
 	date1 := req.URL.Query().Get("date1")
-	if date1 != "" {
-		date1 = strings.TrimLeft(date1, "year_")
-		location, _ := time.LoadLocation("UTC")
-		monthDayString, err := time.ParseInLocation("2006/month_01/day_02", date1, location)
-		log.Print("found: " + monthDayString.Format(time.RFC3339))
-		if err != nil {
-			log.Print(err)
-		} else {
-			i, _ := strconv.Atoi(req.URL.Query().Get("offset"))
-			gameDate = monthDayString.AddDate(0, 0, i)
-		}
-	}
+	offset := req.URL.Query().Get("offset")
 
-	dates := "year_" + gameDate.Format("2006/month_01/day_02")
-	games := make(map[int][]string)
-	games = SearchMLBGames(dates, games, homePageMap)
+	gameDate, _, games := getDatesAndGames(date1, offset, homePageMap)
 
 	var gameUrls []string
 	for _, stringArray := range games {
@@ -64,8 +50,16 @@ type GameDay struct {
 
 // GameDayListingHandler is now commented
 func GameDayListingHandler(w http.ResponseWriter, req *http.Request, homePageMap map[int]Team) GameDay {
-	gameDate := time.Now().AddDate(0, 0, -1)
 	date1 := req.URL.Query().Get("date1")
+	offset := req.URL.Query().Get("offset")
+
+	gameDate, dates, games := getDatesAndGames(date1, offset, homePageMap)
+
+	return GameDay{Date: dates, ReadableDate: gameDate.Format("Mon, Jan _2 2006"), Games: games}
+}
+
+func getDatesAndGames(date1 string, offset string, homePageMap map[int]Team) (time.Time, string, map[int][]string) {
+	gameDate := time.Now().AddDate(0, 0, -1)
 	if date1 != "" {
 		date1 = strings.TrimLeft(date1, "year_")
 		location, _ := time.LoadLocation("UTC")
@@ -73,20 +67,20 @@ func GameDayListingHandler(w http.ResponseWriter, req *http.Request, homePageMap
 		if err != nil {
 			log.Print(err)
 		} else {
-			i, _ := strconv.Atoi(req.URL.Query().Get("offset"))
+			i, _ := strconv.Atoi(offset)
 			gameDate = monthDayString.AddDate(0, 0, i)
 		}
 	}
 
 	dates := "year_" + gameDate.Format("2006/month_01/day_02")
 	games := make(map[int][]string)
-	games = SearchMLBGames(dates, games, homePageMap)
+	games = searchMLBGames(dates, games, homePageMap)
 
-	return GameDay{Date: dates, ReadableDate: gameDate.Format("Mon, Jan _2 2006"), Games: games}
+	return gameDate, dates, games
 }
 
 // SearchMLBGames is now commented
-func SearchMLBGames(dates string, games map[int][]string, homePageMap map[int]Team) map[int][]string {
+func searchMLBGames(dates string, games map[int][]string, homePageMap map[int]Team) map[int][]string {
 	domain := "http://gd2.mlb.com/components/game/mlb/"
 	suffix := "/grid_ce.xml"
 	url := domain + dates + suffix

@@ -1,13 +1,13 @@
 <div id="responseBB">
   <section id="panel" style="display: table; background-color: white; text-align:center;">
     <div style="display: table-row; padding:10px;">
-      <div style="display: table-cell;padding:5px;"><a href="javascript:fetchGames('{{$.Date}}', -1);"><img class="selectors prev-resized" alt="Prev" title="Prev" src="images/img_trans.gif"></a></div>
+      <div style="display: table-cell;padding:5px;"><a href="javascript:fetchGames('{{$.Date}}', -1);" onclick="notifyAjaxCall('spinningBall.gif')"><img class="selectors prev-resized" alt="Prev" title="Prev" src="images/img_trans.gif"></a></div>
       <div style="display: table-cell;padding:5px;"><a href="http://www.mlb.com/mediacenter/">MLB</a> Games from<br><span id='searchDate'>{{ $.ReadableDate }}</span></div>
-      <div style="display: table-cell;padding:5px;"><a href="javascript:fetchGames('{{$.Date}}', 1);"><img class="selectors next-resized" alt="Next" title="Next" src="images/img_trans.gif"></a></div>
+      <div style="display: table-cell;padding:5px;"><a href="javascript:fetchGames('{{$.Date}}', 1);" onclick="notifyAjaxCall('spinningBall.gif')"><img class="selectors next-resized" alt="Next" title="Next" src="images/img_trans.gif"></a></div>
     </div>
     <div style="display: table-row; padding:5px;">
     <div style="display: table-cell;padding:5px;">&nbsp;</div>
-      <div style="display: table-cell;padding:5px;"><a href="/bbAll?date1={{ $.Date }}"><img src="http://hbttoysandgames.com/wp-content/uploads/2015/11/Pokemon-Ball-Poke-ball-Clip-Carry-Poke-3H-0.jpg" width="32px" alt="Gotta Catch 'Em All!" title="Gotta Catch 'Em All!"></a></div>
+      <div style="display: table-cell;padding:5px;"><a href="/bbAll?date1={{ $.Date }}"><img id="ball" src="images/pokemon.jpg" width="32px" alt="Gotta Catch 'Em All!" title="Gotta Catch 'Em All!" /></a></div>
       <div style="display: table-cell;padding:5px;">&nbsp;</div>
     </div>
   </section>

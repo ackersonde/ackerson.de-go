@@ -4,6 +4,13 @@ function getMLBFormattedDate(date) {
   return "year_" + date.getFullYear() + month + day;
 }
 
+function notifyAjaxCall(renderImage) {
+    var ballIcon = document.getElementById('ball');
+    if (ballIcon != null) {
+      ballIcon.src = 'images/' + renderImage;
+    }
+}
+
 function fetchGames(currentDate, offset) {
   var date1;
   var offset;
@@ -28,6 +35,7 @@ function fetchGames(currentDate, offset) {
 
   xmlhttp.onreadystatechange=function() {
     if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
+      notifyAjaxCall('pokemon.jpg');
       document.getElementById("responseBB").innerHTML=xmlhttp.responseText;
     }
   }
