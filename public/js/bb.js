@@ -11,35 +11,62 @@ function notifyAjaxCall(renderImage) {
     }
 }
 
-function fetchGames(currentDate, offset) {
-  var date1;
-  var offset;
+function prepareDate(currentDate) {
+  var searchDate;
 
   // current GET https://ackerson.de/bb?date1=year_2016%2fmonth_04%2fday_26&offset=1
   if (currentDate == "") {
     var today = new Date();
-    var yesterday = today.setDate(today.getDate() - 1);
-    date1 = getMLBFormattedDate(yesterday)
+    searchDate = today.setDate(today.getDate() - 1);
   } else {
-      searchDateString = document.getElementById('searchDate').innerText;
+      var searchDateString = document.getElementById('searchDate').value;
 
       // take the 'Wed, Apr 27 2016' string above and convert to Date object
       searchDate = new Date(Date.parse(searchDateString)) // millis
 
-      date1 = getMLBFormattedDate(searchDate)
   }
+  return getMLBFormattedDate(searchDate)
+}
 
-  if (window.XMLHttpRequest) {
-    xmlhttp=new XMLHttpRequest();
-  }
+function initializeDatePicker(clazz) {
+  $(function() {
+    $( clazz ).datepicker({
+      onSelect: function(value, date)
+        {
+          notifyAjaxCall('spinningBall.gif');
+          $.ajax({
+            type:"GET",
+            url: "/bbAjaxDay?date1=" + prepareDate(value) + "&offset=" + 0,
+            success: function(result)
+            {
+              notifyAjaxCall('pokemon.jpg');
+              document.getElementById("responseBB").innerHTML=result;
+              initializeDatePicker(clazz);
+            }
+          });
+        },
+      dateFormat: "D, M d yy",
+      showButtonPanel: true,
+      showAnim: 'slideDown',
+      autoSize: true,
+      showOn: "both",
+buttonImage: "images/calendar.gif",
+buttonImageOnly: true,
+buttonText: "Select date"
+    });
+  });
+}
 
-  xmlhttp.onreadystatechange=function() {
-    if (xmlhttp.readyState == 4 && xmlhttp.status == 200) {
-      notifyAjaxCall('pokemon.jpg');
-      document.getElementById("responseBB").innerHTML=xmlhttp.responseText;
-    }
-  }
-
-  xmlhttp.open("GET", "/bbAjaxDay?date1=" + date1 + "&offset=" + offset, true);
-  xmlhttp.send();
+function fetchGames(date1, offset) {
+    notifyAjaxCall('spinningBall.gif');
+    $.ajax({
+      type:"GET",
+      url: "/bbAjaxDay?date1=" + date1 + "&offset=" + offset,
+      success: function(result)
+      {
+        notifyAjaxCall('pokemon.jpg');
+        document.getElementById("responseBB").innerHTML=result;
+        initializeDatePicker('#searchDate');
+      }
+    });
 }

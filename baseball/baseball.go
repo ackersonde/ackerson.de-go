@@ -21,10 +21,7 @@ type AllGames struct {
 }
 
 // PlayAllGamesOfDayHandler is now commented
-func PlayAllGamesOfDayHandler(w http.ResponseWriter, req *http.Request, homePageMap map[int]Team) AllGames {
-	date1 := req.URL.Query().Get("date1")
-	offset := req.URL.Query().Get("offset")
-
+func PlayAllGamesOfDayHandler(date1 string, offset string, homePageMap map[int]Team) AllGames {
 	gameDate, _, games := getDatesAndGames(date1, offset, homePageMap)
 
 	var gameUrls []string
@@ -38,7 +35,6 @@ func PlayAllGamesOfDayHandler(w http.ResponseWriter, req *http.Request, homePage
 		VideoCountStorage: gameDate.Format("2006-01-02"),
 		BallgameVideoURLs: gameUrls,
 		BallgameCount:     len(games)}
-
 }
 
 // GameDay is now commented
@@ -49,10 +45,7 @@ type GameDay struct {
 }
 
 // GameDayListingHandler is now commented
-func GameDayListingHandler(w http.ResponseWriter, req *http.Request, homePageMap map[int]Team) GameDay {
-	date1 := req.URL.Query().Get("date1")
-	offset := req.URL.Query().Get("offset")
-
+func GameDayListingHandler(date1 string, offset string, homePageMap map[int]Team) GameDay {
 	gameDate, dates, games := getDatesAndGames(date1, offset, homePageMap)
 
 	return GameDay{Date: dates, ReadableDate: gameDate.Format("Mon, Jan _2 2006"), Games: games}

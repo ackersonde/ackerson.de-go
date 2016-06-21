@@ -64,7 +64,9 @@ func main() {
 
 	// gameDayListing for yesterday (default 'homepage')
 	mux.HandleFunc("/bb", func(w http.ResponseWriter, r *http.Request) {
-		gameDayListing := baseball.GameDayListingHandler(w, r, homePageMap)
+		date1 := r.URL.Query().Get("date1")
+		offset := r.URL.Query().Get("offset")
+		gameDayListing := baseball.GameDayListingHandler(date1, offset, homePageMap)
 
 		w.Header().Set("Cache-Control", "max-age=10800")
 		render := render.New(render.Options{
@@ -77,7 +79,9 @@ func main() {
 
 	// ajax request for gameDayListing
 	mux.HandleFunc("/bbAjaxDay", func(w http.ResponseWriter, r *http.Request) {
-		gameDayListing := baseball.GameDayListingHandler(w, r, homePageMap)
+		date1 := r.URL.Query().Get("date1")
+		offset := r.URL.Query().Get("offset")
+		gameDayListing := baseball.GameDayListingHandler(date1, offset, homePageMap)
 
 		// prepare response page
 		w.Header().Set("Cache-Control", "max-age=10800")
@@ -101,7 +105,9 @@ func main() {
 
 	// play all games of the day
 	mux.HandleFunc("/bbAll", func(w http.ResponseWriter, r *http.Request) {
-		allGames := baseball.PlayAllGamesOfDayHandler(w, r, homePageMap)
+		date1 := r.URL.Query().Get("date1")
+		offset := r.URL.Query().Get("offset")
+		allGames := baseball.PlayAllGamesOfDayHandler(date1, offset, homePageMap)
 
 		// prepare response page
 		w.Header().Set("Cache-Control", "max-age=10800")

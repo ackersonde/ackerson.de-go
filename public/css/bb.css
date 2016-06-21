@@ -5,6 +5,7 @@ html {
   -o-background-size: cover;
   background-size: cover;
 }
+#ui-datepicker-div { font-size:12px; }
 #responseBB {
   margin-top: 50px;
 }
@@ -51,4 +52,3 @@ html {
   background-position:-16px 0px;
   background-size:32px 16px;
 }
-
