@@ -5,6 +5,18 @@ html {
   -o-background-size: cover;
   background-size: cover;
 }
+img.ui-datepicker-trigger {
+  vertical-align: text-top;
+}
+#searchDate {
+  vertical-align:bottom;
+  margin-top:5px;
+  text-align:center;
+  font-size:1em;
+  font-weight:bold;
+  font-family:none;
+  border:none;
+}
 #ui-datepicker-div { font-size:12px; }
 #responseBB {
   margin-top: 50px;

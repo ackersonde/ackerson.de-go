@@ -2,7 +2,7 @@
   <section id="panel" style="display: table; background-color: white; text-align:center;">
     <div style="display: table-row; padding:10px;">
       <div style="display: table-cell;padding:5px;"><a href="javascript:fetchGames(prepareDate('{{$.Date}}'), -1);"><img class="selectors prev-resized" alt="Prev" title="Prev" src="images/img_trans.gif"></a></div>
-      <div style="display: table-cell;padding:5px;"><a href="http://www.mlb.com/mediacenter/">MLB</a> Games from<br><input type='text' id='searchDate' style="margin-top:5px;text-align:center;font-size:1em;font-weight:bold;font-family:none;border:none;" value='{{ $.ReadableDate }}'></div>
+      <div style="display: table-cell;padding:5px;"><a href="http://www.mlb.com/mediacenter/">MLB</a> Games from<br><input type='text' id='searchDate' value='{{ $.ReadableDate }}'></div>
       <div style="display: table-cell;padding:5px;"><a href="javascript:fetchGames(prepareDate('{{$.Date}}'), 1);"><img class="selectors next-resized" alt="Next" title="Next" src="images/img_trans.gif"></a></div>
     </div>
     <div style="display: table-row; padding:5px;">
