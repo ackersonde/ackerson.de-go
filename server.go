@@ -36,11 +36,11 @@ func main() {
 	n.UseHandler(mux)
 
 	port = os.Getenv("NEGRONI_PORT")
-	sslCertPath := "./certs/"
+	sslCertPath := "/root/certs/"
 
 	if port == "" || port == "3001" {
 		port = "3001"
-		sslCertPath = "./"
+		sslCertPath = ""
 	}
 
 	// HTTP/2.0
