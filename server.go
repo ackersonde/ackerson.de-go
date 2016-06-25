@@ -35,12 +35,9 @@ func main() {
 	n.Use(sessions.Sessions("gurkherpaderp", store))
 	n.UseHandler(mux)
 
-	prod := false
 	port = os.Getenv("NEGRONI_PORT")
 	if port == "" {
 		port = "3001"
-	} else if port == "80" {
-		prod = true
 	}
 
 	// HTTP/2.0
@@ -49,14 +46,7 @@ func main() {
 		Handler: n,
 	}
 	http2.ConfigureServer(srv, &http2.Server{})
-
-	if !prod {
-		log.Println("NOT PROD")
-		log.Fatal(srv.ListenAndServeTLS("server.pem", "server.key"))
-	} else {
-		log.Println("PROD - probably serving behind Cloudinary who takes care of TLS termination")
-		log.Fatal(srv.ListenAndServe())
-	}
+	log.Fatal(srv.ListenAndServeTLS("server.pem", "server.key"))
 }
 
 var mongo string

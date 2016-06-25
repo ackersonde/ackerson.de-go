@@ -11,6 +11,7 @@ WORKDIR $GOPATH/src/github.com/danackerson/ackerson.de-go
 RUN go get ./...
 RUN go build server.go
 RUN mv server /root/
+ADD /home/core/certs /root/
 
 RUN apk del git go && \
   rm -rf $GOPATH/pkg && \
@@ -24,4 +25,4 @@ RUN apk del git go && \
   rm -rf /var/cache/apk/*
 
 # execute ackerson.de
-ENTRYPOINT ["/root/server", "-prod"]
+ENTRYPOINT ["/root/server"]
