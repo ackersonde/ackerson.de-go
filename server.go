@@ -36,8 +36,11 @@ func main() {
 	n.UseHandler(mux)
 
 	port = os.Getenv("NEGRONI_PORT")
-	if port == "" {
+	sslCertPath := "./certs/"
+
+	if port == "" || port == "3001" {
 		port = "3001"
+		sslCertPath = "./"
 	}
 
 	// HTTP/2.0
@@ -46,7 +49,7 @@ func main() {
 		Handler: n,
 	}
 	http2.ConfigureServer(srv, &http2.Server{})
-	log.Fatal(srv.ListenAndServeTLS("server.pem", "server.key"))
+	log.Fatal(srv.ListenAndServeTLS(sslCertPath+"server.pem", sslCertPath+"server.key"))
 }
 
 var mongo string
