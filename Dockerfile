@@ -24,4 +24,6 @@ RUN apk del git go && \
   rm -rf /var/cache/apk/*
 
 # execute ackerson.de
+EXPOSE 443
+VOLUME ["/root"]
 ENTRYPOINT ["/root/server"]
