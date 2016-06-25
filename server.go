@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"fmt"
+	"io"
 	"io/ioutil"
 	"log"
 	"net"
@@ -18,13 +19,58 @@ import (
 	"github.com/goincremental/negroni-sessions"
 	"github.com/goincremental/negroni-sessions/cookiestore"
 	"github.com/unrolled/render"
+	"golang.org/x/net/http2"
 	"gopkg.in/mgo.v2"
 )
 
 func main() {
 	mux := http.NewServeMux()
+	setUpMuxHandlers(mux)
+
+	n := negroni.Classic()
+
+	readInCreds()
+
+	store := cookiestore.New([]byte(secret))
+	n.Use(sessions.Sessions("gurkherpaderp", store))
+	n.UseHandler(mux)
+
+	prod := false
+	port = os.Getenv("NEGRONI_PORT")
+	if port == "" {
+		port = "3001"
+	} else if port == "80" {
+		prod = true
+	}
+
+	// HTTP/2.0
+	srv := &http.Server{
+		Addr:    ":" + port,
+		Handler: n,
+	}
+	http2.ConfigureServer(srv, &http2.Server{})
+
+	if !prod {
+		log.Println("NOT PROD")
+		log.Fatal(srv.ListenAndServeTLS("server.pem", "server.key"))
+	} else {
+		log.Println("PROD - probably serving behind Cloudinary who takes care of TLS termination")
+		log.Fatal(srv.ListenAndServe())
+	}
+}
+
+var mongo string
+var secret string
+var poem string
+var wunderground string
+var version string
+var port string
+
+var homePageMap map[int]baseball.Team
+
+func setUpMuxHandlers(mux *http.ServeMux) {
 	post := "POST"
-	homePageMap := baseball.InitHomePageMap()
+	homePageMap = baseball.InitHomePageMap()
 
 	// handlers
 	mux.HandleFunc("/date", func(w http.ResponseWriter, r *http.Request) {
@@ -62,78 +108,108 @@ func main() {
 		}
 	})
 
-	// gameDayListing for yesterday (default 'homepage')
-	mux.HandleFunc("/bb", func(w http.ResponseWriter, r *http.Request) {
-		date1 := r.URL.Query().Get("date1")
-		offset := r.URL.Query().Get("offset")
-		gameDayListing := baseball.GameDayListingHandler(date1, offset, homePageMap)
+	// favTeamGameListing shows all games of selected team for last 30 days
+	mux.HandleFunc("/bbFavoriteTeam", func(w http.ResponseWriter, r *http.Request) {
+		/*id := r.URL.Query().Get("id")
+		id := r.Proto
+		favTeamGameListing := baseball.FavoriteTeamGameListHandler(id, homePageMap)
 
-		w.Header().Set("Cache-Control", "max-age=10800")
+		//w.Header().Set("Cache-Control", "max-age=10800")
 		render := render.New(render.Options{
 			Layout:        "content",
 			IsDevelopment: false,
 		})
 
-		render.HTML(w, http.StatusOK, "bbGameDayListing", gameDayListing)
+		render.HTML(w, http.StatusOK, "bbFavoriteTeamGameList", favTeamGameListing)
+		*/
+		clientGone := w.(http.CloseNotifier).CloseNotify()
+		w.Header().Set("Content-Type", "text/plain")
+		ticker := time.NewTicker(1 * time.Second)
+		defer ticker.Stop()
+		fmt.Fprintf(w, "# ~1KB of junk to force browsers to start rendering immediately: \n")
+		io.WriteString(w, strings.Repeat("# xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n", 13))
+
+		for {
+			fmt.Fprintf(w, "%v [%s]\n", time.Now(), r.Proto)
+			w.(http.Flusher).Flush()
+			select {
+			case <-ticker.C:
+			case <-clientGone:
+				log.Printf("Client %v disconnected from the clock", r.RemoteAddr)
+				return
+			}
+		}
 	})
+
+	// gameDayListing for yesterday (default 'homepage')
+	mux.HandleFunc("/bb", bbHome)
 
 	// ajax request for gameDayListing
-	mux.HandleFunc("/bbAjaxDay", func(w http.ResponseWriter, r *http.Request) {
-		date1 := r.URL.Query().Get("date1")
-		offset := r.URL.Query().Get("offset")
-		gameDayListing := baseball.GameDayListingHandler(date1, offset, homePageMap)
-
-		// prepare response page
-		w.Header().Set("Cache-Control", "max-age=10800")
-		render := render.New(render.Options{
-			IsDevelopment: false,
-		})
-
-		render.HTML(w, http.StatusOK, "bbGameDayListing", gameDayListing)
-	})
+	mux.HandleFunc("/bbAjaxDay", bbAjaxDay)
 
 	// play a single game
-	mux.HandleFunc("/bbStream", func(w http.ResponseWriter, r *http.Request) {
-		URL := r.URL.Query().Get("url")
-		log.Print("render URL: " + URL)
-
-		render := render.New(render.Options{
-			IsDevelopment: false,
-		})
-		render.HTML(w, http.StatusOK, "bbPlaySingleGameOfDay", URL)
-	})
+	mux.HandleFunc("/bbStream", bbStream)
 
 	// play all games of the day
-	mux.HandleFunc("/bbAll", func(w http.ResponseWriter, r *http.Request) {
-		date1 := r.URL.Query().Get("date1")
-		offset := r.URL.Query().Get("offset")
-		allGames := baseball.PlayAllGamesOfDayHandler(date1, offset, homePageMap)
-
-		// prepare response page
-		w.Header().Set("Cache-Control", "max-age=10800")
-
-		render := render.New(render.Options{
-			IsDevelopment: false,
-		})
-		render.HTML(w, http.StatusOK, "bbPlayAllGamesOfDay", allGames)
-	})
-
-	n := negroni.Classic()
-
-	readInCreds()
-
-	store := cookiestore.New([]byte(secret))
-	n.Use(sessions.Sessions("gurkherpaderp", store))
-	n.UseHandler(mux)
-	n.Run(":" + port)
+	mux.HandleFunc("/bbAll", bbAll)
 }
 
-var mongo string
-var secret string
-var poem string
-var wunderground string
-var version string
-var port string
+func bbHome(w http.ResponseWriter, r *http.Request) {
+	date1 := r.URL.Query().Get("date1")
+	offset := r.URL.Query().Get("offset")
+	gameDayListing := baseball.GameDayListingHandler(date1, offset, homePageMap)
+
+	w.Header().Set("Cache-Control", "max-age=10800")
+	render := render.New(render.Options{
+		Layout:        "content",
+		IsDevelopment: false,
+	})
+
+	render.HTML(w, http.StatusOK, "bbGameDayListing", gameDayListing)
+}
+
+func bbStream(w http.ResponseWriter, r *http.Request) {
+	URL := r.URL.Query().Get("url")
+	log.Print("render URL: " + URL)
+
+	render := render.New(render.Options{
+		IsDevelopment: false,
+	})
+
+	if strings.Contains(URL, "youtube") {
+		http.Redirect(w, r, URL, http.StatusFound)
+	} else {
+		render.HTML(w, http.StatusOK, "bbPlaySingleGameOfDay", URL)
+	}
+}
+
+func bbAll(w http.ResponseWriter, r *http.Request) {
+	date1 := r.URL.Query().Get("date1")
+	offset := r.URL.Query().Get("offset")
+	allGames := baseball.PlayAllGamesOfDayHandler(date1, offset, homePageMap)
+
+	// prepare response page
+	w.Header().Set("Cache-Control", "max-age=10800")
+
+	render := render.New(render.Options{
+		IsDevelopment: false,
+	})
+	render.HTML(w, http.StatusOK, "bbPlayAllGamesOfDay", allGames)
+}
+
+func bbAjaxDay(w http.ResponseWriter, r *http.Request) {
+	date1 := r.URL.Query().Get("date1")
+	offset := r.URL.Query().Get("offset")
+	gameDayListing := baseball.GameDayListingHandler(date1, offset, homePageMap)
+
+	// prepare response page
+	w.Header().Set("Cache-Control", "max-age=10800")
+	render := render.New(render.Options{
+		IsDevelopment: false,
+	})
+
+	render.HTML(w, http.StatusOK, "bbGameDayListing", gameDayListing)
+}
 
 func readInCreds() {
 	mongo = os.Getenv("ackMongo")
@@ -141,11 +217,6 @@ func readInCreds() {
 	poem = os.Getenv("ackPoems")
 	wunderground = os.Getenv("ackWunder")
 	version = os.Getenv("CIRCLE_BUILD_NUM")
-	port = os.Getenv("NEGRONI_PORT")
-
-	if port == "" {
-		port = "3001"
-	}
 }
 
 func loadWritings(w http.ResponseWriter) [](structures.Writing) {

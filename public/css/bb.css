@@ -7,6 +7,7 @@ html {
 }
 img.ui-datepicker-trigger {
   vertical-align: text-top;
+  cursor: pointer !important;
 }
 #searchDate {
   vertical-align:bottom;
@@ -16,6 +17,7 @@ img.ui-datepicker-trigger {
   font-weight:bold;
   font-family:none;
   border:none;
+  cursor: pointer !important;
 }
 #ui-datepicker-div { font-size:12px; }
 #responseBB {

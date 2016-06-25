@@ -12,6 +12,13 @@ import (
 	"github.com/clbanning/mxj"
 )
 
+// FavoriteTeamGameListHandler is now commented
+func FavoriteTeamGameListHandler(id string, homePageMap map[int]Team) GameDay {
+	// TODO
+
+	return GameDay{Date: id}
+}
+
 // AllGames is now commented
 type AllGames struct {
 	Date              string
@@ -86,9 +93,6 @@ func searchMLBGames(dates string, games map[int][]string, homePageMap map[int]Te
 	}
 	defer resp.Body.Close()
 	xml, err := ioutil.ReadAll(resp.Body)
-
-	// log.Printf(string(xml))
-
 	m, err := mxj.NewMapXml(xml)
 
 	gameInfos, err := m.ValuesForKey("game")
@@ -99,17 +103,12 @@ func searchMLBGames(dates string, games map[int][]string, homePageMap map[int]Te
 		return games
 	}
 
-	log.Printf("Found %d games", len(gameInfos))
-	mediaGames := 0
-	condensedGames := 0
 	// now just manipulate Map entries returned as []interface{} array.
 	for k, v := range gameInfos {
 		gameID := ""
 		aGameVal, _ := v.(map[string]interface{})
 		if aGameVal["-media_state"].(string) == "media_dead" {
 			continue
-		} else {
-			mediaGames++
 		}
 
 		// rescan looking for keys with data: Values or Value
@@ -121,7 +120,6 @@ func searchMLBGames(dates string, games map[int][]string, homePageMap map[int]Te
 			if aMediaVal["-type"].(string) != "condensed_game" {
 				continue
 			} else {
-				condensedGames++
 				gameID = aMediaVal["-id"].(string)
 				continue
 			}
@@ -143,15 +141,12 @@ func searchMLBGames(dates string, games map[int][]string, homePageMap map[int]Te
 		}
 	}
 
-	log.Println("Media games:", mediaGames)
-	log.Println("Condensed games:", condensedGames)
-
 	return games
 }
 
 // fetchGameURL is now commented
 func fetchGameURL(detailURL string, desiredQuality string) string {
-	gameURL := "MickeyMouse.mp4"
+	fallbackURL := "https://www.youtube.com/user/MLB"
 
 	resp, err := http.Get(detailURL)
 	if err != nil {
@@ -171,11 +166,14 @@ func fetchGameURL(detailURL string, desiredQuality string) string {
 	for _, v := range URLs {
 		aGameVal, _ := v.(map[string]interface{})
 		if aGameVal["-playback_scenario"].(string) == desiredQuality {
-			return aGameVal["#text"].(string)
+			if aGameVal["#text"] != nil {
+				return aGameVal["#text"].(string)
+			}
+			log.Print("ERROR: this game has no videoURL: " + detailURL)
 		}
 	}
 
-	return gameURL
+	return fallbackURL
 }
 
 // generateDetailURL is now commented

@@ -26,4 +26,4 @@ RUN apk del git go && \
 EXPOSE 3001
 
 # execute ackerson.de
-ENTRYPOINT ["/root/server"]
+ENTRYPOINT ["/root/server", "-prod"]
