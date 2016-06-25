@@ -23,7 +23,5 @@ RUN apk del git go && \
   rm -rf $GOPATH/src/github.com/unrolled && \
   rm -rf /var/cache/apk/*
 
-EXPOSE 3001
-
 # execute ackerson.de
 ENTRYPOINT ["/root/server", "-prod"]
