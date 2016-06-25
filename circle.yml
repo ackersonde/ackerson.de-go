@@ -10,8 +10,8 @@ dependencies:
 
 test:
   override:
-    - docker run -d -p 80:3001 -v /opt:/opt -e ackSecret=$ackSecret -e ackPoems=$ackPoems -e ackWunder=$ackWunder -e ackMongo=$ackMongo --name ackerson.de blauerdrachen/ackerson.de:vc$CIRCLE_BUILD_NUM
-    - curl --retry 10 --retry-delay 5 -v http://localhost/ | grep Ackerson
+    - docker run -d -p 3001:3001 -v /opt:/opt -e ackSecret=$ackSecret -e ackPoems=$ackPoems -e ackWunder=$ackWunder -e ackMongo=$ackMongo --name ackerson.de blauerdrachen/ackerson.de:vc$CIRCLE_BUILD_NUM
+    - curl -k --retry 10 --retry-delay 5 -v https://localhost:3001/ | grep Ackerson
     - docker logs ackerson.de
 
 deployment:
