@@ -23,33 +23,58 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
+var prodSession = false
+var httpPort = ":8080"
+var httpsPort = ":8443"
+
+func getHTTPPort() string {
+	return httpPort
+}
+
+func getHTTPSPort() string {
+	return httpsPort
+}
+
 func main() {
+	parseEnvVariables()
+
 	mux := http.NewServeMux()
 	setUpMuxHandlers(mux)
-
 	n := negroni.Classic()
-
-	readInCreds()
 
 	store := cookiestore.New([]byte(secret))
 	n.Use(sessions.Sessions("gurkherpaderp", store))
 	n.UseHandler(mux)
 
-	port = os.Getenv("NEGRONI_PORT")
 	sslCertPath := "/root/certs/"
-
-	if port == "" || port == "3001" {
-		port = "3001"
+	if !prodSession {
 		sslCertPath = ""
 	}
 
-	// HTTP/2.0
+	// keep an ear on the http port and fwd accordingly
+	go func() {
+		errHTTP := http.ListenAndServe(httpPort, http.HandlerFunc(redirectToHTTPS))
+		if errHTTP != nil {
+			log.Fatal("Web server (HTTP): ", errHTTP)
+		}
+	}()
+
+	// HTTP2
 	srv := &http.Server{
-		Addr:    ":" + port,
+		Addr:    httpsPort,
 		Handler: n,
 	}
 	http2.ConfigureServer(srv, &http2.Server{})
 	log.Fatal(srv.ListenAndServeTLS(sslCertPath+"server.pem", sslCertPath+"server.key"))
+}
+
+// redirectToHttps now commented
+func redirectToHTTPS(w http.ResponseWriter, r *http.Request) {
+	if prodSession { // meaning we are running behind a docker container fwd'ing to 443
+		http.Redirect(w, r, "https://ackerson.de"+r.RequestURI, http.StatusMovedPermanently)
+	} else {
+		http.Redirect(w, r, "https://localhost"+httpsPort+r.RequestURI, http.StatusMovedPermanently)
+	}
 }
 
 var mongo string
@@ -59,7 +84,14 @@ var wunderground string
 var version string
 var port string
 
-var homePageMap map[int]baseball.Team
+func parseEnvVariables() {
+	mongo = os.Getenv("ackMongo")
+	secret = os.Getenv("ackSecret")
+	poem = os.Getenv("ackPoems")
+	wunderground = os.Getenv("ackWunder")
+	version = os.Getenv("CIRCLE_BUILD_NUM")
+	prodSession, _ = strconv.ParseBool(os.Getenv("prodSession"))
+}
 
 func setUpMuxHandlers(mux *http.ServeMux) {
 	post := "POST"
@@ -147,6 +179,8 @@ func setUpMuxHandlers(mux *http.ServeMux) {
 	mux.HandleFunc("/bbAll", bbAll)
 }
 
+var homePageMap map[int]baseball.Team
+
 func bbHome(w http.ResponseWriter, r *http.Request) {
 	date1 := r.URL.Query().Get("date1")
 	offset := r.URL.Query().Get("offset")
@@ -204,14 +238,6 @@ func bbAjaxDay(w http.ResponseWriter, r *http.Request) {
 	render.HTML(w, http.StatusOK, "bbGameDayListing", gameDayListing)
 }
 
-func readInCreds() {
-	mongo = os.Getenv("ackMongo")
-	secret = os.Getenv("ackSecret")
-	poem = os.Getenv("ackPoems")
-	wunderground = os.Getenv("ackWunder")
-	version = os.Getenv("CIRCLE_BUILD_NUM")
-}
-
 func loadWritings(w http.ResponseWriter) [](structures.Writing) {
 	writings := [](structures.Writing){}
 	session, err := mgo.Dial(mongo)
@@ -252,8 +278,33 @@ func GetIP(r *http.Request) string {
 	return ip
 }
 
+// https://blog.golang.org/context/userip/userip.go
+func getIP(req *http.Request) {
+	ip, _, err := net.SplitHostPort(req.RemoteAddr)
+	if err != nil {
+		log.Printf("userip: %q is not IP:port", req.RemoteAddr)
+	}
+
+	userIP := net.ParseIP(ip)
+	if userIP == nil {
+		log.Printf("userip: %q is not IP:port", req.RemoteAddr)
+		return
+	}
+
+	// This will only be defined when site is accessed via non-anonymous proxy
+	// and takes precedence over RemoteAddr
+	// Header.Get is case-insensitive
+	forward := req.Header.Get("X-Forwarded-For")
+
+	log.Printf("<p>IP: %s</p>", ip)
+	log.Printf("<p>UserIP: %s</p>", userIP)
+	log.Printf("<p>Forwarded for: %s</p>", forward)
+}
+
 // WhoAmIHandler now commented
 func WhoAmIHandler(w http.ResponseWriter, req *http.Request) {
+	getIP(req)
+
 	s := []string{"[[g;#FFFF00;]Your IP:] " + GetIP(req), "[[g;#FFFF00;]Your Browser:] " + req.UserAgent()}
 	rawData := strings.Join(s, "\r\n")
 	rawDataJSON := map[string]string{"whoami": rawData}

@@ -1,32 +1,27 @@
 [![Circle CI](https://circleci.com/gh/danackerson/ackerson.de-go.svg?style=shield&circle-token=3ad6694a5592b15aef77eeb7051a7b6c61d1c56f)](https://circleci.com/gh/danackerson/ackerson.de-go)
 
 # Installation and Development
-0. go get github.com/codegangsta/gin
+0. go get github.com/pilu/fresh
 0. go get github.com/codegangsta/negroni
 0. go get github.com/goincremental/negroni-session
 0. go get gopkg.in/mgo.v2
 0. cd ~/dev/danackerson/ackerson.de-go/
 0. vi /opt/creds.txt (with appropriate values!)
-0. `gin` (launch app refresher for dev)
-0. http://localhost:3001 (now code and gin builds in the background)
+0. `fresh` (launch app refresher for dev)
+0. http://localhost:8080 (now code and fresh builds in the background)
 
 # Building
 0. cd ~/dev/danackerson/ackerson.de-go/
 0. docker build -t="blauerdrachen/ackerson.de" --no-cache .
 0. docker login
 0. docker push blauerdrachen/ackerson.de
-0. docker run -d -p 80:3001 -v /opt:/opt --name="ackerson.de" blauerdrachen/ackerson.de
+0. docker run -d -p 80:8080 -p 443:8443 --name="ackerson.de" blauerdrachen/ackerson.de
 0. curl http://ackerson.de/
 
 # Running
 Automatic startup on CoreOS:
 ```
 $ docker stop ackerson.de
-$ sudo vi /opt/creds.txt
-mongo=mongodb://XYZ.mongolab.com:123/abc
-secret=[secret]
-wunderground=[api]
-poem=[param]
 
 $ sudo vi -r /etc/systemd/system/ackerson-de.service
 [Unit]
@@ -36,7 +31,7 @@ Requires=docker.service
 
 [Service]
 TimeoutStartSec=0
-ExecStart=/usr/bin/docker start ackerson.de
+ExecStart=/usr/bin/docker run ackerson.de
 
 [Install]
 WantedBy=multi-user.target

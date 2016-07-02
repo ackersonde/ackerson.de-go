@@ -7,9 +7,23 @@ import (
 	"testing"
 )
 
+func Test_redirectHomeHTTPS(t *testing.T) {
+	t.Parallel()
+
+	ts := httptest.NewServer(http.HandlerFunc(redirectToHTTPS))
+	defer ts.Close()
+
+	_, err := http.Get(ts.URL)
+	exp := "https://localhost" + getHTTPSPort()
+	act := err.Error()
+	if !strings.Contains(act, exp) {
+		t.Fatalf("Expected %s got %s", exp, act)
+	}
+}
+
 func Test_bbHome(t *testing.T) {
 	t.Parallel()
-	req, err := http.NewRequest("GET", "https://localhost:3001/bb", nil)
+	req, err := http.NewRequest("GET", "https://localhost"+getHTTPSPort()+"/bb", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -27,7 +41,7 @@ func Test_bbHome(t *testing.T) {
 
 func Test_bbAjaxDay(t *testing.T) {
 	t.Parallel()
-	req, err := http.NewRequest("GET", "https://localhost:3001/bbAjaxDay", nil)
+	req, err := http.NewRequest("GET", "https://localhost"+getHTTPSPort()+"/bbAjaxDay", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -44,7 +58,7 @@ func Test_bbAjaxDay(t *testing.T) {
 
 func Test_bbAll(t *testing.T) {
 	t.Parallel()
-	req, err := http.NewRequest("GET", "https://localhost:3001/bbAll", nil)
+	req, err := http.NewRequest("GET", "https://localhost"+getHTTPSPort()+"/bbAll", nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -65,7 +79,7 @@ func Test_bbStream_redirect(t *testing.T) {
 
 	// redirect case
 	URL := "https://www.youtube.com/user/MLB"
-	req, err := http.NewRequest("GET", "https://localhost:3001/bbStream?url="+URL, nil)
+	req, err := http.NewRequest("GET", "https://localhost"+getHTTPSPort()+"/bbStream?url="+URL, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -85,7 +99,7 @@ func Test_bbStream_normal(t *testing.T) {
 
 	// normal case
 	MLB := "http%3a%2f%2fmediadownloads.mlb.com%2fmlbam%2fmp4%2f2016%2f06%2f24%2f849350983%2f1466728732779%2fasset_2500K.mp4"
-	req, err := http.NewRequest("GET", "https://localhost:3001/bbStream?url="+MLB, nil)
+	req, err := http.NewRequest("GET", "https://localhost"+getHTTPSPort()+"/bbStream?url="+MLB, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
