@@ -10,7 +10,6 @@ RUN git clone https://github.com/danackerson/ackerson.de-go.git $GOPATH/src/gith
 WORKDIR $GOPATH/src/github.com/danackerson/ackerson.de-go
 
 RUN go get ./...
-RUN go vet ./...
 RUN go test
 
 RUN go build server.go
