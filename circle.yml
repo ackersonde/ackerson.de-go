@@ -9,10 +9,9 @@ dependencies:
     - docker build -t blauerdrachen/ackerson.de:vc$CIRCLE_BUILD_NUM .
 
 test:
-  pre:
-    - go vet ./...
   override:
-    - go test .
+    - go vet ./...
+    - go test
     - docker run -d -p 443:8443 -p 80:8080 -e ackSecret=$ackSecret -e ackPoems=$ackPoems -e ackWunder=$ackWunder -e ackMongo=$ackMongo --name ackerson.de blauerdrachen/ackerson.de:vc$CIRCLE_BUILD_NUM
     - curl --retry 10 --retry-delay 5 -v http://localhost/ | grep https://localhost
     - curl -k --retry 10 --retry-delay 5 -v https://localhost/ | grep Ackerson

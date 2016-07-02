@@ -8,6 +8,7 @@ RUN apk add -U git go
 # install ackerson.de
 RUN git clone https://github.com/danackerson/ackerson.de-go.git $GOPATH/src/github.com/danackerson/ackerson.de-go/
 WORKDIR $GOPATH/src/github.com/danackerson/ackerson.de-go
+
 RUN go get ./...
 RUN go build server.go
 RUN mv server /root/
