@@ -4,7 +4,6 @@ machine:
 
 dependencies:
   override:
-    - btrfs subvolume delete /var/lib/docker/btrfs/subvolumes/*
     - docker version
     - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
     - docker build -t blauerdrachen/ackerson.de:vc$CIRCLE_BUILD_NUM .
