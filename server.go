@@ -334,7 +334,7 @@ func ClockCheckHandler(w http.ResponseWriter, req *http.Request) {
 	panelID := r.URL.Query().Get("panel")
 	rawData := time.Now().Format("Mon Jan _2 15:04:05 2006")
 
-	log.Printf("req: ", panelID)
+	log.Printf("req: %s", panelID)
 	for header, value := range req.Header {
 		log.Printf("%s: %s", header, value)
 	}
