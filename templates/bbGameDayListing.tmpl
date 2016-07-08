@@ -6,7 +6,7 @@
       <div style="display: table-cell;padding:5px;"><a href="javascript:fetchGames(prepareDate('{{$.Date}}'), 1);"><img class="selectors next-resized" alt="Next" title="Next" src="images/img_trans.gif"></a></div>
     </div>
     <div style="display: table-row; padding:5px;">
-    <div style="display: table-cell;padding:5px;">&nbsp;</div>
+      <div style="display: table-cell;padding:5px;">&nbsp;</div>
       <div style="display: table-cell;padding:5px;"><a href="/bbAll?date1={{ $.Date }}"><img id="ball" src="images/pokemon.jpg" width="32px" alt="Gotta Catch 'Em All!" title="Gotta Catch 'Em All!" /></a></div>
       <div style="display: table-cell;padding:5px;">&nbsp;</div>
     </div>
@@ -25,11 +25,11 @@
       {{ $id := index $value 8}}
       {{ $game_url := index $value 10}}
       <div style="display: table-cell;padding:5px;">
-        <a href="{{ $away_hp }}" title="{{ $away_team }}" target="_blank"><img class="logo logo-small logo{{ $away_id }}" src="images/img_trans.gif"></a>
+        <a href="/bbFavoriteTeam?id={{ $away_id }}" title="{{ $away_team }}" target="_blank"><img class="logo logo-small logo{{ $away_id }}" src="images/img_trans.gif"></a>
       </div>
       <div style="display:table-cell;padding:5px;text-align:center;vertical-align:middle;"><a target="_blank" href="/bbStream?url={{ $game_url }}">{{ $away_abbrev }}@{{ $home_abbrev }}</a></div>
       <div style="display:table-cell;padding:5px;">
-        <a href="{{ $home_hp }}" title="{{ $home_team }}" target="_blank"><img class="logo logo-small logo{{ $home_id }}" src="images/img_trans.gif"></a>
+        <a href="/bbFavoriteTeam?id={{ $home_id }}" title="{{ $home_team }}" target="_blank"><img class="logo logo-small logo{{ $home_id }}" src="images/img_trans.gif"></a>
       </div>
       <!--<div style="display:table-cell;padding:5px;text-align:center;vertical-align:middle;">
         <a target="_blank" href="http://m.mlb.com/video/v{{$id}}/condensed-game-{{$away_abbrev}}{{$home_abbrev}}"><img src="images/link_external.png"/></a>

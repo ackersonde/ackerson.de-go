@@ -3,6 +3,8 @@
 *.a
 *.so
 
+public/images/.DS_Store
+
 # Folders
 _obj
 _test

@@ -1,12 +1,12 @@
 html {
-  background: url(../images/baseball-field-loud.jpg) no-repeat center center fixed;
+  background: url(../images/baseball-field-quiet.jpg) no-repeat center center fixed;
   -webkit-background-size: cover;
   -moz-background-size: cover;
   -o-background-size: cover;
   background-size: cover;
 }
 img.ui-datepicker-trigger {
-  vertical-align: text-top;
+  vertical-align: center;
   cursor: pointer !important;
 }
 #searchDate {

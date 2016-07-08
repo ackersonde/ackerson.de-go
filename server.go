@@ -3,7 +3,6 @@ package main
 import (
 	"encoding/json"
 	"fmt"
-	"io"
 	"io/ioutil"
 	"log"
 	"net"
@@ -97,6 +96,9 @@ func setUpMuxHandlers(mux *http.ServeMux) {
 	post := "POST"
 	homePageMap = baseball.InitHomePageMap()
 
+	mux.HandleFunc("/clockCheck", func(w http.ResponseWriter, r *http.Request) {
+		ClockCheckHandler(w, r)
+	})
 	// handlers
 	mux.HandleFunc("/date", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == post {
@@ -135,35 +137,39 @@ func setUpMuxHandlers(mux *http.ServeMux) {
 
 	// favTeamGameListing shows all games of selected team for last 30 days
 	mux.HandleFunc("/bbFavoriteTeam", func(w http.ResponseWriter, r *http.Request) {
-		/*id := r.URL.Query().Get("id")
-		id := r.Proto
+		id := r.URL.Query().Get("id")
 		favTeamGameListing := baseball.FavoriteTeamGameListHandler(id, homePageMap)
 
-		//w.Header().Set("Cache-Control", "max-age=10800")
+		w.Header().Set("Cache-Control", "max-age=10800")
 		render := render.New(render.Options{
 			Layout:        "content",
 			IsDevelopment: false,
 		})
 
-		render.HTML(w, http.StatusOK, "bbFavoriteTeamGameList", favTeamGameListing)
-		*/
-		clientGone := w.(http.CloseNotifier).CloseNotify()
-		w.Header().Set("Content-Type", "text/plain")
-		ticker := time.NewTicker(1 * time.Second)
-		defer ticker.Stop()
-		fmt.Fprintf(w, "# ~1KB of junk to force browsers to start rendering immediately: \n")
-		io.WriteString(w, strings.Repeat("# xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n", 13))
+		teamID, _ := strconv.Atoi(id)
+		favTeam := homePageMap[teamID]
+		render.HTML(w, http.StatusOK, "bbFavoriteTeamGameList", FavGames{FavGamesList: favTeamGameListing, FavTeam: favTeam})
+		/*
+			id := r.Proto
 
-		for {
-			fmt.Fprintf(w, "%v [%s]\n", time.Now(), r.Proto)
-			w.(http.Flusher).Flush()
-			select {
-			case <-ticker.C:
-			case <-clientGone:
-				log.Printf("Client %v disconnected from the clock", r.RemoteAddr)
-				return
+			clientGone := w.(http.CloseNotifier).CloseNotify()
+			w.Header().Set("Content-Type", "text/plain")
+			ticker := time.NewTicker(1 * time.Second)
+			defer ticker.Stop()
+			fmt.Fprintf(w, "# ~1KB of junk to force browsers to start rendering immediately: \n")
+			io.WriteString(w, strings.Repeat("# xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n", 13))
+
+			for {
+				fmt.Fprintf(w, "%v [%s]\n", time.Now(), r.Proto)
+				w.(http.Flusher).Flush()
+				select {
+				case <-ticker.C:
+				case <-clientGone:
+					log.Printf("Client %v disconnected from the clock", r.RemoteAddr)
+					return
+				}
 			}
-		}
+		*/
 	})
 
 	// gameDayListing for yesterday (default 'homepage')
@@ -177,6 +183,12 @@ func setUpMuxHandlers(mux *http.ServeMux) {
 
 	// play all games of the day
 	mux.HandleFunc("/bbAll", bbAll)
+}
+
+// FavGames is now commented
+type FavGames struct {
+	FavGamesList []baseball.GameDay
+	FavTeam      baseball.Team
 }
 
 var homePageMap map[int]baseball.Team
@@ -312,6 +324,21 @@ func WhoAmIHandler(w http.ResponseWriter, req *http.Request) {
 		log.Printf("%s: %s", header, value)
 	}
 	data, _ := json.Marshal(rawDataJSON)
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+	w.Write(data)
+}
+
+// ClockCheckHandler now commented
+func ClockCheckHandler(w http.ResponseWriter, req *http.Request) {
+	panelID := r.URL.Query().Get("panel")
+	rawData := time.Now().Format("Mon Jan _2 15:04:05 2006")
+
+	log.Printf("req: ", panelID)
+	for header, value := range req.Header {
+		log.Printf("%s: %s", header, value)
+	}
+	data, _ := json.Marshal(rawData)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
 	w.Write(data)

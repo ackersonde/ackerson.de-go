@@ -50,9 +50,9 @@ function initializeDatePicker(clazz) {
       showAnim: 'slideDown',
       autoSize: true,
       showOn: "both",
-buttonImage: "images/calendar.gif",
-buttonImageOnly: true,
-buttonText: "Select date"
+      buttonImage: "images/calendar.gif",
+      buttonImageOnly: true,
+      buttonText: "Select date"
     });
   });
 }
@@ -69,4 +69,39 @@ function fetchGames(date1, offset) {
         initializeDatePicker('#searchDate');
       }
     });
+}
+
+fetchLast4WeeksForFavTeam(favTeamID) {
+  $.ajax({
+    type:"GET",
+    url: "/clockCheck?panel=panel1",
+    success: function(result)
+    {
+      document.getElementById("panel1").innerHTML=result;
+    }
+  });
+  $.ajax({
+    type:"GET",
+    url: "/clockCheck?panel=panel2",
+    success: function(result)
+    {
+      document.getElementById("panel2").innerHTML=result;
+    }
+  });
+  $.ajax({
+    type:"GET",
+    url: "/clockCheck?panel=panel3",
+    success: function(result)
+    {
+      document.getElementById("panel3").innerHTML=result;
+    }
+  });
+  $.ajax({
+    type:"GET",
+    url: "/clockCheck?panel=panel4",
+    success: function(result)
+    {
+      document.getElementById("panel4").innerHTML=result;
+    }
+  });
 }
