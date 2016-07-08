@@ -331,7 +331,7 @@ func WhoAmIHandler(w http.ResponseWriter, req *http.Request) {
 
 // ClockCheckHandler now commented
 func ClockCheckHandler(w http.ResponseWriter, req *http.Request) {
-	panelID := r.URL.Query().Get("panel")
+	panelID := req.URL.Query().Get("panel")
 	rawData := time.Now().Format("Mon Jan _2 15:04:05 2006")
 
 	log.Printf("req: %s", panelID)
