@@ -71,7 +71,7 @@ function fetchGames(date1, offset) {
     });
 }
 
-fetchLast4WeeksForFavTeam(favTeamID) {
+function fetchLast4WeeksForFavTeam(favTeamID) {
   $.ajax({
     type:"GET",
     url: "/clockCheck?panel=panel1",

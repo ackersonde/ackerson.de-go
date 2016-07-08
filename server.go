@@ -22,6 +22,18 @@ import (
 	"gopkg.in/mgo.v2"
 )
 
+// ClockCheckHandler now commented
+func ClockCheckHandler(w http.ResponseWriter, req *http.Request) {
+	panelID := req.URL.Query().Get("panel")
+
+	log.Printf("req: %s", panelID)
+	render := render.New(render.Options{
+		IsDevelopment: false,
+	})
+
+	render.HTML(w, http.StatusOK, "test", nil)
+}
+
 var prodSession = false
 var httpPort = ":8080"
 var httpsPort = ":8443"
@@ -290,33 +302,8 @@ func GetIP(r *http.Request) string {
 	return ip
 }
 
-// https://blog.golang.org/context/userip/userip.go
-func getIP(req *http.Request) {
-	ip, _, err := net.SplitHostPort(req.RemoteAddr)
-	if err != nil {
-		log.Printf("userip: %q is not IP:port", req.RemoteAddr)
-	}
-
-	userIP := net.ParseIP(ip)
-	if userIP == nil {
-		log.Printf("userip: %q is not IP:port", req.RemoteAddr)
-		return
-	}
-
-	// This will only be defined when site is accessed via non-anonymous proxy
-	// and takes precedence over RemoteAddr
-	// Header.Get is case-insensitive
-	forward := req.Header.Get("X-Forwarded-For")
-
-	log.Printf("<p>IP: %s</p>", ip)
-	log.Printf("<p>UserIP: %s</p>", userIP)
-	log.Printf("<p>Forwarded for: %s</p>", forward)
-}
-
 // WhoAmIHandler now commented
 func WhoAmIHandler(w http.ResponseWriter, req *http.Request) {
-	getIP(req)
-
 	s := []string{"[[g;#FFFF00;]Your IP:] " + GetIP(req), "[[g;#FFFF00;]Your Browser:] " + req.UserAgent()}
 	rawData := strings.Join(s, "\r\n")
 	rawDataJSON := map[string]string{"whoami": rawData}
@@ -324,21 +311,6 @@ func WhoAmIHandler(w http.ResponseWriter, req *http.Request) {
 		log.Printf("%s: %s", header, value)
 	}
 	data, _ := json.Marshal(rawDataJSON)
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-
-	w.Write(data)
-}
-
-// ClockCheckHandler now commented
-func ClockCheckHandler(w http.ResponseWriter, req *http.Request) {
-	panelID := req.URL.Query().Get("panel")
-	rawData := time.Now().Format("Mon Jan _2 15:04:05 2006")
-
-	log.Printf("req: %s", panelID)
-	for header, value := range req.Header {
-		log.Printf("%s: %s", header, value)
-	}
-	data, _ := json.Marshal(rawData)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
 	w.Write(data)
