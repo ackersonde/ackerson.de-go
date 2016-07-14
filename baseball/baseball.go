@@ -98,13 +98,16 @@ func searchMLBGames(dates string, games map[int][]string, homePageMap map[int]Te
 	suffix := "/grid_ce.xml"
 	url := domain + dates + suffix
 
-	log.Printf(url)
+	startW1 := time.Now()
 	resp, err := http.Get(url)
 	if err != nil {
 		log.Print(err)
 		return nil
 	}
 	defer resp.Body.Close()
+	elapsedW1 := time.Since(startW1)
+	log.Printf("%s took %s", url, elapsedW1)
+
 	xml, err := ioutil.ReadAll(resp.Body)
 	m, err := mxj.NewMapXml(xml)
 
@@ -119,6 +122,7 @@ func searchMLBGames(dates string, games map[int][]string, homePageMap map[int]Te
 	// now just manipulate Map entries returned as []interface{} array.
 	for k, v := range gameInfos {
 		gameID := ""
+		startX1 := time.Now()
 		aGameVal, _ := v.(map[string]interface{})
 		if aGameVal["-media_state"].(string) == "media_dead" {
 			continue
@@ -142,6 +146,8 @@ func searchMLBGames(dates string, games map[int][]string, homePageMap map[int]Te
 				continue
 			}
 		}
+		elapsedX1 := time.Since(startX1)
+		log.Printf("XML parsing of subsection %s took %s", url, elapsedX1)
 
 		if gameID != "" {
 			awayTeamID := aGameVal["-away_team_id"].(string)
@@ -166,11 +172,16 @@ func searchMLBGames(dates string, games map[int][]string, homePageMap map[int]Te
 func fetchGameURL(detailURL string, desiredQuality string) string {
 	fallbackURL := "https://www.youtube.com/user/MLB"
 
+	startW1 := time.Now()
 	resp, err := http.Get(detailURL)
 	if err != nil {
 		log.Print(err)
 	}
 	defer resp.Body.Close()
+	elapsedW1 := time.Since(startW1)
+	log.Printf("%s took %s", detailURL, elapsedW1)
+
+	startX2 := time.Now()
 	xml, err := ioutil.ReadAll(resp.Body)
 	m, err := mxj.NewMapXml(xml)
 
@@ -185,6 +196,8 @@ func fetchGameURL(detailURL string, desiredQuality string) string {
 		aGameVal, _ := v.(map[string]interface{})
 		if aGameVal["-playback_scenario"].(string) == desiredQuality {
 			if aGameVal["#text"] != nil {
+				elapsedX2 := time.Since(startX2)
+				log.Printf("XML parsing of %s took %s", detailURL, elapsedX2)
 				return aGameVal["#text"].(string)
 			}
 			log.Print("ERROR: this game has no videoURL: " + detailURL)

@@ -28,6 +28,7 @@ func ClockCheckHandler(w http.ResponseWriter, req *http.Request) {
 
 	log.Printf("req: %s", panelID)
 	render := render.New(render.Options{
+		Layout:        "content",
 		IsDevelopment: false,
 	})
 
