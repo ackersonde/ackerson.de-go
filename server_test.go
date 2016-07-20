@@ -40,7 +40,6 @@ func Test_bbHome(t *testing.T) {
 }
 
 func Test_bbAjaxDay(t *testing.T) {
-	t.Skip("skip test due to allstar game")
 	t.Parallel()
 	req, err := http.NewRequest("GET", "https://localhost"+getHTTPSPort()+"/bbAjaxDay", nil)
 	if err != nil {
@@ -58,7 +57,6 @@ func Test_bbAjaxDay(t *testing.T) {
 }
 
 func Test_bbAll(t *testing.T) {
-	t.Skip("skip test due to allstar game")
 	t.Parallel()
 	req, err := http.NewRequest("GET", "https://localhost"+getHTTPSPort()+"/bbAll", nil)
 	if err != nil {
