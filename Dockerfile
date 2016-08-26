@@ -21,7 +21,7 @@ RUN apk del git go && \
   rm -rf $GOPATH/bin && \
   rm -rf $GOPATH/src/gopkg.in && \
   rm -rf $GOPATH/src/github.com/clbanning && \
-  rm -rf $GOPATH/src/github.com/codegangsta && \
+  rm -rf $GOPATH/src/github.com/urfave && \
   rm -rf $GOPATH/src/github.com/goincremental && \
   rm -rf $GOPATH/src/github.com/gorilla && \
   rm -rf $GOPATH/src/github.com/unrolled && \

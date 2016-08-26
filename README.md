@@ -2,7 +2,7 @@
 
 # Installation and Development
 0. go get github.com/pilu/fresh
-0. go get github.com/codegangsta/negroni
+0. go get github.com/urfave/negroni
 0. go get github.com/goincremental/negroni-session
 0. go get gopkg.in/mgo.v2
 0. cd ~/dev/danackerson/ackerson.de-go/

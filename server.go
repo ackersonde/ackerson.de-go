@@ -12,7 +12,7 @@ import (
 	"strings"
 	"time"
 
-	"github.com/codegangsta/negroni"
+	"github.com/urfave/negroni"
 	"github.com/danackerson/ackerson.de-go/baseball"
 	"github.com/danackerson/ackerson.de-go/structures"
 	"github.com/goincremental/negroni-sessions"
