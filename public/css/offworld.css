@@ -11,6 +11,28 @@ a {
     color:white;
     text-decoration:none;
 }
+#cookieBanner {
+    font-family: FreeMono, monospace;
+    color: #fff;
+    display: none;
+    font-size: 14px;
+    width: 900px;
+    margin: 200px auto;
+    padding: 12px;
+    background-color: #000;
+    border-bottom: solid 1px #ccc;
+}
+
+#cookieBannerClose {
+    float: right;
+    font-weight: bold;
+    padding: 4px;
+}
+
+#cookieBannerActions {
+    text-align: center;
+    padding-top: 4px;
+}
 a:hover {
     color:#E06C1F;
 }

@@ -25,14 +25,14 @@
       {{ $id := index $value 8}}
       {{ $game_url := index $value 10}}
       <div style="display: table-cell;padding:5px;">
-        <a href="/bbFavoriteTeam?id={{ $away_id }}" title="{{ $away_team }}" target="_blank"><img class="logo logo-small logo{{ $away_id }}" src="images/img_trans.gif"></a>
+        <a href="/bbFavoriteTeam?id={{ $away_id }}" title="{{ $away_team }}"><img class="logo logo-small logo{{ $away_id }}" src="images/img_trans.gif"></a>
       </div>
-      <div style="display:table-cell;padding:5px;text-align:center;vertical-align:middle;"><a target="_blank" href="/bbStream?url={{ $game_url }}">{{ $away_abbrev }}@{{ $home_abbrev }}</a></div>
+      <div style="display:table-cell;padding:5px;text-align:center;vertical-align:middle;"><a href="/bbStream?url={{ $game_url }}">{{ $away_abbrev }}@{{ $home_abbrev }}</a></div>
       <div style="display:table-cell;padding:5px;">
-        <a href="/bbFavoriteTeam?id={{ $home_id }}" title="{{ $home_team }}" target="_blank"><img class="logo logo-small logo{{ $home_id }}" src="images/img_trans.gif"></a>
+        <a href="/bbFavoriteTeam?id={{ $home_id }}" title="{{ $home_team }}"><img class="logo logo-small logo{{ $home_id }}" src="images/img_trans.gif"></a>
       </div>
       <!--<div style="display:table-cell;padding:5px;text-align:center;vertical-align:middle;">
-        <a target="_blank" href="http://m.mlb.com/video/v{{$id}}/condensed-game-{{$away_abbrev}}{{$home_abbrev}}"><img src="images/link_external.png"/></a>
+        <a href="http://m.mlb.com/video/v{{$id}}/condensed-game-{{$away_abbrev}}{{$home_abbrev}}"><img src="images/link_external.png"/></a>
       </div>-->
     </div>
   {{ end }}

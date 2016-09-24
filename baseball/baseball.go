@@ -19,7 +19,7 @@ func FavoriteTeamGameListHandler(id string, homePageMap map[int]Team) []GameDay 
 	if id != "" {
 		// fetch all the games for this team in last 7-30 days from now
 		date1 := ""
-		for i := 0; i > -7; i-- {
+		for i := 0; i > -15; i-- {
 			gameDate, dates, games := getDatesAndGames(date1, "-1", homePageMap, id)
 
 			date1 = gameDate.Format("2006/month_01/day_02")

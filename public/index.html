@@ -4,6 +4,11 @@
 <head>
     <meta charset="UTF-8" />
     <title>OffWorld</title>
+
+    <script src="js/jquery-2.1.3.min.js"></script>
+    <script src="//code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
+    <script src="js/consent.js"></script>
+
     <link rel="stylesheet" href="css/jquery.terminal.css" />
     <link rel="stylesheet" href="css/jquery-ui.min.css"/>
     <link rel="stylesheet" href="css/offworld.css" />
@@ -11,21 +16,20 @@
     <script type="text/javascript">
       if (location.hostname == 'ackerson.de' && window.location.protocol != "https:")
         window.location.href = "https:" + window.location.href.substring(window.location.protocol.length);
-
-      var _gaq = _gaq || [];
-      _gaq.push(['_setAccount', 'UA-35450644-1']);
-      _gaq.push (['_gat._anonymizeIp']);
-      _gaq.push(['_trackPageview']);
-
-      (function() {
-        var ga = document.createElement('script'); ga.type = 'text/javascript'; ga.async = true;
-        ga.src = ('https:' == document.location.protocol ? 'https://ssl' : 'http://www') + '.google-analytics.com/ga.js';
-        var s = document.getElementsByTagName('script')[0]; s.parentNode.insertBefore(ga, s);
-      })();
     </script>
 </head>
 
 <body>
+    <div id="cookieBanner">
+        <div id="cookieBannerClose"><a href="#">x</a></div>
+        This website uses third party cookies exclusively to collect analytics data.
+        If you continue browsing or close this notice, you will accept their use.
+        <div id="cookieBannerActions">
+            <a class="noconsent" href="impressum.html">Learn about this website's cookies</a>
+            &mdash;
+            <a class="denyConsent noconsent" href="#">Disallow cookies</a>
+        </div>
+    </div>
     <section>
         <div id="term1"></div>
         <div id="links">
@@ -69,8 +73,6 @@
         <div id="footerRight">Background: <a href="https://imgur.com/N7Bnl">"The beauty of space."</a></div>
     </footer>
 
-    <script src="js/jquery-2.1.3.min.js"></script>
-    <script src="//code.jquery.com/ui/1.11.3/jquery-ui.min.js"></script>
     <script src="js/jquery.mousewheel-min.js"></script>
     <script src="js/jquery.terminal-0.7.0.min.js"></script>
     <script src="js/offworld.js"></script>
