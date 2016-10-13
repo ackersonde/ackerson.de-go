@@ -7,6 +7,8 @@ import (
 	"testing"
 )
 
+var testDay = "?date1=year_2016%2fmonth_06%2fday_26&offset=0"
+
 func Test_redirectHomeHTTPS(t *testing.T) {
 	t.Parallel()
 
@@ -23,7 +25,7 @@ func Test_redirectHomeHTTPS(t *testing.T) {
 
 func Test_bbHome(t *testing.T) {
 	t.Parallel()
-	req, err := http.NewRequest("GET", "https://localhost"+getHTTPSPort()+"/bb", nil)
+	req, err := http.NewRequest("GET", "https://localhost"+getHTTPSPort()+"/bb"+testDay, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -32,7 +34,7 @@ func Test_bbHome(t *testing.T) {
 	bbHome(res, req)
 
 	// Verify a list of baseball games for that day is returned
-	exp := "<a id=\"homeplate\" href=\"/\"></a>"
+	exp := "/bbStream?url=http%3a%2f%2fmediadownloads.mlb.com%2fmlbam%2fmp4%2f"
 	act := res.Body.String()
 	if !strings.Contains(act, exp) {
 		t.Fatalf("Expected %s got %s", exp, act)
@@ -41,7 +43,7 @@ func Test_bbHome(t *testing.T) {
 
 func Test_bbAjaxDay(t *testing.T) {
 	t.Parallel()
-	req, err := http.NewRequest("GET", "https://localhost"+getHTTPSPort()+"/bbAjaxDay", nil)
+	req, err := http.NewRequest("GET", "https://localhost"+getHTTPSPort()+"/bbAjaxDay"+testDay, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -58,7 +60,7 @@ func Test_bbAjaxDay(t *testing.T) {
 
 func Test_bbAll(t *testing.T) {
 	t.Parallel()
-	req, err := http.NewRequest("GET", "https://localhost"+getHTTPSPort()+"/bbAll", nil)
+	req, err := http.NewRequest("GET", "https://localhost"+getHTTPSPort()+"/bbAll"+testDay, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
