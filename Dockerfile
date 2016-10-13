@@ -3,7 +3,7 @@ FROM alpine:edge
 # install Go
 RUN mkdir -p /root/gocode
 ENV GOPATH /root/gocode
-RUN apk add -U git go
+RUN apk add -U git go .build-deps
 
 # install ackerson.de
 RUN git clone https://github.com/danackerson/ackerson.de-go.git $GOPATH/src/github.com/danackerson/ackerson.de-go/
@@ -16,7 +16,7 @@ RUN go build server.go
 RUN mv server /root/
 RUN mkdir /root/certs
 
-RUN apk del git go && \
+RUN apk del git go .build-deps && \
   rm -rf $GOPATH/pkg && \
   rm -rf $GOPATH/bin && \
   rm -rf $GOPATH/src/gopkg.in && \
