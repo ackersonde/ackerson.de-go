@@ -1,4 +1,4 @@
-FROM alpine:edge
+FROM alpine:latest
 
 # install Go
 RUN mkdir -p /root/gocode
