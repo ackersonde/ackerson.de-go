@@ -22,6 +22,8 @@ function init_googlemaps() {
     new google.maps.Point(0,0),     // origin
     new google.maps.Point(16, 32)   // anchor
   );
+
+  getCurrentLocation();
 }
 
 function getCurrentLocation() {
