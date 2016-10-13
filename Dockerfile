@@ -3,6 +3,7 @@ FROM alpine:edge
 # install Go
 RUN mkdir -p /root/gocode
 ENV GOPATH /root/gocode
+ENV CGO_ENABLED="1"
 RUN apk add -U git go --virtual .build-deps
 
 # install ackerson.de
