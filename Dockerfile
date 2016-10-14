@@ -16,7 +16,7 @@ RUN go build server.go
 RUN mv server /root/
 RUN mkdir /root/certs
 
-RUN apk del git go && \
+RUN apk del git go musl-dev && \
   rm -rf $GOPATH/pkg && \
   rm -rf $GOPATH/bin && \
   rm -rf $GOPATH/src/gopkg.in && \

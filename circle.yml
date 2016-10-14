@@ -18,6 +18,7 @@ deployment:
   live:
     branch: master
     commands:
+      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
       - docker push danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
       - ssh core@go.ackerson.de docker pull danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
       - ssh core@go.ackerson.de docker rm -f ackerson.de; true
