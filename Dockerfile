@@ -1,9 +1,9 @@
-FROM alpine:latest
+FROM alpine:edge
 
 # install Go
 RUN mkdir -p /root/gocode
 ENV GOPATH /root/gocode
-RUN apk add -U git go
+RUN apk add -U git go musl-dev
 
 # install ackerson.de
 RUN git clone https://github.com/danackerson/ackerson.de-go.git $GOPATH/src/github.com/danackerson/ackerson.de-go/
