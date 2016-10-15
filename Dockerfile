@@ -1,3 +1,4 @@
+<<<<<<< HEAD
 FROM alpine:edge
 
 # install Go
@@ -29,3 +30,12 @@ RUN apk del git go musl-dev && \
 
 # execute ackerson.de
 ENTRYPOINT ["/root/server"]
+=======
+FROM iron/base
+RUN mkdir -p /root/certs
+ADD . /app/
+COPY server.pem /root/certs
+COPY server.key /root/certs
+WORKDIR /app
+ENTRYPOINT ["/app/server"]
+>>>>>>> iron
