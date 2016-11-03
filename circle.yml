@@ -5,7 +5,7 @@ machine:
 dependencies:
   override:
     - docker version
-    - go get -t -d -v ./...
+    - go get -t -d -v -u ./...
     - env GOOS=linux GOARCH=386 go build server.go
     - docker build -t danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM .
 
