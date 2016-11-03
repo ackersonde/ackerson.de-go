@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io/ioutil"
 	"log"
 	"net"
@@ -12,14 +11,13 @@ import (
 	"strings"
 	"time"
 
-	"github.com/urfave/negroni"
 	"github.com/danackerson/ackerson.de-go/baseball"
 	"github.com/danackerson/ackerson.de-go/structures"
 	"github.com/goincremental/negroni-sessions"
 	"github.com/goincremental/negroni-sessions/cookiestore"
 	"github.com/unrolled/render"
+	"github.com/urfave/negroni"
 	"golang.org/x/net/http2"
-	"gopkg.in/mgo.v2"
 )
 
 // ClockCheckHandler now commented
@@ -97,9 +95,7 @@ var version string
 var port string
 
 func parseEnvVariables() {
-	mongo = os.Getenv("ackMongo")
 	secret = os.Getenv("ackSecret")
-	poem = os.Getenv("ackPoems")
 	wunderground = os.Getenv("ackWunder")
 	version = os.Getenv("CIRCLE_BUILD_NUM")
 	prodSession, _ = strconv.ParseBool(os.Getenv("prodSession"))
@@ -142,8 +138,6 @@ func setUpMuxHandlers(mux *http.ServeMux) {
 				http.NotFound(w, r)
 			} else if r.FormValue("sesam") == poem || pass != nil {
 				session.Set("pass", "true")
-
-				PoemsHandler(w, r)
 			}
 		}
 	})
@@ -261,34 +255,6 @@ func bbAjaxDay(w http.ResponseWriter, r *http.Request) {
 	})
 
 	render.HTML(w, http.StatusOK, "bbGameDayListing", gameDayListing)
-}
-
-func loadWritings(w http.ResponseWriter) [](structures.Writing) {
-	writings := [](structures.Writing){}
-	session, err := mgo.Dial(mongo)
-
-	if err != nil {
-		fmt.Fprintf(w, err.Error())
-	} else {
-		defer session.Close()
-		session.SetMode(mgo.Monotonic, true)
-		c := session.DB("ackersonde").C("writings")
-
-		iter := c.Find(nil).Iter()
-		iter.All(&writings)
-		session.Close()
-	}
-
-	return writings
-}
-
-// PoemsHandler now commented
-func PoemsHandler(w http.ResponseWriter, req *http.Request) {
-	writings := loadWritings(w)
-	for _, writing := range writings {
-		fmt.Fprintf(w, "%1.0f: %s", writing.ID, writing.Content)
-		fmt.Fprintf(w, "\r\n")
-	}
 }
 
 // GetIP now commented

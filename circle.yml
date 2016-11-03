@@ -23,4 +23,4 @@ deployment:
       - docker push danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
       - ssh core@bender.ackerson.de docker pull danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
       - ssh core@bender.ackerson.de docker rm -f ackerson.de; true
-      - ssh core@bender.ackerson.de docker run -d -p 443:8443 -p 80:8080 -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM -e prodSession=true -e ackSecret=$ackSecret -e ackPoems=$ackPoems -e ackWunder=$ackWunder -e ackMongo=$ackMongo -v /home/core/certs:/root/certs:ro --name ackerson.de danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
+      - ssh core@bender.ackerson.de docker run -d -p 443:8443 -p 80:8080 -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM -e prodSession=true -e ackSecret=$ackSecret -e ackWunder=$ackWunder -v /home/core/certs:/root/certs:ro --name ackerson.de danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
