@@ -1,34 +1,28 @@
-machine:
-  services:
-    - docker
-  environment:
-    GODIST: "go1.7.3.linux-amd64.tar.gz"
-    IMPORT_PATH: "github.com/$CIRCLE_PROJECT_USERNAME/$CIRCLE_PROJECT_REPONAME"
-  post:
-    - mkdir -p download
-    - test -e download/$GODIST || curl -o download/$GODIST https://storage.googleapis.com/golang/$GODIST
-    - sudo rm -rf /usr/local/go
-    - sudo tar -C /usr/local -xzf download/$GODIST
-
-dependencies:
-  override:
-    - docker version
-    - go get -t -d -v ./...
-    - env GOOS=linux GOARCH=386 go build server.go
-    - docker build -t danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM .
-
-test:
-  post:
-    - docker run -d -p 443:8443 -p 80:8080 -e prodSession=true --name ackerson.de danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
-    - curl -k --retry 10 --retry-delay 5 -v https://localhost/ | grep Ackerson
-    - docker logs ackerson.de
-
-deployment:
-  live:
-    branch: master
-    commands:
-      - docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
-      - docker push danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
-      - ssh core@bender.ackerson.de docker pull danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
-      - ssh core@bender.ackerson.de docker rm -f ackerson.de; true
-      - ssh core@bender.ackerson.de docker run -d --restart=always -p 443:8443 -p 80:8080 -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM -e prodSession=true -e ackSecret=$ackSecret -e ackWunder=$ackWunder -v /home/core/certs:/root/certs:ro -v /app/public --name ackerson.de danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
+version: 2
+executorType: docker
+containerInfo:
+  - image: golang:1.7
+stages:
+  build:
+    workDir: /go/src/github.com/danackerson/ackerson.de-go
+    steps:
+      - type: checkout
+      # Build & Test
+      - type: shell
+        command: |
+          set -eu
+          go get -t -d -v ./...
+          go test
+          env GOOS=linux GOARCH=386 go build server.go
+          docker build -t danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM .
+          docker run -d -p 443:8443 -p 80:8080 -e prodSession=true --name ackerson.de danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
+          curl -k --retry 10 --retry-delay 5 -v https://localhost/ | grep Ackerson
+          docker logs ackerson.de
+      # Upload container to dockerHub, Deploy container to droplet & Launch
+      - type: deploy
+        command: |
+          docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+          docker push danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
+          ssh ackersond@deploy.ackerson.de docker pull danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
+          ssh ackersond@deploy.ackerson.de docker rm -f ackerson.de; true
+          ssh ackersond@deploy.ackerson.de docker run -d --restart=always -p 443:8443 -p 80:8080 -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM -e prodSession=true -e ackSecret=$ackSecret -e ackWunder=$ackWunder -v /home/core/certs:/root/certs:ro -v /app/public --name ackerson.de danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
