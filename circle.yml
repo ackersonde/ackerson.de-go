@@ -9,15 +9,23 @@ stages:
       - type: checkout
       # Build & Test
       - type: shell
+        name: "Install JUnit & Setup Test Path"
+        command: |
+          go get github.com/jstemmer/go-junit-report
+          mkdir -p /tmp/test-results
+      - type: shell
         command: |
           set -eu
           go get -t -d -v ./...
-          go test
+          go test -v -race ./... | go-junit-report > /tmp/test-results/unit-tests.xml
           env GOOS=linux GOARCH=386 go build server.go
+#NOPE: https://discuss.circleci.com/t/sample-rails-app-running-docker-in-a-container/9066
           docker build -t danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM .
           docker run -d -p 443:8443 -p 80:8080 -e prodSession=true --name ackerson.de danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
           curl -k --retry 10 --retry-delay 5 -v https://localhost/ | grep Ackerson
           docker logs ackerson.de
+      - type: test-results-store
+        path: /tmp/test-results
       # Upload container to dockerHub, Deploy container to droplet & Launch
       - type: deploy
         command: |
