@@ -20,19 +20,7 @@ import (
 	"golang.org/x/net/http2"
 )
 
-// ClockCheckHandler now commented
-func ClockCheckHandler(w http.ResponseWriter, req *http.Request) {
-	panelID := req.URL.Query().Get("panel")
-
-	log.Printf("req: %s", panelID)
-	render := render.New(render.Options{
-		Layout:        "content",
-		IsDevelopment: false,
-	})
-
-	render.HTML(w, http.StatusOK, "test", nil)
-}
-
+var port80only = false
 var prodSession = false
 var httpPort = ":8080"
 var httpsPort = ":8443"
@@ -61,21 +49,28 @@ func main() {
 		sslCertPath = ""
 	}
 
-	// keep an ear on the http port and fwd accordingly
-	go func() {
-		errHTTP := http.ListenAndServe(httpPort, http.HandlerFunc(redirectToHTTPS))
-		if errHTTP != nil {
-			log.Fatal("Web server (HTTP): ", errHTTP)
-		}
-	}()
+	if _, certErr := os.Stat(sslCertPath + "server.pem"); os.IsNotExist(certErr) {
+		port80only = true
+		http.ListenAndServe(httpPort, n)
+	} else {
 
-	// HTTP2
-	srv := &http.Server{
-		Addr:    httpsPort,
-		Handler: n,
+		// keep an ear on the http port and fwd accordingly
+		go func() {
+			errHTTP := http.ListenAndServe(httpPort, http.HandlerFunc(redirectToHTTPS))
+			if errHTTP != nil {
+				log.Fatal("Web server (HTTP): ", errHTTP)
+			}
+		}()
 	}
-	http2.ConfigureServer(srv, &http2.Server{})
-	log.Fatal(srv.ListenAndServeTLS(sslCertPath+"server.pem", sslCertPath+"server.key"))
+	if !port80only {
+		// HTTP2
+		srv := &http.Server{
+			Addr:    httpsPort,
+			Handler: n,
+		}
+		http2.ConfigureServer(srv, &http2.Server{})
+		log.Fatal(srv.ListenAndServeTLS(sslCertPath+"server.pem", sslCertPath+"server.key"))
+	}
 }
 
 // redirectToHttps now commented
@@ -105,9 +100,6 @@ func setUpMuxHandlers(mux *http.ServeMux) {
 	post := "POST"
 	homePageMap = baseball.InitHomePageMap()
 
-	mux.HandleFunc("/clockCheck", func(w http.ResponseWriter, r *http.Request) {
-		ClockCheckHandler(w, r)
-	})
 	// handlers
 	mux.HandleFunc("/date", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == post {
