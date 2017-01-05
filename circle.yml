@@ -28,13 +28,16 @@ stages:
           go get -t -d -v ./...
           go test -v -race ./... | go-junit-report > /tmp/test-results/unit-tests.xml
           env GOOS=linux GOARCH=386 go build server.go
+      - type: test-results-store
+        path: /tmp/test-results
+      - type: shell
+        name: "Build and test image"
+        command: |
           docker build -t danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM .
+          docker ps -a
           docker run -d -p 443:8443 -p 80:8080 -e prodSession=true --name ackerson.de danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
           curl -k --retry 10 --retry-delay 5 -v https://$DOCKER_HOST/ | grep Ackerson
           docker logs ackerson.de
-
-      - type: test-results-store
-        path: /tmp/test-results
       # Upload container to dockerHub, Deploy container to droplet & Launch
       - type: deploy
         command: |
