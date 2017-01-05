@@ -43,7 +43,7 @@ stages:
       - type: deploy
         name: "Upload to DockerHub, deploy container to Digital Ocean Droplet & launch"
         command: |
-          docker login -e $DOCKER_EMAIL -u $DOCKER_USER -p $DOCKER_PASS
+          docker login -u $DOCKER_USER -p $DOCKER_PASS
           docker push danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
           ssh -o "StrictHostKeyChecking no" ackersond@deploy.ackerson.de docker pull danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
           ssh -o "StrictHostKeyChecking no" ackersond@deploy.ackerson.de docker rm -f ackerson.de; true
