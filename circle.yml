@@ -43,7 +43,7 @@ stages:
       - type: add-ssh-keys
         name: "Load key"
         fingerprints:
-          - "SHA256:1+Zh6An/JCeKPkFx5xLnsEMRxJoAwJ6mQVFoAMfrYtQ"
+          - "93:c4:61:21:a6:82:d8:6d:4f:73:11:79:37:23:83:07"
       - type: shell
         name: Start ssh-agent
         command: |
@@ -59,6 +59,7 @@ stages:
           docker login -u $DOCKER_USER -p $DOCKER_PASS
           docker push danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
           source ~/.ssh_agent_conf
+          ssh-add -l
           ssh -o "StrictHostKeyChecking no" ackersond@deploy.ackerson.de docker pull danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
           ssh -o "StrictHostKeyChecking no" ackersond@deploy.ackerson.de docker rm -f ackerson.de; true
           ssh -o "StrictHostKeyChecking no" ackersond@deploy.ackerson.de docker run -d --restart=always -p 443:8443 -p 80:8080 -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM -e prodSession=true -e ackSecret=$ackSecret -e ackWunder=$ackWunder -v /home/core/certs:/root/certs:ro -v /app/public --name ackerson.de danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
