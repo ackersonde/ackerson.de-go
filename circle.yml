@@ -40,11 +40,25 @@ stages:
           docker exec ackerson.de curl -k --retry 10 --retry-delay 5 -v https://localhost/ | grep Ackerson
           docker ps -a
 
+      - type: add-ssh-keys
+        name: "Load key"
+        fingerprints:
+          - "SHA256:1+Zh6An/JCeKPkFx5xLnsEMRxJoAwJ6mQVFoAMfrYtQ"
+      - type: shell
+        name: Start ssh-agent
+        command: |
+          ssh-agent -s > ~/.ssh_agent_conf
+          source ~/.ssh_agent_conf
+          for _k in $(ls ${HOME}/.ssh/id_*); do
+            ssh-add ${_k} || true
+          done
+
       - type: deploy
         name: "Upload to DockerHub, deploy container to Digital Ocean Droplet & launch"
         command: |
           docker login -u $DOCKER_USER -p $DOCKER_PASS
           docker push danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
+          source ~/.ssh_agent_conf
           ssh -o "StrictHostKeyChecking no" ackersond@deploy.ackerson.de docker pull danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
           ssh -o "StrictHostKeyChecking no" ackersond@deploy.ackerson.de docker rm -f ackerson.de; true
           ssh -o "StrictHostKeyChecking no" ackersond@deploy.ackerson.de docker run -d --restart=always -p 443:8443 -p 80:8080 -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM -e prodSession=true -e ackSecret=$ackSecret -e ackWunder=$ackWunder -v /home/core/certs:/root/certs:ro -v /app/public --name ackerson.de danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
