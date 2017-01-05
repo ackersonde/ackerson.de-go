@@ -30,9 +30,8 @@ stages:
           env GOOS=linux GOARCH=386 go build server.go
           docker build -t danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM .
           docker run -d -p 443:8443 -p 80:8080 -e prodSession=true --name ackerson.de danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
-          docker ps -a
+          curl -k --retry 10 --retry-delay 5 -v https://$DOCKER_HOST/ | grep Ackerson
           docker logs ackerson.de
-          curl -k --retry 10 --retry-delay 5 -v http://localhost/ | grep Ackerson
 
       - type: test-results-store
         path: /tmp/test-results
