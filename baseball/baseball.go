@@ -158,15 +158,20 @@ func searchMLBGames(dates string, games map[int][]string, homePageMap map[int]Te
 			homeTeamID := aGameVal["-home_team_id"].(string)
 			homeTeamName, homeTeamHomePage := LookupTeamInfo(homePageMap, homeTeamID)
 			homeAbbrev := aGameVal["-home_name_abbrev"].(string)
-
-			detailURL := "http://m.mlb.com/gen/multimedia/detail" + generateDetailURL(gameID)
-			gameURL := fetchGameURL(detailURL, "FLASH_2500K_1280X720")
+			gameURL := FetchGameURLFromID(gameID)
 
 			games[k] = []string{awayTeamName, awayTeamHomePage, awayTeamID, awayAbbrev, homeTeamName, homeTeamHomePage, homeTeamID, homeAbbrev, gameID, dates, gameURL}
 		}
 	}
 
 	return games
+}
+
+// FetchGameURLFromID is now commented
+func FetchGameURLFromID(gameID string) string {
+	detailURL := "http://m.mlb.com/gen/multimedia/detail" + generateDetailURL(gameID)
+
+	return fetchGameURL(detailURL, "FLASH_2500K_1280X720")
 }
 
 // fetchGameURL is now commented
