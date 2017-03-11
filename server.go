@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"io"
 	"io/ioutil"
 	"log"
 	"net"
@@ -182,6 +183,9 @@ func setUpMuxHandlers(mux *http.ServeMux) {
 
 	// play all games of the day
 	mux.HandleFunc("/bbAll", bbAll)
+
+	// download gameURL to ~/bb_games (& eventually send to Join Push App)
+	mux.HandleFunc("/bb_download", bbDownloadPush)
 }
 
 // FavGames is now commented
@@ -191,6 +195,74 @@ type FavGames struct {
 }
 
 var homePageMap map[int]baseball.Team
+
+func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
+	gameTitle := r.URL.Query().Get("gameTitle")
+	gameURL := r.URL.Query().Get("gameURL")
+
+	log.Println("game Title: " + gameTitle)
+	log.Println("game URL: " + gameURL)
+
+	// gameTitle: 112-114__Wed, Nov  2 2016
+	result := strings.Split(gameTitle, "__")
+	gameDate, _ := time.Parse("Mon, Jan _2 2006", result[1])
+	formattedDate := gameDate.Format("Mon_Jan02_2006")
+
+	// parse out teams "<awayID>-<homeID>"
+	teams := strings.Split(result[0], "-")
+	awayID, _ := strconv.Atoi(teams[0])
+	homeID, _ := strconv.Atoi(teams[1])
+	awayTeam := homePageMap[awayID]
+	homeTeam := homePageMap[homeID]
+
+	// create download filename: "Cubs@Diamondbacks-Wed_Nov02_2017.mp4"
+	downloadFilename := awayTeam.Name + "@" + homeTeam.Name + "-" + formattedDate + ".mp4"
+	downloadFilename = strings.Replace(downloadFilename, " ", "_", 2)
+
+	// and download it to ~/bb_games/
+	log.Println(downloadFilename)
+	filepath := "/app/public/bb_games/" + downloadFilename
+
+	go func() {
+		err := downloadFile(filepath, gameURL)
+		if err != nil {
+			log.Printf("ERR: unable to download & save file %v\n", err)
+		} else {
+			log.Printf("Finished downloading %s\n", filepath)
+		}
+	}()
+
+	// then go and try and watch the thing from
+	// https://ackerson.de/bb_games/Cubs@Diamondbacks-Wed_Nov02_2017.mp4
+
+	// Step 2
+	// send this URL to the Join Push App API to get it delivered to handy :)
+}
+
+func downloadFile(filepath string, url string) (err error) {
+
+	// Create the file
+	out, err := os.Create(filepath)
+	if err != nil {
+		return err
+	}
+	defer out.Close()
+
+	// Get the data
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	defer resp.Body.Close()
+
+	// Writer the body to file
+	_, err = io.Copy(out, resp.Body)
+	if err != nil {
+		return err
+	}
+
+	return nil
+}
 
 func bbHome(w http.ResponseWriter, r *http.Request) {
 	date1 := r.URL.Query().Get("date1")
