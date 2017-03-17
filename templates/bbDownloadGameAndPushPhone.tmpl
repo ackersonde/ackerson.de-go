@@ -1,0 +1,63 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>Download and Push</title>
+    <style>
+      #progressbar {
+        margin-top: 20px;
+        margin-left: 10px;
+        width: 50%;
+      }
+      .progress-label {
+        font-weight: bold;
+        text-shadow: 1px 1px 0 #fff;
+      }
+      .ui-widget-header {
+        background-image: none !important;
+        background-color: #17cc11 !important;
+      }
+    </style>
+    <script src="//code.jquery.com/jquery-3.1.1.js"></script>
+    <script src="//code.jquery.com/jquery-1.12.4.js"></script>
+    <script src="//code.jquery.com/ui/1.12.1/jquery-ui.js"></script>
+    <link rel="stylesheet" href="//code.jquery.com/ui/1.12.1/themes/smoothness/jquery-ui.css">
+    <script type="text/javascript">
+      $( function() {
+        var progressbar = $( "#progressbar" ),
+        progressLabel = $( ".progress-label" ),
+        gameLength ={{ $.GameLength }};
+
+        progressbar.progressbar({
+          max: gameLength,
+          change: function() {
+            percentage = progressbar.progressbar( "value" ) / gameLength * 100;
+            progressLabel.text( "Current Progress: " + percentage.toFixed(0) + "%" );
+          },
+          complete: function() {
+            progressLabel.text( "Complete!" );
+            $(".ui-dialog button").last().trigger( "focus" );
+          }
+        });
+
+        function getData(){
+          $.getJSON("/bb_download_status?title={{ $.GameDownloadTitle }}&totalSize={{ $.GameLength }}", function(data) {
+              if(data != null){
+                  setTimeout(getData, 2000);
+                  progressbar.progressbar( "value",  data.size );
+              }
+          });
+        }
+
+        //Initial Invocation
+        getData();
+    });
+    </script>
+  </head>
+  <body>
+    <div>Downloading <span style="font-weight:bold;">{{ $.GameTitle }}</span> from {{ $.GameDate }}<br/><br/>
+      <div class="progress-label">One moment...</div>
+      <div id="progressbar"></div>
+    </div>
+  </body>
+</html>

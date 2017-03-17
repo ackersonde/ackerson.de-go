@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -25,6 +26,7 @@ var port80only = false
 var prodSession = false
 var httpPort = ":8080"
 var httpsPort = ":8443"
+var gameDownloadDir = "/app/public/bb_games/"
 
 func getHTTPPort() string {
 	return httpPort
@@ -85,6 +87,7 @@ func redirectToHTTPS(w http.ResponseWriter, r *http.Request) {
 
 var mongo string
 var secret string
+var joinAPIKey string
 var poem string
 var wunderground string
 var version string
@@ -92,6 +95,7 @@ var port string
 
 func parseEnvVariables() {
 	secret = os.Getenv("ackSecret")
+	joinAPIKey = os.Getenv("joinAPIKey")
 	wunderground = os.Getenv("ackWunder")
 	version = os.Getenv("CIRCLE_BUILD_NUM")
 	prodSession, _ = strconv.ParseBool(os.Getenv("prodSession"))
@@ -149,27 +153,6 @@ func setUpMuxHandlers(mux *http.ServeMux) {
 		teamID, _ := strconv.Atoi(id)
 		favTeam := homePageMap[teamID]
 		render.HTML(w, http.StatusOK, "bbFavoriteTeamGameList", FavGames{FavGamesList: favTeamGameListing, FavTeam: favTeam})
-		/*
-			id := r.Proto
-
-			clientGone := w.(http.CloseNotifier).CloseNotify()
-			w.Header().Set("Content-Type", "text/plain")
-			ticker := time.NewTicker(1 * time.Second)
-			defer ticker.Stop()
-			fmt.Fprintf(w, "# ~1KB of junk to force browsers to start rendering immediately: \n")
-			io.WriteString(w, strings.Repeat("# xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx\n", 13))
-
-			for {
-				fmt.Fprintf(w, "%v [%s]\n", time.Now(), r.Proto)
-				w.(http.Flusher).Flush()
-				select {
-				case <-ticker.C:
-				case <-clientGone:
-					log.Printf("Client %v disconnected from the clock", r.RemoteAddr)
-					return
-				}
-			}
-		*/
 	})
 
 	// gameDayListing for yesterday (default 'homepage')
@@ -186,6 +169,8 @@ func setUpMuxHandlers(mux *http.ServeMux) {
 
 	// download gameURL to ~/bb_games (& eventually send to Join Push App)
 	mux.HandleFunc("/bb_download", bbDownloadPush)
+
+	mux.HandleFunc("/bb_download_status", bbDownloadStatus)
 }
 
 // FavGames is now commented
@@ -196,6 +181,34 @@ type FavGames struct {
 
 var homePageMap map[int]baseball.Team
 
+func bbDownloadStatus(w http.ResponseWriter, req *http.Request) {
+	var size int64
+
+	title := req.URL.Query().Get("title")
+	totalSizeReq := req.URL.Query().Get("totalSize")
+	totalSize, _ := strconv.ParseInt(totalSizeReq, 10, 64)
+
+	filepath := gameDownloadDir + title
+	file, err := os.Open(filepath)
+	if err != nil {
+		log.Printf("%s", err)
+	}
+	fi, err := file.Stat()
+	if err != nil {
+		log.Printf("%s", err)
+		size = -10
+	} else {
+		size = fi.Size()
+	}
+	fmt.Printf(" %d / %d bytes downloaded\n", size, totalSize)
+	v := map[string]int64{"size": size}
+
+	data, _ := json.Marshal(v)
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+	w.Write(data)
+}
+
 func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 	gameTitle := r.URL.Query().Get("gameTitle")
 	gameURL := r.URL.Query().Get("gameURL")
@@ -203,9 +216,10 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 	log.Println("game Title: " + gameTitle)
 	log.Println("game URL: " + gameURL)
 
-	// gameTitle: 112-114__Wed, Nov  2 2016
+	//gameTitle: 112-114__Wed, Nov  2 2016
 	result := strings.Split(gameTitle, "__")
 	gameDate, _ := time.Parse("Mon, Jan _2 2006", result[1])
+	humanDate := gameDate.Format("Mon, Jan _2 2006")
 	formattedDate := gameDate.Format("Mon_Jan02_2006")
 
 	// parse out teams "<awayID>-<homeID>"
@@ -221,7 +235,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 
 	// and download it to ~/bb_games/
 	log.Println(downloadFilename)
-	filepath := "/app/public/bb_games/" + downloadFilename
+	filepath := gameDownloadDir + downloadFilename
 
 	go func() {
 		err := downloadFile(filepath, gameURL)
@@ -229,14 +243,45 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 			log.Printf("ERR: unable to download & save file %v\n", err)
 		} else {
 			log.Printf("Finished downloading %s\n", filepath)
+
+			// NOW send this URL to the Join Push App API
+			pushURL := "https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush"
+			defaultParams := "?deviceNames=LG%20G4&deviceId=group.phone&icon=https://ackerson.de/images/baseballSmall.png&smallicon=https://ackerson.de/images/baseballSmall.png"
+			fileOnPhone := "&title=" + downloadFilename
+			fileURL := "&file=https://ackerson.de/bb_games/" + downloadFilename
+			apiKey := "&apikey=" + joinAPIKey
+
+			completeURL := pushURL + defaultParams + fileOnPhone + fileURL + apiKey
+			// Get the data
+			resp, err := http.Get(completeURL)
+			if err != nil {
+				log.Printf("ERR: unable to call Join Push")
+			}
+			defer resp.Body.Close()
+			if resp.StatusCode == 200 {
+				log.Printf("successfully sent payload to Join!")
+			}
 		}
 	}()
 
-	// then go and try and watch the thing from
-	// https://ackerson.de/bb_games/Cubs@Diamondbacks-Wed_Nov02_2017.mp4
+	type GameMeta struct {
+		GameTitle         string
+		GameDownloadTitle string
+		GameLength        int64
+		GameDate          string
+	}
+	render := render.New(render.Options{IsDevelopment: true})
+	res, err := http.Head(gameURL)
+	if err != nil {
+		log.Printf("ERR: unable to find game size")
+	}
 
-	// Step 2
-	// send this URL to the Join Push App API to get it delivered to handy :)
+	render.HTML(w, http.StatusOK, "bbDownloadGameAndPushPhone",
+		GameMeta{
+			GameTitle:         awayTeam.Name + "@" + homeTeam.Name,
+			GameDownloadTitle: downloadFilename,
+			GameLength:        res.ContentLength,
+			GameDate:          humanDate})
 }
 
 func downloadFile(filepath string, url string) (err error) {
@@ -381,7 +426,7 @@ func WeatherHandler(w http.ResponseWriter, req *http.Request) {
 	//body := string(structures.TestGeoLocationPost) // in case you are testing :)
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		panic("ioutil.ReadAll")
+		log.Printf("%s", err)
 	}
 
 	geoLocation := new(structures.JSONGeoLocationRequest)
