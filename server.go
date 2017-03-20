@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/json"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -185,8 +184,6 @@ func bbDownloadStatus(w http.ResponseWriter, req *http.Request) {
 	var size int64
 
 	title := req.URL.Query().Get("title")
-	totalSizeReq := req.URL.Query().Get("totalSize")
-	totalSize, _ := strconv.ParseInt(totalSizeReq, 10, 64)
 
 	filepath := gameDownloadDir + title
 	file, err := os.Open(filepath)
@@ -200,7 +197,6 @@ func bbDownloadStatus(w http.ResponseWriter, req *http.Request) {
 	} else {
 		size = fi.Size()
 	}
-	fmt.Printf(" %d / %d bytes downloaded\n", size, totalSize)
 	v := map[string]int64{"size": size}
 
 	data, _ := json.Marshal(v)
@@ -212,9 +208,6 @@ func bbDownloadStatus(w http.ResponseWriter, req *http.Request) {
 func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 	gameTitle := r.URL.Query().Get("gameTitle")
 	gameURL := r.URL.Query().Get("gameURL")
-
-	log.Println("game Title: " + gameTitle)
-	log.Println("game URL: " + gameURL)
 
 	//gameTitle: 112-114__Wed, Nov  2 2016
 	result := strings.Split(gameTitle, "__")
