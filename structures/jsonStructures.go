@@ -2,7 +2,7 @@ package structures
 
 // Writing is now commented
 // DraftIn: https://draftin.com/documents/69898?token=5fjKKlZ0-AeBzqj_RAftAGdzRzl9VBfBHj5wpSWm_gU
-// JSON2struct: https://mervine.net/json2struct
+// JSON2struct: http://json2struct.mervine.net/
 type Writing struct {
 	Content     string  `json:"content"`
 	ContentHTML string  `json:"content_html"`
