@@ -224,7 +224,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 
 	// create download filename: "Cubs@Diamondbacks-Wed_Nov02_2017.mp4"
 	downloadFilename := awayTeam.Name + "@" + homeTeam.Name + "-" + formattedDate + ".mp4"
-	downloadFilename = strings.Replace(downloadFilename, " ", "_", 2)
+	downloadFilename = strings.Replace(downloadFilename, " ", "_", -1)
 
 	// and download it to ~/bb_games/
 	log.Println(downloadFilename)
@@ -239,13 +239,14 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 
 			// NOW send this URL to the Join Push App API
 			pushURL := "https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush"
-			defaultParams := "?deviceId=007e5b72192c420d9115334d1f177c4c&icon=https://ackerson.de/images/baseballSmall.png&smallicon=https://ackerson.de/images/baseballSmall.png"
+			defaultParams := "?deviceId=007e5b72192c420d9115334d1f177c4c&icon=https://ackerson.de/images/baseballSmall.png&smallicon=https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRGnh-mDD_ibUn1ZDx8tn5cizEFTlCTAajDqkdICzmjVqJZ2Uy_"
 			fileOnPhone := "&title=" + downloadFilename
 			fileURL := "&file=https://ackerson.de/bb_games/" + downloadFilename
 			apiKey := "&apikey=" + joinAPIKey
 
 			completeURL := pushURL + defaultParams + fileOnPhone + fileURL + apiKey
 			// Get the data
+			log.Printf("joinPushURL: %s\n", completeURL)
 			resp, err := http.Get(completeURL)
 			if err != nil {
 				log.Printf("ERR: unable to call Join Push")
