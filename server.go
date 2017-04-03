@@ -239,7 +239,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 
 			// NOW send this URL to the Join Push App API
 			pushURL := "https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush"
-			defaultParams := "?deviceId=007e5b72192c420d9115334d1f177c4c&icon=https://ackerson.de/images/baseballSmall.png&smallicon=https://encrypted-tbn1.gstatic.com/images?q=tbn:ANd9GcRGnh-mDD_ibUn1ZDx8tn5cizEFTlCTAajDqkdICzmjVqJZ2Uy_"
+			defaultParams := "?deviceId=007e5b72192c420d9115334d1f177c4c&icon=https://ackerson.de/images/baseballSmall.png&smallicon=https://connect.baseball.trackman.com/Images/spinner.png"
 			fileOnPhone := "&title=" + downloadFilename
 			fileURL := "&file=https://ackerson.de/bb_games/" + downloadFilename
 			apiKey := "&apikey=" + joinAPIKey
