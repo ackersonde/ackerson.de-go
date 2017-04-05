@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/json"
+	"errors"
 	"io"
 	"io/ioutil"
 	"log"
@@ -229,11 +230,21 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 	// and download it to ~/bb_games/
 	log.Println(downloadFilename)
 	filepath := gameDownloadDir + downloadFilename
+	downloadedAlready := false
+	res, err := http.Head(gameURL)
+	if err != nil {
+		log.Printf("ERR: unable to find game size")
+	}
 
 	go func() {
-		err := downloadFile(filepath, gameURL)
+		err := downloadFile(filepath, gameURL, res.ContentLength)
 		if err != nil {
+			// Check if file was already downloaded! - Offer an optional button to sendPush again,
+			// but default to *not* sending it again (e.g. reopen browser and last page was download page!)
 			log.Printf("ERR: unable to download & save file %v\n", err)
+			if err.Error() == "file exists" {
+				downloadedAlready = true
+			}
 		} else {
 			log.Printf("Finished downloading %s\n", filepath)
 
@@ -263,43 +274,47 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 		GameDownloadTitle string
 		GameLength        int64
 		GameDate          string
+		DownloadedAlready bool
 	}
 	render := render.New(render.Options{IsDevelopment: true})
-	res, err := http.Head(gameURL)
-	if err != nil {
-		log.Printf("ERR: unable to find game size")
-	}
-
 	render.HTML(w, http.StatusOK, "bbDownloadGameAndPushPhone",
 		GameMeta{
 			GameTitle:         awayTeam.Name + "@" + homeTeam.Name,
 			GameDownloadTitle: downloadFilename,
 			GameLength:        res.ContentLength,
-			GameDate:          humanDate})
+			GameDate:          humanDate,
+			DownloadedAlready: downloadedAlready,
+		})
 }
 
-func downloadFile(filepath string, url string) (err error) {
-
-	// Create the file
-	out, err := os.Create(filepath)
+func downloadFile(filepath string, url string, filesize int64) (err error) {
+	// check if file exists and is same size as MLB.com (meaning we already downloaded it)
+	fi, err := os.Stat(filepath)
 	if err != nil {
-		return err
-	}
-	defer out.Close()
+		// Create the file
+		out, err := os.Create(filepath)
+		if err != nil {
+			return err
+		}
+		defer out.Close()
 
-	// Get the data
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	defer resp.Body.Close()
+		// Get the data
+		resp, err := http.Get(url)
+		if err != nil {
+			return err
+		}
+		defer resp.Body.Close()
 
-	// Writer the body to file
-	_, err = io.Copy(out, resp.Body)
-	if err != nil {
-		return err
+		// Writer the body to file
+		_, err = io.Copy(out, resp.Body)
+		if err != nil {
+			return err
+		}
+	} else {
+		if fi.Size() == filesize {
+			return errors.New("file exists")
+		}
 	}
-
 	return nil
 }
 
