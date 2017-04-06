@@ -171,6 +171,11 @@ func setUpMuxHandlers(mux *http.ServeMux) {
 	mux.HandleFunc("/bb_download", bbDownloadPush)
 
 	mux.HandleFunc("/bb_download_status", bbDownloadStatus)
+
+	mux.HandleFunc("/bb_resend_join_push", func(w http.ResponseWriter, r *http.Request) {
+		title := r.URL.Query().Get("title")
+		sendPayloadToJoinAPI(title)
+	})
 }
 
 // FavGames is now commented
@@ -245,25 +250,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 			}
 		} else {
 			log.Printf("Finished downloading %s\n", filepath)
-
-			// NOW send this URL to the Join Push App API
-			pushURL := "https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush"
-			defaultParams := "?deviceId=007e5b72192c420d9115334d1f177c4c&icon=https://ackerson.de/images/baseballSmall.png&smallicon=https://connect.baseball.trackman.com/Images/spinner.png"
-			fileOnPhone := "&title=" + downloadFilename
-			fileURL := "&file=https://ackerson.de/bb_games/" + downloadFilename
-			apiKey := "&apikey=" + joinAPIKey
-
-			completeURL := pushURL + defaultParams + fileOnPhone + fileURL + apiKey
-			// Get the data
-			log.Printf("joinPushURL: %s\n", completeURL)
-			resp, err := http.Get(completeURL)
-			if err != nil {
-				log.Printf("ERR: unable to call Join Push")
-			}
-			defer resp.Body.Close()
-			if resp.StatusCode == 200 {
-				log.Printf("successfully sent payload to Join!")
-			}
+			sendPayloadToJoinAPI(downloadFilename)
 		}
 	}()
 
@@ -272,6 +259,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 		GameDownloadTitle string
 		GameLength        int64
 		GameDate          string
+		GameFile          string
 	}
 	render := render.New(render.Options{IsDevelopment: true})
 	render.HTML(w, http.StatusOK, "bbDownloadGameAndPushPhone",
@@ -280,7 +268,29 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 			GameDownloadTitle: downloadFilename,
 			GameLength:        res.ContentLength,
 			GameDate:          humanDate,
+			GameFile:          downloadFilename,
 		})
+}
+
+func sendPayloadToJoinAPI(downloadFilename string) {
+	// NOW send this URL to the Join Push App API
+	pushURL := "https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush"
+	defaultParams := "?deviceId=007e5b72192c420d9115334d1f177c4c&icon=https://ackerson.de/images/baseballSmall.png&smallicon=https://connect.baseball.trackman.com/Images/spinner.png"
+	fileOnPhone := "&title=" + downloadFilename
+	fileURL := "&file=https://ackerson.de/bb_games/" + downloadFilename
+	apiKey := "&apikey=" + joinAPIKey
+
+	completeURL := pushURL + defaultParams + fileOnPhone + fileURL + apiKey
+	// Get the data
+	log.Printf("joinPushURL: %s\n", completeURL)
+	resp, err := http.Get(completeURL)
+	if err != nil {
+		log.Printf("ERR: unable to call Join Push")
+	}
+	defer resp.Body.Close()
+	if resp.StatusCode == 200 {
+		log.Printf("successfully sent payload to Join!")
+	}
 }
 
 func downloadFile(filepath string, url string, filesize int64) (err error) {
