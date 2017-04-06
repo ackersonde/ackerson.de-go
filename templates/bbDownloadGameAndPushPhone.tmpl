@@ -26,7 +26,9 @@
       $( function() {
         var progressbar = $( "#progressbar" ),
         progressLabel = $( ".progress-label" ),
-        gameLength ={{ $.GameLength }};
+        gameLength ={{ $.GameLength }},
+        timer = 0,
+        finished = false;
 
         progressbar.progressbar({
           max: gameLength,
@@ -36,21 +38,27 @@
           },
           complete: function() {
             progressLabel.text( "Complete!" );
-            $(".ui-dialog button").last().trigger( "focus" );
+            //$(".ui-dialog button").last().trigger( "focus" );
+            clearTimeout(timer);
+            $("#render").css("display","block");
+            $("#render").last().trigger( "focus" );
+            finished = true;
           }
         });
 
         function getData(){
           $.getJSON("/bb_download_status?title={{ $.GameDownloadTitle }}&totalSize={{ $.GameLength }}", function(data) {
               if(data != null){
-                  setTimeout(getData, 2000);
+                  timer = setTimeout(getData, 2000);
                   progressbar.progressbar( "value",  data.size );
               }
           });
         }
 
         //Initial Invocation
-        getData();
+        if (!finished) {
+          getData();
+        }
     });
     </script>
   </head>
@@ -59,6 +67,9 @@
       <div class="progress-label">One moment...</div>
       <div id="progressbar"></div>
     </div>
-    <div>Downloaded already? {{ $.DownloadedAlready }}</div>
+    <div>
+      <br/>
+      <input type="button" id="render" style="display:none" onclick="location.href='http://google.com';" value="Resend ballgame" />
+    </div>
   </body>
 </html>
