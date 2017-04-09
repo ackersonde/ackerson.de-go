@@ -173,8 +173,9 @@ func setUpMuxHandlers(mux *http.ServeMux) {
 	mux.HandleFunc("/bb_download_status", bbDownloadStatus)
 
 	mux.HandleFunc("/bb_resend_join_push", func(w http.ResponseWriter, r *http.Request) {
-		title := r.URL.Query().Get("title")
-		sendPayloadToJoinAPI(title)
+		response := sendPayloadToJoinAPI(r.URL.Query().Get("title"))
+
+		w.Write([]byte(response))
 	})
 }
 
@@ -272,7 +273,9 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 		})
 }
 
-func sendPayloadToJoinAPI(downloadFilename string) {
+func sendPayloadToJoinAPI(downloadFilename string) string {
+	response := "Sorry, couldn't resend..."
+
 	// NOW send this URL to the Join Push App API
 	pushURL := "https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush"
 	defaultParams := "?deviceId=007e5b72192c420d9115334d1f177c4c&icon=https://ackerson.de/images/baseballSmall.png&smallicon=https://connect.baseball.trackman.com/Images/spinner.png"
@@ -290,7 +293,10 @@ func sendPayloadToJoinAPI(downloadFilename string) {
 	defer resp.Body.Close()
 	if resp.StatusCode == 200 {
 		log.Printf("successfully sent payload to Join!")
+		response = "Success!"
 	}
+
+	return response
 }
 
 func downloadFile(filepath string, url string, filesize int64) (err error) {
