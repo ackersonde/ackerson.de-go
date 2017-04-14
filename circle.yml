@@ -59,8 +59,14 @@ stages:
           docker login -u $DOCKER_USER -p $DOCKER_PASS
           docker push danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
           source ~/.ssh_agent_conf
+
+          export DEPLOY_SERVER=deploy.ackerson.de
+          if [ $DEPLOY_SERVER_IP ]; then
+            export DEPLOY_SERVER=$DEPLOY_SERVER_IP
+          fi
+          echo "Deploy to $DEPLOY_SERVER"
           ssh-add -l
-          ssh -o "StrictHostKeyChecking no" ackersond@deploy.ackerson.de mkdir -p /home/ackersond/bb_games/
-          ssh -o "StrictHostKeyChecking no" ackersond@deploy.ackerson.de docker pull danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
-          ssh -o "StrictHostKeyChecking no" ackersond@deploy.ackerson.de docker rm -f ackerson.de; true
-          ssh -o "StrictHostKeyChecking no" ackersond@deploy.ackerson.de docker run -d --restart=always -p 443:8443 -p 80:8080 -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM -e prodSession=true -e joinAPIKey=$joinAPIKey -e ackSecret=$ackSecret -e ackWunder=$ackWunder -v /home/ackersond/certs:/root/certs:ro -v /home/ackersond/bb_games:/app/public/bb_games:rw --name ackerson.de danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
+          ssh -o "StrictHostKeyChecking no" ackersond@$DEPLOY_SERVER mkdir -p /home/ackersond/bb_games/
+          ssh -o "StrictHostKeyChecking no" ackersond@$DEPLOY_SERVER docker pull danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
+          ssh -o "StrictHostKeyChecking no" ackersond@$DEPLOY_SERVER docker rm -f ackerson.de; true
+          ssh -o "StrictHostKeyChecking no" ackersond@$DEPLOY_SERVER docker run -d --restart=always -p 443:8443 -p 80:8080 -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM -e prodSession=true -e joinAPIKey=$joinAPIKey -e ackSecret=$ackSecret -e ackWunder=$ackWunder -v /home/ackersond/certs:/root/certs:ro -v /home/ackersond/bb_games:/app/public/bb_games:rw --name ackerson.de danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
