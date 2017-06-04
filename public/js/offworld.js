@@ -27,7 +27,7 @@ function mvvRoute(origin, destination) {
 
 (function($) {
   var id = 1;
-  var greeting = "Welcome Offworld (type help)";
+  var greeting = "Welcome Off World (type help)";
   var drive_msg = "[[g;#FFFF00;]drive] <DESTINATION>: google directions from your location\r\n\r\n";
   var weather_msg = "[[g;#FFFF00;]weather]: show weather forecast\r\n\r\n";
   var whoami_msg = "[[g;#FFFF00;]whoami]: your browser info and IP address\r\n\r\n";
