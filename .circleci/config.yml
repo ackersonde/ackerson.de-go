@@ -1,0 +1,65 @@
+version: 2
+jobs:
+  build:
+    docker:
+      - image: golang:1.8
+    working_directory: /go/src/github.com/danackerson/ackerson.de-go
+    steps:
+      - checkout
+      - setup_remote_docker
+      - run:
+          name: "Install Docker Engine"
+          command: |
+            set -x
+            VER="17.05.0"
+            curl -fsSLO https://get.docker.com/builds/Linux/x86_64/docker-$VER-ce.tgz && tar --strip-components=1 -xvzf docker-$VER-ce.tgz -C /usr/local/bin
+
+            go get github.com/jstemmer/go-junit-report
+            mkdir -p /tmp/test-results
+
+      - run:
+          name: "Fetch dependencies and test"
+          command: |
+            set -eu
+            go get -t -d -v ./...
+            go test -v -race ./... | go-junit-report > /tmp/test-results/unit-tests.xml
+      - type: test-results-store
+        path: /tmp/test-results
+
+      - run:
+          name: "Build, run and test docker image"
+          command: |
+            env GOOS=linux GOARCH=386 go build server.go
+            docker build -t danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM .
+            docker run -d -p 443:8443 -p 80:8080 -e prodSession=true --name ackerson.de danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
+            docker exec ackerson.de curl -k --retry 10 --retry-delay 5 -v https://localhost:8443/ | grep Ackerson
+
+      - type: add-ssh-keys
+        name: "Load key"
+        fingerprints:
+          - "93:c4:61:21:a6:82:d8:6d:4f:73:11:79:37:23:83:07"
+      - run:
+          name: Start ssh-agent
+          command: |
+            ssh-agent -s > ~/.ssh_agent_conf
+            source ~/.ssh_agent_conf
+            for _k in $(ls ${HOME}/.ssh/id_*); do
+              ssh-add ${_k} || true
+            done
+
+      - deploy:
+          name: "Upload to DockerHub, deploy container to Digital Ocean Droplet & launch"
+          command: |
+            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker push danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
+            source ~/.ssh_agent_conf
+
+            export DEPLOY_SERVER=deploy.ackerson.de
+            if [ $DEPLOY_SERVER_IP ]; then
+              export DEPLOY_SERVER=$DEPLOY_SERVER_IP
+            fi
+            echo "Deploy to $DEPLOY_SERVER"
+            ssh-add -l
+            ssh -o "StrictHostKeyChecking no" ackersond@$DEPLOY_SERVER docker pull danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
+            ssh -o "StrictHostKeyChecking no" ackersond@$DEPLOY_SERVER docker rm -f ackerson.de || true
+            ssh -o "StrictHostKeyChecking no" ackersond@$DEPLOY_SERVER docker run -d --restart=always -p 443:8443 -p 80:8080 -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM -e prodSession=true -e joinAPIKey=$joinAPIKey -e ackSecret=$ackSecret -e ackWunder=$ackWunder -v /home/ackersond/certs:/root/certs:ro -v /app/public --name ackerson.de danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
