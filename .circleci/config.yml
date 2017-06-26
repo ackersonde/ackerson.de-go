@@ -6,7 +6,8 @@ jobs:
     working_directory: /go/src/github.com/danackerson/ackerson.de-go
     steps:
       - checkout
-      - setup_remote_docker
+      - setup_remote_docker:
+          reusable: true
       - run:
           name: "Install Docker Engine"
           command: |
