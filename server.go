@@ -280,7 +280,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 		icon = "https://emoji.slack-edge.com/T092UA8PR/youtube/a9a89483b7536f8a.png"
 		smallIcon = "http://icons.iconarchive.com/icons/iconsmind/outline/16/Youtube-icon.png"
 		gameLength = res.ContentLength
-		downloadFilename = url.QueryEscape(vid.Title) + "." + vid.Formats[0].Extension
+		downloadFilename = vid.Title + "." + vid.Formats[0].Extension
 		gameURL = URI.String()
 	}
 
@@ -308,7 +308,7 @@ func sendPayloadToJoinAPI(downloadFilename string, icon string, smallIcon string
 	pushURL := "https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush"
 	defaultParams := "?deviceId=007e5b72192c420d9115334d1f177c4c&icon=" + icon + "&smallicon=" + smallIcon
 	fileOnPhone := "&title=" + downloadFilename
-	fileURL := "&file=https://ackerson.de/bb_games/" + downloadFilename
+	fileURL := "&file=https://ackerson.de/bb_games/" + url.QueryEscape(downloadFilename)
 	apiKey := "&apikey=" + joinAPIKey
 
 	completeURL := pushURL + defaultParams + fileOnPhone + fileURL + apiKey
