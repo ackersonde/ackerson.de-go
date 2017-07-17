@@ -8,7 +8,6 @@ import (
 	"log"
 	"net"
 	"net/http"
-	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -308,7 +307,7 @@ func sendPayloadToJoinAPI(downloadFilename string, icon string, smallIcon string
 	pushURL := "https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush"
 	defaultParams := "?deviceId=007e5b72192c420d9115334d1f177c4c&icon=" + icon + "&smallicon=" + smallIcon
 	fileOnPhone := "&title=" + downloadFilename
-	fileURL := "&file=https://ackerson.de/bb_games/" + url.QueryEscape(downloadFilename)
+	fileURL := "&file=https://ackerson.de/bb_games/" + downloadFilename
 	apiKey := "&apikey=" + joinAPIKey
 
 	completeURL := pushURL + defaultParams + fileOnPhone + fileURL + apiKey
