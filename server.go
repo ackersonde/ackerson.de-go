@@ -8,6 +8,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -17,6 +18,7 @@ import (
 	"github.com/danackerson/ackerson.de-go/structures"
 	"github.com/goincremental/negroni-sessions"
 	"github.com/goincremental/negroni-sessions/cookiestore"
+	"github.com/otium/ytdl"
 	"github.com/unrolled/render"
 	"github.com/urfave/negroni"
 	"golang.org/x/net/http2"
@@ -172,8 +174,10 @@ func setUpMuxHandlers(mux *http.ServeMux) {
 
 	mux.HandleFunc("/bb_download_status", bbDownloadStatus)
 
+	icon := "https://ackerson.de/images/baseballSmall.png"
+	smallIcon := "https://connect.baseball.trackman.com/Images/spinner.png"
 	mux.HandleFunc("/bb_resend_join_push", func(w http.ResponseWriter, r *http.Request) {
-		response := sendPayloadToJoinAPI(r.URL.Query().Get("title"))
+		response := sendPayloadToJoinAPI(r.URL.Query().Get("title"), icon, smallIcon)
 
 		w.Write([]byte(response))
 	})
@@ -215,46 +219,12 @@ func bbDownloadStatus(w http.ResponseWriter, req *http.Request) {
 func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 	gameTitle := r.URL.Query().Get("gameTitle")
 	gameURL := r.URL.Query().Get("gameURL")
+	fileType := r.URL.Query().Get("fileType")
+	var gameLength int64
+	icon := "https://ackerson.de/images/baseballSmall.png"
+	smallIcon := "https://connect.baseball.trackman.com/Images/spinner.png"
 
-	//gameTitle: 112-114__Wed, Nov  2 2016
-	result := strings.Split(gameTitle, "__")
-	gameDate, _ := time.Parse("Mon, Jan _2 2006", result[1])
-	humanDate := gameDate.Format("Mon, Jan _2 2006")
-	formattedDate := gameDate.Format("Mon_Jan02_2006")
-
-	// parse out teams "<awayID>-<homeID>"
-	teams := strings.Split(result[0], "-")
-	awayID, _ := strconv.Atoi(teams[0])
-	homeID, _ := strconv.Atoi(teams[1])
-	awayTeam := homePageMap[awayID]
-	homeTeam := homePageMap[homeID]
-
-	// create download filename: "Cubs@Diamondbacks-Wed_Nov02_2017.mp4"
-	downloadFilename := awayTeam.Name + "@" + homeTeam.Name + "-" + formattedDate + ".mp4"
-	downloadFilename = strings.Replace(downloadFilename, " ", "_", -1)
-
-	// and download it to ~/bb_games/
-	log.Println(downloadFilename)
-	filepath := gameDownloadDir + downloadFilename
-
-	res, err := http.Head(gameURL)
-	if err != nil {
-		log.Printf("ERR: unable to find game size")
-	}
-
-	go func() {
-		err := downloadFile(filepath, gameURL, res.ContentLength)
-		if err != nil {
-			// Check if file was already downloaded & don't resend to Join!
-			if err.Error() != "file exists" {
-				log.Printf("ERR: unable to download & save file %v\n", err)
-			}
-		} else {
-			log.Printf("Finished downloading %s\n", filepath)
-			sendPayloadToJoinAPI(downloadFilename)
-		}
-	}()
-
+	downloadFilename := ""
 	type GameMeta struct {
 		GameTitle         string
 		GameDownloadTitle string
@@ -262,23 +232,78 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 		GameDate          string
 		GameFile          string
 	}
-	render := render.New(render.Options{IsDevelopment: true})
-	render.HTML(w, http.StatusOK, "bbDownloadGameAndPushPhone",
-		GameMeta{
-			GameTitle:         awayTeam.Name + "@" + homeTeam.Name,
-			GameDownloadTitle: downloadFilename,
-			GameLength:        res.ContentLength,
-			GameDate:          humanDate,
-			GameFile:          downloadFilename,
-		})
+
+	if fileType == "bb" {
+		//gameTitle: 112-114__Wed, Nov  2 2016
+		result := strings.Split(gameTitle, "__")
+		gameDate, _ := time.Parse("Mon, Jan _2 2006", result[1])
+		humanDate := gameDate.Format("Mon, Jan _2 2006")
+		formattedDate := gameDate.Format("Mon_Jan02_2006")
+
+		// parse out teams "<awayID>-<homeID>"
+		teams := strings.Split(result[0], "-")
+		awayID, _ := strconv.Atoi(teams[0])
+		homeID, _ := strconv.Atoi(teams[1])
+		awayTeam := homePageMap[awayID]
+		homeTeam := homePageMap[homeID]
+
+		// create download filename: "Cubs@Diamondbacks-Wed_Nov02_2017.mp4"
+		downloadFilename = awayTeam.Name + "@" + homeTeam.Name + "-" + formattedDate + ".mp4"
+		downloadFilename = strings.Replace(downloadFilename, " ", "_", -1)
+
+		res, err := http.Head(gameURL)
+		if err != nil {
+			log.Printf("ERR: unable to find game size")
+		}
+		gameLength = res.ContentLength
+
+		render := render.New(render.Options{IsDevelopment: true})
+		render.HTML(w, http.StatusOK, "bbDownloadGameAndPushPhone",
+			GameMeta{
+				GameTitle:         awayTeam.Name + "@" + homeTeam.Name,
+				GameDownloadTitle: downloadFilename,
+				GameLength:        res.ContentLength,
+				GameDate:          humanDate,
+				GameFile:          downloadFilename,
+			})
+	} else {
+		// will be a YouTube video
+		vid, _ := ytdl.GetVideoInfo(gameURL)
+		URI, _ := vid.GetDownloadURL(vid.Formats[0])
+		res, err := http.Head(URI.String())
+		if err != nil {
+			log.Printf("ERR: unable to find game size")
+		}
+		icon = "https://emoji.slack-edge.com/T092UA8PR/youtube/a9a89483b7536f8a.png"
+		smallIcon = "http://icons.iconarchive.com/icons/iconsmind/outline/16/Youtube-icon.png"
+		gameLength = res.ContentLength
+		downloadFilename = url.QueryEscape(vid.Title)
+	}
+
+	// and download it to ~/bb_games/
+	log.Println(downloadFilename)
+	filepath := gameDownloadDir + downloadFilename
+
+	go func() {
+		err := downloadFile(filepath, gameURL, gameLength)
+		if err != nil {
+			// Check if file was already downloaded & don't resend to Join!
+			if err.Error() != "file exists" {
+				log.Printf("ERR: unable to download & save file %v\n", err)
+			}
+		} else {
+			log.Printf("Finished downloading %s\n", filepath)
+			sendPayloadToJoinAPI(downloadFilename, icon, smallIcon)
+		}
+	}()
 }
 
-func sendPayloadToJoinAPI(downloadFilename string) string {
+func sendPayloadToJoinAPI(downloadFilename string, icon string, smallIcon string) string {
 	response := "Sorry, couldn't resend..."
 
 	// NOW send this URL to the Join Push App API
 	pushURL := "https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush"
-	defaultParams := "?deviceId=007e5b72192c420d9115334d1f177c4c&icon=https://ackerson.de/images/baseballSmall.png&smallicon=https://connect.baseball.trackman.com/Images/spinner.png"
+	defaultParams := "?deviceId=007e5b72192c420d9115334d1f177c4c&icon=" + icon + "&smallicon=" + smallIcon
 	fileOnPhone := "&title=" + downloadFilename
 	fileURL := "&file=https://ackerson.de/bb_games/" + downloadFilename
 	apiKey := "&apikey=" + joinAPIKey
