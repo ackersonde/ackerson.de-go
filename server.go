@@ -270,9 +270,12 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 		// will be a YouTube video
 		vid, _ := ytdl.GetVideoInfo(gameURL)
 		URI, _ := vid.GetDownloadURL(vid.Formats[0])
+		log.Println(URI.String())
 		res, err := http.Head(URI.String())
 		if err != nil {
 			log.Printf("ERR: unable to find game size")
+		} else {
+			log.Println(strconv.FormatInt(res.ContentLength, 10) + " bytes")
 		}
 		icon = "https://emoji.slack-edge.com/T092UA8PR/youtube/a9a89483b7536f8a.png"
 		smallIcon = "http://icons.iconarchive.com/icons/iconsmind/outline/16/Youtube-icon.png"
@@ -282,7 +285,6 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// and download it to ~/bb_games/
-	log.Println(downloadFilename)
 	filepath := gameDownloadDir + downloadFilename
 
 	go func() {
