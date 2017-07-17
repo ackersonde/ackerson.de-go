@@ -303,13 +303,14 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 
 func sendPayloadToJoinAPI(downloadFilename string, icon string, smallIcon string) string {
 	response := "Sorry, couldn't resend..."
+	filename := &url.URL{Path: downloadFilename}
+	filenameEncoded := filename.String()
 
 	// NOW send this URL to the Join Push App API
 	pushURL := "https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush"
 	defaultParams := "?deviceId=007e5b72192c420d9115334d1f177c4c&icon=" + icon + "&smallicon=" + smallIcon
-	fileOnPhone := "&title=" + downloadFilename
-	joinEncodedURL := &url.URL{Path: downloadFilename}
-	fileURL := "&file=https://ackerson.de/bb_games/" + joinEncodedURL.String()
+	fileOnPhone := "&title=" + filenameEncoded
+	fileURL := "&file=https://ackerson.de/bb_games/" + filenameEncoded
 	apiKey := "&apikey=" + joinAPIKey
 
 	completeURL := pushURL + defaultParams + fileOnPhone + fileURL + apiKey
