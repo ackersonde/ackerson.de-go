@@ -277,7 +277,8 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 		icon = "https://emoji.slack-edge.com/T092UA8PR/youtube/a9a89483b7536f8a.png"
 		smallIcon = "http://icons.iconarchive.com/icons/iconsmind/outline/16/Youtube-icon.png"
 		gameLength = res.ContentLength
-		downloadFilename = url.QueryEscape(vid.Title)
+		downloadFilename = url.QueryEscape(vid.Title) + "." + vid.Formats[0].Extension
+		gameURL = URI.String()
 	}
 
 	// and download it to ~/bb_games/
