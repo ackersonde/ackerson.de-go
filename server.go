@@ -177,7 +177,7 @@ func setUpMuxHandlers(mux *http.ServeMux) {
 	icon := "https://ackerson.de/images/baseballSmall.png"
 	smallIcon := "https://connect.baseball.trackman.com/Images/spinner.png"
 	mux.HandleFunc("/bb_resend_join_push", func(w http.ResponseWriter, r *http.Request) {
-		response := sendPayloadToJoinAPI(r.URL.Query().Get("title"), icon, smallIcon)
+		response := sendPayloadToJoinAPI(r.URL.Query().Get("title"), r.URL.Query().Get("title"), icon, smallIcon)
 
 		w.Write([]byte(response))
 	})
@@ -225,6 +225,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 	smallIcon := "https://connect.baseball.trackman.com/Images/spinner.png"
 
 	downloadFilename := ""
+	humanFilename := ""
 	type GameMeta struct {
 		GameTitle         string
 		GameDownloadTitle string
@@ -250,7 +251,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 		// create download filename: "Cubs@Diamondbacks-Wed_Nov02_2017.mp4"
 		downloadFilename = awayTeam.Name + "@" + homeTeam.Name + "-" + formattedDate + ".mp4"
 		downloadFilename = strings.Replace(downloadFilename, " ", "_", -1)
-
+		humanFilename = downloadFilename
 		res, err := http.Head(gameURL)
 		if err != nil {
 			log.Printf("ERR: unable to find game size")
@@ -280,7 +281,9 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 		icon = "https://emoji.slack-edge.com/T092UA8PR/youtube/a9a89483b7536f8a.png"
 		smallIcon = "http://icons.iconarchive.com/icons/iconsmind/outline/16/Youtube-icon.png"
 		gameLength = res.ContentLength
-		downloadFilename = vid.Title + "." + vid.Formats[0].Extension
+		downloadFilename = vid.ID + "." + vid.Formats[0].Extension
+		humanFilename = vid.Title + "." + vid.Formats[0].Extension
+		// TODO: split this download up into humanFileName and diskFileID (e.g. YouTube ID)
 		gameURL = URI.String()
 	}
 
@@ -296,21 +299,20 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 			}
 		} else {
 			log.Printf("Finished downloading %s\n", filepath)
-			sendPayloadToJoinAPI(downloadFilename, icon, smallIcon)
+			sendPayloadToJoinAPI(downloadFilename, humanFilename, icon, smallIcon)
 		}
 	}()
 }
 
-func sendPayloadToJoinAPI(downloadFilename string, icon string, smallIcon string) string {
+func sendPayloadToJoinAPI(downloadFilename string, humanFilename string, icon string, smallIcon string) string {
 	response := "Sorry, couldn't resend..."
-	filename := &url.URL{Path: downloadFilename}
-	filenameEncoded := filename.String()
-
+	humanFilenameEnc := &url.URL{Path: humanFilename}
+	humanFilenameEncoded := humanFilenameEnc.String()
 	// NOW send this URL to the Join Push App API
 	pushURL := "https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush"
 	defaultParams := "?deviceId=007e5b72192c420d9115334d1f177c4c&icon=" + icon + "&smallicon=" + smallIcon
-	fileOnPhone := "&title=" + filenameEncoded
-	fileURL := "&file=https://ackerson.de/bb_games/" + filenameEncoded
+	fileOnPhone := "&title=" + humanFilenameEncoded
+	fileURL := "&file=https://ackerson.de/bb_games/" + downloadFilename
 	apiKey := "&apikey=" + joinAPIKey
 
 	completeURL := pushURL + defaultParams + fileOnPhone + fileURL + apiKey
