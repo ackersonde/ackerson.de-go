@@ -267,6 +267,11 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 				GameDate:          humanDate,
 				GameFile:          downloadFilename,
 			})
+	} else if fileType == "vpn" {
+		icon = "http://www.setaram.com/wp-content/themes/setaram/library/images/lock.png"
+		smallIcon = "http://www.setaram.com/wp-content/themes/setaram/library/images/lock.png"
+
+		sendPayloadToJoinAPI(gameTitle, gameTitle, icon, smallIcon)
 	} else {
 		// will be a YouTube video
 		vid, _ := ytdl.GetVideoInfo(gameURL)
