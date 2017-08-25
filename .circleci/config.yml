@@ -69,10 +69,10 @@ jobs:
 
               # Need to create new SSL cert for the new server instance
               $DEPLOY_CONNECT docker run -d --name letsencrypt --volumes-from ackerson.de quay.io/letsencrypt/letsencrypt certonly --non-interactive --text --agree-tos --webroot --no-eff-email --webroot-path /app/public -m dan@ackerson.de -d ackerson.de
-              $DEPLOY_CONNECT sleep 30 # wait for letsencrypt to verify ackerson.de and generate SSL cert
+              $DEPLOY_CONNECT sleep 15 # wait for letsencrypt to verify ackerson.de and generate SSL cert
               $DEPLOY_CONNECT docker cp letsencrypt:/etc/letsencrypt/ ./letsencrypt
-              $DEPLOY_CONNECT sudo cp ./letsencrypt/letsencrypt/archive/ackerson.de/fullchain1.pem /home/ackersond/certs/server.pem
-              $DEPLOY_CONNECT sudo cp ./letsencrypt/letsencrypt/archive/ackerson.de/privkey1.pem /home/ackersond/certs/server.key
+              $DEPLOY_CONNECT sudo cp ./letsencrypt/archive/ackerson.de/fullchain1.pem /home/ackersond/certs/server.pem
+              $DEPLOY_CONNECT sudo cp ./letsencrypt/archive/ackerson.de/privkey1.pem /home/ackersond/certs/server.key
               $DEPLOY_CONNECT docker rm -f letsencrypt && docker restart ackerson.de
 
               # BenderBot also needs to be deployed to new server
