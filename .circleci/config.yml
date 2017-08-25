@@ -6,13 +6,14 @@ jobs:
     working_directory: /go/src/github.com/danackerson/ackerson.de-go
     steps:
       - checkout
-      - setup_remote_docker:
-          reusable: true
+      - setup_remote_docker
+
       - run:
-          name: "Install Docker Engine"
+          name: "Install Docker CE"
           command: |
-            set -x
-            curl -fsSL get.docker.com -o get-docker.sh && sh get-docker.sh
+            VER="17.06.1"
+            curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-$VER-ce.tgz && tar --strip-components=1 -xvzf docker-$VER-ce.tgz -C /usr/local/bin
+
             go get github.com/jstemmer/go-junit-report
             mkdir -p /tmp/test-results
 
