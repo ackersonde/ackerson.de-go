@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: golang:1.8
+      - image: golang:1.9
     working_directory: /go/src/github.com/danackerson/ackerson.de-go
     steps:
       - checkout
@@ -12,9 +12,7 @@ jobs:
           name: "Install Docker Engine"
           command: |
             set -x
-            VER="17.05.0"
-            curl -fsSLO https://get.docker.com/builds/Linux/x86_64/docker-$VER-ce.tgz && tar --strip-components=1 -xvzf docker-$VER-ce.tgz -C /usr/local/bin
-
+            curl -fsSL get.docker.com -o get-docker.sh && sh get-docker.sh
             go get github.com/jstemmer/go-junit-report
             mkdir -p /tmp/test-results
 
@@ -66,11 +64,11 @@ jobs:
             export DEPLOY_CONNECT="ssh -o StrictHostKeyChecking=no ackersond@$DEPLOY_SERVER"
             $DEPLOY_CONNECT docker pull danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
             $DEPLOY_CONNECT docker rm -f ackerson.de || true
-            $DEPLOY_CONNECT docker run -d --restart=always -p 443:8443 -p 80:8080 -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM -e prodSession=true -e joinAPIKey=$joinAPIKey -e ackSecret=$ackSecret -e ackWunder=$ackWunder -v /home/ackersond/certs:/root/certs:ro -v /app/public --name ackerson.de danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
-
+            $DEPLOY_CONNECT docker run -d --restart=always -p 443:8443 -p 80:8080 -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM -e prodSession=true -e joinAPIKey=$joinAPIKey -e ackSecret=$ackSecret -e ackWunder=$ackWunder -v /home/ackersond/certs:/root/certs:ro -v /app/public --name ackerson.de danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM && docker run -d --name letsencrypt --volumes-from ackerson.de quay.io/letsencrypt/letsencrypt certonly --non-interactive --text --agree-tos --webroot --no-eff-email --webroot-path /app/public -m dan@ackerson.de -d ackerson.de
+            
             if [ $DEPLOY_SERVER_IP ]; then
               # Need to create new SSL cert for the new server instance
-              $DEPLOY_CONNECT sleep 3 && docker run -d --name letsencrypt --volumes-from ackerson.de quay.io/letsencrypt/letsencrypt certonly --non-interactive --text --agree-tos --webroot --no-eff-email --webroot-path /app/public -m dan@ackerson.de -d ackerson.de
+              #$DEPLOY_CONNECT docker run -d --name letsencrypt --volumes-from ackerson.de quay.io/letsencrypt/letsencrypt certonly --non-interactive --text --agree-tos --webroot --no-eff-email --webroot-path /app/public -m dan@ackerson.de -d ackerson.de
               $DEPLOY_CONNECT sleep 30 # wait for letsencrypt to verify ackerson.de and generate SSL cert
               $DEPLOY_CONNECT docker cp letsencrypt:/etc/letsencrypt/ ./letsencrypt
               $DEPLOY_CONNECT sudo cp ./letsencrypt/archive/ackerson.de/fullchain1.pem /home/ackersond/certs/server.pem
