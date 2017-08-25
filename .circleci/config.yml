@@ -73,7 +73,7 @@ jobs:
               $DEPLOY_CONNECT docker cp letsencrypt:/etc/letsencrypt/ ./letsencrypt
               $DEPLOY_CONNECT sudo cp ./letsencrypt/archive/ackerson.de/fullchain1.pem /home/ackersond/certs/server.pem
               $DEPLOY_CONNECT sudo cp ./letsencrypt/archive/ackerson.de/privkey1.pem /home/ackersond/certs/server.key
-              $DEPLOY_CONNECT docker rm -f letsencrypt && docker restart ackerson.de
+              $DEPLOY_CONNECT docker rm -f letsencrypt && docker stop ackerson.de && docker start ackerson.de
 
               # BenderBot also needs to be deployed to new server
               curl --user ${CIRCLE_API_TOKEN}: \
