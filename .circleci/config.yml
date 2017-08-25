@@ -79,6 +79,6 @@ jobs:
                 
               # BenderBot also needs to be deployed to new server
               curl --user ${CIRCLE_API_TOKEN}: \
-                --data build_parameters[DEPLOY_SERVER_IP]=$NEW_SERVER_IPV4 \
+                --data build_parameters[DEPLOY_SERVER_IP]=$DEPLOY_SERVER_IP \
                 https://circleci.com/api/v1.1/project/github/$CIRCLE_PROJECT_USERNAME/bender-slackbot/tree/master
             fi
