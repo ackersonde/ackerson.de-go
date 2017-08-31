@@ -1,4 +1,4 @@
-FROM iron/base
+FROM alpine:latest
 RUN apk --no-cache add curl
 RUN mkdir -p /root/certs
 ADD . /app/
