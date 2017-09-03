@@ -69,12 +69,12 @@ jobs:
               $DEPLOY_CONNECT docker run -d --restart=always -p 443:8443 -p 80:8080 -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM -e prodSession=true -e joinAPIKey=$joinAPIKey -e ackSecret=$ackSecret -e ackWunder=$ackWunder -v /home/ackersond/certs:/root/certs:ro -v /app/public --name ackerson.de danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
 
               # Need to create new SSL cert for the new server instance
-              $DEPLOY_CONNECT docker run -d --name letsencrypt --volumes-from ackerson.de quay.io/letsencrypt/letsencrypt certonly --non-interactive --text --agree-tos --webroot --no-eff-email --webroot-path /app/public -m dan@ackerson.de -d ackerson.de
-              $DEPLOY_CONNECT sleep 30 # wait for letsencrypt to verify ackerson.de and generate SSL cert
+              $DEPLOY_CONNECT docker run -d --name letsencrypt --volumes-from ackerson.de certbot/certbot certonly --non-interactive --text --agree-tos --webroot --no-eff-email --webroot-path /app/public -m dan@ackerson.de -d ackerson.de
+              $DEPLOY_CONNECT sleep 15 # wait for letsencrypt to verify ackerson.de and generate SSL cert
               $DEPLOY_CONNECT docker cp letsencrypt:/etc/letsencrypt/ ./letsencrypt
               $DEPLOY_CONNECT sudo cp ./letsencrypt/archive/ackerson.de/fullchain1.pem /home/ackersond/certs/server.pem
               $DEPLOY_CONNECT sudo cp ./letsencrypt/archive/ackerson.de/privkey1.pem /home/ackersond/certs/server.key
-              $DEPLOY_CONNECT docker stop ackerson.de && docker start ackerson.de
+              $DEPLOY_CONNECT docker rm -f letsencrypt && docker stop ackerson.de && docker start ackerson.de
 
               # BenderBot also needs to be deployed to new server
               curl --user ${CIRCLE_API_TOKEN}: \
