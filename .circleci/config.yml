@@ -50,7 +50,7 @@ jobs:
       - run:
           name: Disable Digital Ocean firewall for deploy
           command: |
-            sudo apt-get install jq
+            apt-get install jq
             sh <(curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/disableFW.sh)
 
       - deploy:
