@@ -1,7 +1,6 @@
 var geocoder;
 var map;
 var green_marker;
-var currentPosition;
 var currentLatLng;
 var currentLat;
 var currentLng;
@@ -23,18 +22,23 @@ function init_googlemaps() {
     new google.maps.Point(16, 32)   // anchor
   );
 
-  getCurrentLocation();
+  // default position to Munich
+  currentLatLng = new google.maps.LatLng(48.1351, 11.5820);
+
+  // Try HTML5 geolocation.
+  if (navigator.geolocation) {
+    getCurrentLocation();
+  }
 }
 
 function getCurrentLocation() {
   navigator.geolocation.getCurrentPosition(function(position) {
-    currentPosition = position;
     currentLatLng = new google.maps.LatLng(parseFloat(position.coords.latitude), parseFloat(position.coords.longitude));
     homeLocation = geocoder.geocode({'latLng': currentLatLng}, function(results, status) {
       if (status == google.maps.GeocoderStatus.OK) {
         if (results[1]) {
           homeLocation = results[1].formatted_address;
-          document.getElementById('home_location').innerHTML = 
+          document.getElementById('home_location').innerHTML =
             "<p style='font-size:14px;margin-left:10px;margin-bottom:0px;'><img style='height:24px;width:16px;vertical-align:middle;' src='/images/marker_greenA.png'>&nbsp;&nbsp;&nbsp;<b>" + homeLocation + "</b></p><hr>";
           return homeLocation;
         }
@@ -58,12 +62,12 @@ function getDrivingDirections() {
 
   geocoder.geocode( { 'address': address }, function(results, status) {
     if (status == google.maps.GeocoderStatus.OK) {
-      destinationLatLng = results[0].geometry.location; 
+      destinationLatLng = results[0].geometry.location;
       if (ff_first_load) {
         alert('Driving to: ' + destinationLatLng);
         ff_first_load = false;
       }
-         
+
       homeMarker = new google.maps.Marker({
           map: map,
           icon: green_marker,
@@ -100,8 +104,8 @@ function getDrivingDirections() {
           totalTime = hours + "hr " + (minutes < 10 ? "0" + minutes : minutes) + "mins";
 
           document.getElementById('directions').innerHTML = result;
-          document.getElementById('home_location').innerHTML = 
-            "<p style='font-size:14px;margin-left:10px;margin-bottom:0px;'><img style='height:24px;width:16px;vertical-align:middle;' src='/images/marker_greenA.png'>&nbsp;&nbsp;&nbsp;<b>" + homeLocation + "</b></p>" + 
+          document.getElementById('home_location').innerHTML =
+            "<p style='font-size:14px;margin-left:10px;margin-bottom:0px;'><img style='height:24px;width:16px;vertical-align:middle;' src='/images/marker_greenA.png'>&nbsp;&nbsp;&nbsp;<b>" + homeLocation + "</b></p>" +
             "<p style='font-size:14px;margin-left:10px;margin-bottom:0px;'><img style='height:24px;width:16px;vertical-align:middle;' src='/images/marker_greenB.png'>&nbsp;&nbsp;&nbsp;<b>" + document.getElementById('address').value + "</b> (<span style='font-size:14px;font-style:italic;font-weight:bold;color:blue;'>" + totalDist/1000 + " km - " + totalTime + "</span>)</p><hr>";
         }
       });
