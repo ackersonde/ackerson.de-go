@@ -183,13 +183,16 @@ function mvvRoute(origin, destination) {
             var weatherForecast = document.getElementById("forecastweather");
             weatherForecast.innerHTML = "";
             for(var i=0;i<forecast.length;i++){
+                var sslImage = forecast[i]['icon_url'];
+                sslImage = sslImage.replace("http:", "https:");
+
                 /*jshint multistr: true */
                 weatherForecast.innerHTML += "\
                 <div style='float:left;margin:10px;'>\
                     <span style='float:left;'>"+forecast[i]['date']['weekday_short']+",&nbsp;"+forecast[i]['date']['monthname']+" "+forecast[i]['date']['day']+"</span>\
                     <div style='float:left;clear:left;margin-right:5px;'>\
                         <span style='font-weight:bold;'>"+forecast[i]['low']['celsius']+"&nbsp;&#8451;</span>\
-                        <img src='"+forecast[i]['icon_url']+"' width='44' height='44' alt='"+forecast[i]['conditions']+"'>\
+                        <img src='"+sslImage+"' width='44' height='44' alt='"+forecast[i]['conditions']+"'>\
                         <span style='font-weight:bold;'>"+forecast[i]['high']['celsius']+"&nbsp;&#8451;</span>\
                     </div>";
                     if (i+1 < forecast.length) {
@@ -199,12 +202,15 @@ function mvvRoute(origin, destination) {
             }
 
             var weatherReport = document.getElementById("currentweather");
+            var sslCurrentImage = current['icon_url'];
+            sslCurrentImage = sslCurrentImage.replace("http:", "https:");
+
             weatherReport.innerHTML = "<span style='font-weight:bold;color:darkblue;'>Weather for "+homeLocation+"</span>\
                 <div id='weatherreport'>\
                     <div style='float:left;margin-left:10px;'>\
                         <div>\
                             <a target='_blank' href='"+current['ob_url']+"'>\
-                            <img src='"+current['icon_url']+"' width='44' height='44' alt='"+current['weather']+"'>\
+                            <img src='"+sslCurrentImage+"' width='44' height='44' alt='"+current['weather']+"'>\
                             </a>\
                         </div>\
                         <div style='margin-left:-10px;'>"+current['weather']+"</div>\
