@@ -151,7 +151,9 @@ function mvvRoute(origin, destination) {
         });
       }, showGeoLocationError);
     } else {
-      simpleAjaxCall('weather', {'lat':currentLat,'lng':currentLng});
+      var currentLatLng = {"lat":currentLat,"lng":currentLng};
+      // JSON.stringify(currentLatLng)
+      simpleAjaxCall('weather', currentLatLng);
     }
   }
 
@@ -162,8 +164,8 @@ function mvvRoute(origin, destination) {
     //$.jrpc is helper function which creates json-rpc request
     $.jrpc(command,                         // uri
       id++,
+      query_param,
       'post',
-      query_param,                          // command
       function(data) {
         term.resume();
         if (data.error) {

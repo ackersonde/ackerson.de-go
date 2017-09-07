@@ -484,12 +484,14 @@ func WeatherHandler(w http.ResponseWriter, req *http.Request) {
 	//body := string(structures.TestGeoLocationPost) // in case you are testing :)
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		log.Printf("%s", err)
+		log.Printf("err: %s", err)
+	} else {
+		log.Printf("body: %s", body)
 	}
 
 	geoLocation := new(structures.JSONGeoLocationRequest)
 	json.Unmarshal([]byte(body), &geoLocation)
-
+	log.Printf("location: %v\n", geoLocation)
 	latString := strconv.FormatFloat(float64(geoLocation.Params.Lat), 'f', 15, 32)
 	lngString := strconv.FormatFloat(float64(geoLocation.Params.Lng), 'f', 15, 32)
 
@@ -501,15 +503,14 @@ func WeatherHandler(w http.ResponseWriter, req *http.Request) {
 	currentWeather := new(structures.CurrentWeatherConditions)
 	currentWeatherResp, err := http.Get(conditionsURI + locationParams)
 	if err != nil {
-		log.Printf("%s", err)
+		log.Printf("wunderground ERR: %s", err)
 	} else {
 		defer currentWeatherResp.Body.Close()
 		currentWeatherJSON, err2 := ioutil.ReadAll(currentWeatherResp.Body)
 		if err2 != nil {
-			log.Printf("%s", err2)
+			log.Printf("wunderground ERR2: %s", err2)
 		}
 		json.Unmarshal([]byte(currentWeatherJSON), &currentWeather)
-		log.Printf("%v\n", currentWeather)
 	}
 
 	currentForecast := new(structures.CurrentWeatherForecast)
