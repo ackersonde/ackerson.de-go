@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: golang:1.9
+      - image: golang:1.9-alpine
     working_directory: /go/src/github.com/danackerson/ackerson.de-go
     steps:
       - checkout
@@ -11,6 +11,7 @@ jobs:
       - run:
           name: "Install Docker CE"
           command: |
+            apk -U install curl
             VER="17.06.2"
             curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-$VER-ce.tgz && tar --strip-components=1 -xvzf docker-$VER-ce.tgz -C /usr/local/bin && rm docker-$VER-ce.tgz
 
@@ -50,7 +51,7 @@ jobs:
       - run:
           name: Disable Digital Ocean firewall for deploy
           command: |
-            apt-get update && apt-get -y install jq
+            apk -U install jq
             sh <(curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/disableFW.sh)
 
       - deploy:
@@ -58,7 +59,6 @@ jobs:
           command: |
             docker login -u $DOCKER_USER -p $DOCKER_PASS
             docker push danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
-
 
             source ~/.ssh_agent_conf
             ssh-add -l
