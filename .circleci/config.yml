@@ -23,7 +23,7 @@ jobs:
           command: |
             set -eu
             go get -t -d -v ./...
-            go test -v -race ./... | go-junit-report > /tmp/test-results/unit-tests.xml
+            go test -v ./... | go-junit-report > /tmp/test-results/unit-tests.xml
       - type: test-results-store
         path: /tmp/test-results
 
