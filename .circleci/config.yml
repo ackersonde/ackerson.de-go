@@ -11,7 +11,7 @@ jobs:
       - run:
           name: "Install Docker CE"
           command: |
-            apk -U install curl
+            apk add -U curl
             VER="17.06.2"
             curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-$VER-ce.tgz && tar --strip-components=1 -xvzf docker-$VER-ce.tgz -C /usr/local/bin && rm docker-$VER-ce.tgz
 
@@ -51,7 +51,7 @@ jobs:
       - run:
           name: Disable Digital Ocean firewall for deploy
           command: |
-            apk -U install jq
+            apk add -U jq
             sh <(curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/disableFW.sh)
 
       - deploy:
