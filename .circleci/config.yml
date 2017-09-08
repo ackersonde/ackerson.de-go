@@ -11,7 +11,7 @@ jobs:
       - run:
           name: "Install Docker CE"
           command: |
-            apk add -U curl git
+            apk add -U curl git build-base
             VER="17.06.2"
             curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-$VER-ce.tgz && tar --strip-components=1 -xvzf docker-$VER-ce.tgz -C /usr/local/bin && rm docker-$VER-ce.tgz
 
@@ -52,7 +52,7 @@ jobs:
           name: Disable Digital Ocean firewall for deploy
           command: |
             apk add -U jq
-            sh <(curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/disableFW.sh)
+            curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/disableFW.sh | sh
 
       - deploy:
           name: "Upload to DockerHub, deploy container to Digital Ocean Droplet & launch"
@@ -95,5 +95,5 @@ jobs:
       - run:
           name: Reenable Digital Ocean firewall
           command: |
-            sh <(curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/reenableFW.sh)
+            curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/reenableFW.sh | sh
           when: always
