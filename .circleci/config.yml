@@ -2,7 +2,7 @@ version: 2
 jobs:
   build:
     docker:
-      - image: golang:1.9
+      - image: golang:1.9-alpine
     working_directory: /go/src/github.com/danackerson/ackerson.de-go
     steps:
       - checkout
@@ -11,18 +11,23 @@ jobs:
       - run:
           name: "Install Docker CE"
           command: |
-            VER="17.06.1"
-            curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-$VER-ce.tgz && tar --strip-components=1 -xvzf docker-$VER-ce.tgz -C /usr/local/bin && rm docker-$VER-ce.tgz
-            apk update && apk add jq && rm -f /var/cache/apk/*
-            go get github.com/jstemmer/go-junit-report
-            mkdir -p /tmp/test-results
+            apk add -U jq curl openssh-client build-base git
+
+            VER="17.06.2"
+            curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-$VER-ce.tgz && tar --strip-components=1 -xvzf docker-$VER-ce.tgz -C /usr/local/bin
+
+            rm docker-$VER-ce.tgz && rm -f /var/cache/apk/*
 
       - run:
           name: "Fetch dependencies and test"
           command: |
             set -eu
+
+            go get github.com/jstemmer/go-junit-report
+            mkdir -p /tmp/test-results
+
             go get -t -d -v ./...
-            go test -v -race ./... | go-junit-report > /tmp/test-results/unit-tests.xml
+            go test -v ./... | go-junit-report > /tmp/test-results/unit-tests.xml
       - type: test-results-store
         path: /tmp/test-results
 
@@ -47,6 +52,11 @@ jobs:
               ssh-add ${_k} || true
             done
 
+      - run:
+          name: Disable Digital Ocean firewall for deploy
+          command: |
+            curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/disableFW.sh | sh
+
       - deploy:
           name: "Upload to DockerHub, deploy container to Digital Ocean Droplet & launch"
           command: |
@@ -64,8 +74,6 @@ jobs:
 
             export DEPLOY_CONNECT="ssh -o StrictHostKeyChecking=no ackersond@$DEPLOY_SERVER"
             $DEPLOY_CONNECT docker pull danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
-
-            # TODO: need to disable/save current DigitalOcean Firewall
 
             if [ $DEPLOY_SERVER_IP ]; then
               $DEPLOY_CONNECT docker run -d --restart=always -p 443:8443 -p 80:8080 -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM -e prodSession=true -e joinAPIKey=$joinAPIKey -e ackSecret=$ackSecret -e ackWunder=$ackWunder -v /home/ackersond/certs:/root/certs:ro -v /app/public --name ackerson.de danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
@@ -87,4 +95,8 @@ jobs:
               $DEPLOY_CONNECT docker run -d --restart=always -p 443:8443 -p 80:8080 -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM -e prodSession=true -e joinAPIKey=$joinAPIKey -e ackSecret=$ackSecret -e ackWunder=$ackWunder -v /home/ackersond/certs:/root/certs:ro -v /app/public --name ackerson.de danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
             fi
 
-            # TODO: need to load/reenable DigitalOcean Firewall for Droplet again
+      - run:
+          name: Reenable Digital Ocean firewall
+          command: |
+            curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/reenableFW.sh | sh
+          when: always

@@ -22,7 +22,7 @@ var TestGeoLocationPost = `{"jsonrpc":"2.0","method":"post","params":{"lat":48.3
 // JSONGeoLocationRequest is now commented
 type JSONGeoLocationRequest struct {
 	Jsonrpc string `json:"jsonrpc"`
-	Method  string `json:"method"`
+	Method  int    `json:"method"`
 	Params  struct {
 		Lat float32 `json:"lat"`
 		Lng float32 `json:"lng"`

@@ -28,13 +28,13 @@ function mvvRoute(origin, destination) {
 (function($) {
   var id = 1;
   var greeting = "Welcome Off World (type help)";
-  var drive_msg = "[[g;#FFFF00;]drive] <DESTINATION>: google directions from your location\r\n\r\n";
-  var weather_msg = "[[g;#FFFF00;]weather]: show weather forecast\r\n\r\n";
-  var whoami_msg = "[[g;#FFFF00;]whoami]: your browser info and IP address\r\n\r\n";
-  var date_msg = "[[g;#FFFF00;]date]: my server date/time\r\n\r\n";
-  var version_msg = "[[g;#FFFF00;]version]: build of this website\r\n\r\n";
-  var sw_msg = "[[g;#FFFF00;]sw]: Schwabhausen weather \r\n\r\n";
-  var clear_msg = "[[g;#FFFF00;]clear]: clear this terminal screen\r\n\r\n";
+  var drive_msg = "[[g;#FFFF00;]drive] <DESTINATION>: google directions from your location\r\n";
+  var weather_msg = "[[g;#FFFF00;]weather]: show weather forecast\r\n";
+  var whoami_msg = "[[g;#FFFF00;]whoami]: your browser info and IP address\r\n";
+  var date_msg = "[[g;#FFFF00;]date]: my server date/time\r\n";
+  var version_msg = "[[g;#FFFF00;]version]: build of this website\r\n";
+  var sw_msg = "[[g;#FFFF00;]sw]: Schwabhausen weather \r\n";
+  var clear_msg = "[[g;#FFFF00;]clear]: clear this terminal screen\r\n";
   var help = drive_msg + weather_msg + whoami_msg + date_msg + sw_msg + version_msg + clear_msg;
 
   // TODO 'wp' (write poetry) => window.open('https://draftin.com/api')
@@ -132,7 +132,6 @@ function mvvRoute(origin, destination) {
   function getPosition() {
     if (currentLatLng === undefined || currentLat === undefined || currentLng === undefined) {
       navigator.geolocation.getCurrentPosition(function(position) {
-        currentPosition = position;
         currentLatLng = new google.maps.LatLng(parseFloat(position.coords.latitude), parseFloat(position.coords.longitude));
         currentLat = currentLatLng.lat();
         currentLng = currentLatLng.lng();
@@ -152,7 +151,9 @@ function mvvRoute(origin, destination) {
         });
       }, showGeoLocationError);
     } else {
-      simpleAjaxCall('weather', {'lat':currentLat,'lng':currentLng});
+      var currentLatLng = {"lat":currentLat,"lng":currentLng};
+      // JSON.stringify(currentLatLng)
+      simpleAjaxCall('weather', currentLatLng);
     }
   }
 
@@ -163,31 +164,35 @@ function mvvRoute(origin, destination) {
     //$.jrpc is helper function which creates json-rpc request
     $.jrpc(command,                         // uri
       id++,
+      query_param,
       'post',
-      query_param,                          // command
       function(data) {
         term.resume();
         if (data.error) {
           term.error(data.error.message);
         } else {
+          var responseText = jQuery.parseJSON(data.responseText);
           if (command == 'version') {
-            term.echo("[[g;#FFFF00;]ackerson.de build " + data['build'] + "]")
-            window.open(data['version']);
+            term.echo("[[g;#FFFF00;]ackerson.de build " + responseText['build'] + "]")
+            window.open(responseText['version']);
           }
           else if (command == 'weather') {
             showPopup(command);
-            var forecast = data['forecastday']['forecast']['simpleforecast']['forecastday'];
-            var current = data['current']['current_observation']
+            var forecast = responseText['forecastday']['forecast']['simpleforecast']['forecastday'];
+            var current = responseText['current']['current_observation']
             var weatherForecast = document.getElementById("forecastweather");
             weatherForecast.innerHTML = "";
             for(var i=0;i<forecast.length;i++){
+                var sslImage = forecast[i]['icon_url'];
+                sslImage = sslImage.replace("http:", "https:");
+
                 /*jshint multistr: true */
                 weatherForecast.innerHTML += "\
                 <div style='float:left;margin:10px;'>\
                     <span style='float:left;'>"+forecast[i]['date']['weekday_short']+",&nbsp;"+forecast[i]['date']['monthname']+" "+forecast[i]['date']['day']+"</span>\
                     <div style='float:left;clear:left;margin-right:5px;'>\
                         <span style='font-weight:bold;'>"+forecast[i]['low']['celsius']+"&nbsp;&#8451;</span>\
-                        <img src='"+forecast[i]['icon_url']+"' width='44' height='44' alt='"+forecast[i]['conditions']+"'>\
+                        <img src='"+sslImage+"' width='44' height='44' alt='"+forecast[i]['conditions']+"'>\
                         <span style='font-weight:bold;'>"+forecast[i]['high']['celsius']+"&nbsp;&#8451;</span>\
                     </div>";
                     if (i+1 < forecast.length) {
@@ -197,12 +202,15 @@ function mvvRoute(origin, destination) {
             }
 
             var weatherReport = document.getElementById("currentweather");
+            var sslCurrentImage = current['icon_url'];
+            sslCurrentImage = sslCurrentImage.replace("http:", "https:");
+
             weatherReport.innerHTML = "<span style='font-weight:bold;color:darkblue;'>Weather for "+homeLocation+"</span>\
                 <div id='weatherreport'>\
                     <div style='float:left;margin-left:10px;'>\
                         <div>\
                             <a target='_blank' href='"+current['ob_url']+"'>\
-                            <img src='"+current['icon_url']+"' width='44' height='44' alt='"+current['weather']+"'>\
+                            <img src='"+sslCurrentImage+"' width='44' height='44' alt='"+current['weather']+"'>\
                             </a>\
                         </div>\
                         <div style='margin-left:-10px;'>"+current['weather']+"</div>\
@@ -217,7 +225,7 @@ function mvvRoute(origin, destination) {
                     </div>\
                 </div>\
                 ";
-          } else term.echo(data[command]);       // data set
+          } else term.echo(responseText[command]);       // data set
         }
       },
       function(xhr, status, error) {
