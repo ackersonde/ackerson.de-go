@@ -13,7 +13,7 @@ jobs:
           command: |
             VER="17.06.1"
             curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-$VER-ce.tgz && tar --strip-components=1 -xvzf docker-$VER-ce.tgz -C /usr/local/bin && rm docker-$VER-ce.tgz
-
+            apk update && apk add jq && rm -f /var/cache/apk/*
             go get github.com/jstemmer/go-junit-report
             mkdir -p /tmp/test-results
 
@@ -65,6 +65,8 @@ jobs:
             export DEPLOY_CONNECT="ssh -o StrictHostKeyChecking=no ackersond@$DEPLOY_SERVER"
             $DEPLOY_CONNECT docker pull danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
 
+            # TODO: need to disable/save current DigitalOcean Firewall
+
             if [ $DEPLOY_SERVER_IP ]; then
               $DEPLOY_CONNECT docker run -d --restart=always -p 443:8443 -p 80:8080 -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM -e prodSession=true -e joinAPIKey=$joinAPIKey -e ackSecret=$ackSecret -e ackWunder=$ackWunder -v /home/ackersond/certs:/root/certs:ro -v /app/public --name ackerson.de danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
 
@@ -84,3 +86,5 @@ jobs:
               $DEPLOY_CONNECT docker rm -f ackerson.de || true
               $DEPLOY_CONNECT docker run -d --restart=always -p 443:8443 -p 80:8080 -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM -e prodSession=true -e joinAPIKey=$joinAPIKey -e ackSecret=$ackSecret -e ackWunder=$ackWunder -v /home/ackersond/certs:/root/certs:ro -v /app/public --name ackerson.de danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
             fi
+
+            # TODO: need to load/reenable DigitalOcean Firewall for Droplet again
