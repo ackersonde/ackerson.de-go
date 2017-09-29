@@ -21,21 +21,13 @@ import (
 	"github.com/otium/ytdl"
 	"github.com/unrolled/render"
 	"github.com/urfave/negroni"
-	"golang.org/x/net/http2"
 )
 
-var port80only = false
-var prodSession = false
 var httpPort = ":8080"
-var httpsPort = ":8443"
 var gameDownloadDir = "/app/public/bb_games/"
 
 func getHTTPPort() string {
 	return httpPort
-}
-
-func getHTTPSPort() string {
-	return httpsPort
 }
 
 func main() {
@@ -48,43 +40,7 @@ func main() {
 	store := cookiestore.New([]byte(secret))
 	n.Use(sessions.Sessions("gurkherpaderp", store))
 	n.UseHandler(mux)
-
-	sslCertPath := "/root/certs/"
-	if !prodSession {
-		sslCertPath = ""
-	}
-
-	if _, certErr := os.Stat(sslCertPath + "server.pem"); os.IsNotExist(certErr) {
-		port80only = true
-		http.ListenAndServe(httpPort, n)
-	} else {
-
-		// keep an ear on the http port and fwd accordingly
-		go func() {
-			errHTTP := http.ListenAndServe(httpPort, http.HandlerFunc(redirectToHTTPS))
-			if errHTTP != nil {
-				log.Fatal("Web server (HTTP): ", errHTTP)
-			}
-		}()
-	}
-	if !port80only {
-		// HTTP2
-		srv := &http.Server{
-			Addr:    httpsPort,
-			Handler: n,
-		}
-		http2.ConfigureServer(srv, &http2.Server{})
-		log.Fatal(srv.ListenAndServeTLS(sslCertPath+"server.pem", sslCertPath+"server.key"))
-	}
-}
-
-// redirectToHttps now commented
-func redirectToHTTPS(w http.ResponseWriter, r *http.Request) {
-	if prodSession { // meaning we are running behind a docker container fwd'ing to 443
-		http.Redirect(w, r, "https://ackerson.de"+r.RequestURI, http.StatusMovedPermanently)
-	} else {
-		http.Redirect(w, r, "https://localhost"+httpsPort+r.RequestURI, http.StatusMovedPermanently)
-	}
+	http.ListenAndServe(httpPort, n)
 }
 
 var mongo string
@@ -100,7 +56,6 @@ func parseEnvVariables() {
 	joinAPIKey = os.Getenv("joinAPIKey")
 	wunderground = os.Getenv("ackWunder")
 	version = os.Getenv("CIRCLE_BUILD_NUM")
-	prodSession, _ = strconv.ParseBool(os.Getenv("prodSession"))
 }
 
 func setUpMuxHandlers(mux *http.ServeMux) {
