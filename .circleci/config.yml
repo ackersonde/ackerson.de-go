@@ -73,15 +73,15 @@ jobs:
             $DEPLOY_CONNECT docker pull danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
 
             export $DOCKER_RUN="docker run -d --restart=always \
-              -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM -e joinAPIKey=$joinAPIKey \
-              -e ackSecret=$ackSecret -e ackWunder=$ackWunder \
-              --label='traefik.backend=homepage' \
-              --label='traefik.docker.network=web' \
-              --label='traefik.frontend.rule=Host:ackerson.de' \
-              --label='traefik.enable=true' \
-              --label='traefik.port=8080' \
-              -v /app/public \
-              --name homepage danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM"
+            -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM -e joinAPIKey=$joinAPIKey \
+            -e ackSecret=$ackSecret -e ackWunder=$ackWunder \
+            --label='traefik.backend=homepage' \
+            --label='traefik.docker.network=web' \
+            --label='traefik.frontend.rule=Host:ackerson.de' \
+            --label='traefik.enable=true' \
+            --label='traefik.port=8080' \
+            -v /app/public \
+            --name homepage danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM"
 
             if [ $DEPLOY_SERVER_IP ]; then
               $DEPLOY_CONNECT $DOCKER_RUN
