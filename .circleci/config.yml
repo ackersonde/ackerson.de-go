@@ -75,7 +75,7 @@ jobs:
             export DOCKER_RUN="docker run -d --restart=always --network='web' \
               -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM -e joinAPIKey=$joinAPIKey \
               -e ackSecret=$ackSecret -e ackWunder=$ackWunder \
-              --label='traefik.backend=backend-homepage' \
+              --label='traefik.backend=homepage' \
               --label='traefik.docker.network=web' \
               --label='traefik.frontend.rule=Host:ackerson.de' \
               --label='traefik.enable=true' \
