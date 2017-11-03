@@ -326,11 +326,11 @@ func bbHome(w http.ResponseWriter, r *http.Request) {
 	date1 := r.URL.Query().Get("date1")
 	offset := r.URL.Query().Get("offset")
 
-	/*if date1 == "" {
-		//TODO 2016 is over - make default /bb goto Game 7, 2016 World Series
-		date1 = "year_2016/month_11/day_02"
+	if date1 == "" {
+		//TODO 2017 is over - make default /bb goto Game 1, 2017 World Series
+		date1 = "year_2017/month_10/day_24"
 		offset = "0"
-	}*/
+	}
 	gameDayListing := baseball.GameDayListingHandler(date1, offset, homePageMap)
 
 	w.Header().Set("Cache-Control", "max-age=10800")
