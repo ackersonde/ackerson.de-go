@@ -91,7 +91,7 @@ div.framePopup {
   height:75%;
   background: #eeeeee;
   color: #000000;
-  border: 1px solid #1a1a1a;
+  border: 1px solid transparent;
   font-size: 90%;
 }
 div#drivePopup {
@@ -100,11 +100,11 @@ div#drivePopup {
     top:20px;
 }
 div#weatherPopup {
-    background: white;
+    background: transparent;
     width: 50%;
-    height: 65%;
+    height: 30%;
     left:580px;
-    top:20px;
+    top:250px;
 }
 p.border {
     background-image: url(../images/border.png);

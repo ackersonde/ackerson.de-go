@@ -88,7 +88,7 @@ function mvvRoute(origin, destination) {
             break;
 
           case 'sw':
-            schwabhausen_weather = '//www.wunderground.com/cgi-bin/findweather/getForecast?query=48.300000,11.350000&ID=IBAYERNS22';
+            schwabhausen_weather = '//www.wunderground.com/forecast/de/sickertshofen/48.300000%2C11.350000?cm_ven=localwx_10day';
             window.open(schwabhausen_weather);
             break;
 
