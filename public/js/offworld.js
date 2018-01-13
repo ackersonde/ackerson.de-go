@@ -205,7 +205,7 @@ function mvvRoute(origin, destination) {
             var sslCurrentImage = current['icon_url'];
             sslCurrentImage = sslCurrentImage.replace("http:", "https:");
 
-            weatherReport.innerHTML = "<span style='font-weight:bold;color:darkblue;'>Weather for "+homeLocation+"</span>\
+            weatherReport.innerHTML = "<span style='font-weight:bold;color:white;'>Weather for "+homeLocation+"</span>\
                 <div id='weatherreport'>\
                     <div style='float:left;margin-left:10px;'>\
                         <div>\

@@ -105,6 +105,7 @@ div#weatherPopup {
     height: 30%;
     left:580px;
     top:250px;
+    color: white;
 }
 p.border {
     background-image: url(../images/border.png);
