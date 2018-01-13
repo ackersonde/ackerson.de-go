@@ -28,8 +28,10 @@ jobs:
 
             go get -t -d -v ./...
             go test -v ./... | go-junit-report > /tmp/test-results/unit-tests.xml
-      - type: test-results-store
-        path: /tmp/test-results
+      - store_test_results:
+          path: /tmp/test-results
+      - store_artifacts:
+          path: /tmp/test-results
 
       - run:
           name: "Build, run and test docker image"
