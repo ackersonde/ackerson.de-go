@@ -37,7 +37,7 @@ jobs:
           name: "Build, run and test docker image"
           command: |
             env GOOS=linux GOARCH=386 go build server.go
-            docker build --experimental --compress --squash -t danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM .
+            docker build --compress -t danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM .
 
       - add-ssh-keys:
           fingerprints:
