@@ -227,6 +227,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 		smallIcon = "http://www.setaram.com/wp-content/themes/setaram/library/images/lock.png"
 
 		sendPayloadToJoinAPI(gameURL, gameTitle, icon, smallIcon)
+		return
 	} else {
 		// will be a YouTube video
 		vid, _ := ytdl.GetVideoInfo(gameURL)
