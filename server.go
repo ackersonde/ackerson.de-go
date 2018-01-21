@@ -268,7 +268,7 @@ func sendPayloadToJoinAPI(downloadFilename string, humanFilename string, icon st
 	humanFilenameEncoded := humanFilenameEnc.String()
 	// NOW send this URL to the Join Push App API
 	pushURL := "https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush"
-	defaultParams := "?deviceId=007e5b72192c420d9115334d1f177c4c&icon=" + icon + "&smallicon=" + smallIcon
+	defaultParams := "?deviceId=d888b2e9a3a24a29a15178b2304a40b3&icon=" + icon + "&smallicon=" + smallIcon
 	fileOnPhone := "&title=" + humanFilenameEncoded
 	fileURL := "&file=https://ackerson.de/downloads/" + downloadFilename
 	apiKey := "&apikey=" + joinAPIKey
