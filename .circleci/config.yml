@@ -13,7 +13,7 @@ jobs:
           command: |
             apk add -U jq curl openssh-client build-base git
 
-            VER="17.09.0"
+            VER="17.12.0"
             curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-$VER-ce.tgz && tar --strip-components=1 -xvzf docker-$VER-ce.tgz -C /usr/local/bin
 
             rm docker-$VER-ce.tgz && rm -f /var/cache/apk/*
@@ -37,7 +37,7 @@ jobs:
           name: "Build, run and test docker image"
           command: |
             env GOOS=linux GOARCH=386 go build server.go
-            docker build -t danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM .
+            docker build --compress -t danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM .
 
       - add-ssh-keys:
           fingerprints:
@@ -89,10 +89,10 @@ jobs:
             if [ $DEPLOY_SERVER_IP ]; then
               $DEPLOY_CONNECT $DOCKER_RUN
 
-              # BenderBot also needs to be deployed to new server
+              # Battlefleet also needs to be deployed to new server
               curl --user ${CIRCLE_API_TOKEN}: \
                 --data build_parameters[DEPLOY_SERVER_IP]=$DEPLOY_SERVER_IP \
-                https://circleci.com/api/v1.1/project/github/$CIRCLE_PROJECT_USERNAME/bender-slackbot/tree/master
+                https://circleci.com/api/v1.1/project/github/$CIRCLE_PROJECT_USERNAME/battlefleet/tree/master
             else
               $DEPLOY_CONNECT docker rm -f homepage || true
               $DEPLOY_CONNECT $DOCKER_RUN

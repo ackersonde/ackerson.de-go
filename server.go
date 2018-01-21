@@ -234,7 +234,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 		log.Println(URI.String())
 		res, err := http.Head(URI.String())
 		if err != nil {
-			log.Printf("ERR: unable to find game size")
+			log.Printf("ERR: unable to find video size")
 		} else {
 			log.Println(strconv.FormatInt(res.ContentLength, 10) + " bytes")
 		}
@@ -254,9 +254,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 		err := downloadFile(filepath, gameURL, gameLength)
 		if err != nil {
 			// Check if file was already downloaded & don't resend to Join!
-			if err.Error() != "file exists" {
-				log.Printf("ERR: unable to download & save file %v\n", err)
-			}
+			log.Printf("ERR: unable to download/save %s: %s\n", gameURL, err.Error())
 		} else {
 			log.Printf("Finished downloading %s\n", filepath)
 			sendPayloadToJoinAPI(downloadFilename, humanFilename, icon, smallIcon)
