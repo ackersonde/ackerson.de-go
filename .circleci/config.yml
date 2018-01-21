@@ -67,6 +67,7 @@ jobs:
 
             export DEPLOY_SERVER=deploy.ackerson.de
             if [ $DEPLOY_SERVER_IP ]; then
+              docker volume create --name data-volume
               export DEPLOY_SERVER=$DEPLOY_SERVER_IP
             fi
             echo "Deploy to $DEPLOY_SERVER"
@@ -82,7 +83,7 @@ jobs:
               --label='traefik.frontend.rule=Host:ackerson.de,www.ackerson.de' \
               --label='traefik.enable=true' \
               --label='traefik.port=8080' \
-              -v /app/public \
+              -v data-volume:/app/public/downloads \
               --name homepage danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM"
 
             if [ $DEPLOY_SERVER_IP ]; then

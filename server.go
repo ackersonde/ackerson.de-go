@@ -16,7 +16,7 @@ import (
 
 	"github.com/danackerson/ackerson.de-go/baseball"
 	"github.com/danackerson/ackerson.de-go/structures"
-	"github.com/goincremental/negroni-sessions"
+	sessions "github.com/goincremental/negroni-sessions"
 	"github.com/goincremental/negroni-sessions/cookiestore"
 	"github.com/otium/ytdl"
 	"github.com/unrolled/render"
@@ -24,7 +24,7 @@ import (
 )
 
 var httpPort = ":8080"
-var gameDownloadDir = "/app/public/bb_games/"
+var gameDownloadDir = "/app/public/downloads/"
 
 func getHTTPPort() string {
 	return httpPort
@@ -124,7 +124,7 @@ func setUpMuxHandlers(mux *http.ServeMux) {
 	// play all games of the day
 	mux.HandleFunc("/bbAll", bbAll)
 
-	// download gameURL to ~/bb_games (& eventually send to Join Push App)
+	// download gameURL to ~/downloads (& eventually send to Join Push App)
 	mux.HandleFunc("/bb_download", bbDownloadPush)
 
 	mux.HandleFunc("/bb_download_status", bbDownloadStatus)
@@ -247,7 +247,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 		gameURL = URI.String()
 	}
 
-	// and download it to ~/bb_games/
+	// and download it to ~/downloads/
 	filepath := gameDownloadDir + downloadFilename
 
 	go func() {
@@ -272,7 +272,7 @@ func sendPayloadToJoinAPI(downloadFilename string, humanFilename string, icon st
 	pushURL := "https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush"
 	defaultParams := "?deviceId=007e5b72192c420d9115334d1f177c4c&icon=" + icon + "&smallicon=" + smallIcon
 	fileOnPhone := "&title=" + humanFilenameEncoded
-	fileURL := "&file=https://ackerson.de/bb_games/" + downloadFilename
+	fileURL := "&file=https://ackerson.de/downloads/" + downloadFilename
 	apiKey := "&apikey=" + joinAPIKey
 
 	completeURL := pushURL + defaultParams + fileOnPhone + fileURL + apiKey
