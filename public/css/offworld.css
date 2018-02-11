@@ -100,11 +100,15 @@ div#drivePopup {
     top:20px;
 }
 div#weatherPopup {
+    display: none;
+    position: fixed;
+    border: 1px solid transparent;
+    font-size: 90%;
     background: transparent;
     width: 50%;
     height: 30%;
-    left:580px;
-    top:250px;
+    right:50px;
+    bottom:50px;
     color: white;
 }
 p.border {
