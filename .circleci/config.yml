@@ -87,11 +87,6 @@ jobs:
 
             if [ $DEPLOY_SERVER_IP ]; then
               $DEPLOY_CONNECT $DOCKER_RUN
-
-              # Battlefleet also needs to be deployed to new server
-              curl --user ${CIRCLE_API_TOKEN}: \
-                --data build_parameters[DEPLOY_SERVER_IP]=$DEPLOY_SERVER_IP \
-                https://circleci.com/api/v1.1/project/github/$CIRCLE_PROJECT_USERNAME/battlefleet/tree/master
             else
               $DEPLOY_CONNECT docker rm -f homepage || true
               $DEPLOY_CONNECT $DOCKER_RUN
