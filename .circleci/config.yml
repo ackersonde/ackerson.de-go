@@ -95,5 +95,7 @@ jobs:
       - run:
           name: Reenable Digital Ocean firewall
           command: |
-            curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/reenableFW.sh | sh
+            if [ -z $DEPLOY_SERVER_IP ]; then
+              curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/reenableFW.sh | sh
+            fi
           when: always
