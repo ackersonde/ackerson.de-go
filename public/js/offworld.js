@@ -14,7 +14,7 @@ function mvvRoute(origin, destination) {
   var hour = d.getHours();
   var minute = d.getMinutes();
 
-  var url = "http://efa.mvv-muenchen.de/mvv/XSLT_TRIP_REQUEST2?&language=de"+
+  var url = "https://efa.mvv-muenchen.de/mvv/XSLT_TRIP_REQUEST2?&language=de"+
     "&anyObjFilter_origin=0&sessionID=0&itdTripDateTimeDepArr=dep&type_destination=any"+
     "&itdDateMonth="+month+"&itdTimeHour="+hour+"&anySigWhenPerfectNoOtherMatches=1"+
     "&locationServerActive=1&name_origin="+origin+"&itdDateDay="+day+"&type_origin=any"+
