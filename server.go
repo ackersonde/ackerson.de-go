@@ -231,7 +231,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 	} else if fileType == "dl" {
 		from, err := os.Open("/app/public/downloads/" + gameURL)
 		if err != nil {
-			log.Printf("couldn't find file: %s", err.Error())
+			http.Error(w, err.Error(), http.StatusNotFound)
 		} else {
 			fi, _ := from.Stat()
 			gameLength = fi.Size()
@@ -244,6 +244,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 
 			http.ServeContent(w, r, gameTitle, time.Now(), from)
 		}
+		return
 	} else {
 		// will be a YouTube video
 		vid, _ := ytdl.GetVideoInfo(gameURL)
