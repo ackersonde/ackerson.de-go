@@ -229,14 +229,15 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 		sendPayloadToJoinAPI(gameURL, gameTitle, icon, smallIcon)
 		return
 	} else if fileType == "dl" {
+		log.Printf("DANNY BOY! - downloading %s", gameURL)
 		from, err := os.Open("/app/public/downloads/" + gameURL)
 		if err != nil {
 			log.Printf("couldn't find file: %s", err.Error())
 		} else {
-			fi, _ := from.Stat()
+			/*fi, _ := from.Stat()
 			gameLength = fi.Size()
 
-			/*w.Header().Set("Content-Length", strconv.FormatInt(gameLength, 10))
+			w.Header().Set("Content-Length", strconv.FormatInt(gameLength, 10))
 			w.Header().Set(`Content-Disposition: attachment; filename="`, gameTitle+`"`)
 			//    header('Content-Transfer-Encoding: binary');
 			//    header('Accept-Ranges: bytes');
