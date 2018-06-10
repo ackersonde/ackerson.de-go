@@ -239,7 +239,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 			w.Header().Set("Content-Length", strconv.FormatInt(gameLength, 10))
 			log.Printf("gameTitle: %s", gameTitle)
 			gameTitle = strings.TrimPrefix(gameTitle, ": ")
-			w.Header().Set(`Content-Disposition: attachment; filename="`, gameTitle+`"`)
+			w.Header().Set("Content-Disposition", `attachment; filename="`+gameTitle+`"`)
 			w.Header().Set("Cache-Control", "private")
 			w.Header().Set("Pragma", "private")
 			w.Header().Set("Expires", "Mon, 26 Jul 1997 05:00:00 GMT")
