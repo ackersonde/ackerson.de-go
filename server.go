@@ -236,7 +236,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 		if err != nil {
 			log.Printf("couldn't find file: %s", err.Error())
 		} else {
-			/*fi, _ := from.Stat()
+			fi, _ := from.Stat()
 			gameLength = fi.Size()
 
 			w.Header().Set("Content-Length", strconv.FormatInt(gameLength, 10))
@@ -247,7 +247,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 			// Send Headers: Prevent Caching of File
 			w.Header().Set("Cache-Control", "private")
 			w.Header().Set("Pragma", "private")
-			w.Header().Set("Expires", "Mon, 26 Jul 1997 05:00:00 GMT")*/
+			w.Header().Set("Expires", "Mon, 26 Jul 1997 05:00:00 GMT")
 
 			http.ServeContent(w, r, gameTitle, time.Now(), from)
 		}
