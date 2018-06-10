@@ -228,6 +228,30 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 
 		sendPayloadToJoinAPI(gameURL, gameTitle, icon, smallIcon)
 		return
+	} else if fileType == "dl" {
+		from, err := os.Open("/app/public/downloads/" + gameURL)
+		if err != nil {
+			log.Printf("couldn't find file: %s", err.Error())
+		} else {
+			fi, _ := from.Stat()
+			gameLength = fi.Size()
+
+			w.Header().Set("Content-Length", strconv.FormatInt(gameLength, 10))
+			w.Header().Set(`Content-Disposition: attachment; filename="`, gameTitle+`"`)
+			//    header('Content-Transfer-Encoding: binary');
+			//    header('Accept-Ranges: bytes');
+
+			// Send Headers: Prevent Caching of File
+			w.Header().Set("Cache-Control", "private")
+			w.Header().Set("Pragma", "private")
+			w.Header().Set("Expires", "Mon, 26 Jul 1997 05:00:00 GMT")
+
+			// Write the body to file
+			_, err = io.Copy(w, from)
+			if err != nil {
+				log.Printf("ERR: writing file: %s", err.Error())
+			}
+		}
 	} else {
 		// will be a YouTube video
 		vid, _ := ytdl.GetVideoInfo(gameURL)
