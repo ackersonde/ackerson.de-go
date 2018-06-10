@@ -172,8 +172,6 @@ func bbDownloadStatus(w http.ResponseWriter, req *http.Request) {
 }
 
 func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
-	log.Printf("1. DANNY BOY! - downloading ?")
-
 	gameTitle := r.URL.Query().Get("gameTitle")
 	gameURL := r.URL.Query().Get("gameURL")
 	fileType := r.URL.Query().Get("fileType")
@@ -231,7 +229,6 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 		sendPayloadToJoinAPI(gameURL, gameTitle, icon, smallIcon)
 		return
 	} else if fileType == "dl" {
-		log.Printf("2. DANNY BOY! - downloading %s", gameURL)
 		from, err := os.Open("/app/public/downloads/" + gameURL)
 		if err != nil {
 			log.Printf("couldn't find file: %s", err.Error())
@@ -240,7 +237,9 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 			gameLength = fi.Size()
 
 			w.Header().Set("Content-Length", strconv.FormatInt(gameLength, 10))
-			w.Header().Set("Content-Disposition: attachment; filename=\"", gameTitle+"\"")
+			log.Printf("gameTitle: %s", gameTitle)
+			gameTitle = strings.TrimPrefix(gameTitle, ": ")
+			w.Header().Set(`Content-Disposition: attachment; filename="`, gameTitle+`"`)
 			w.Header().Set("Cache-Control", "private")
 			w.Header().Set("Pragma", "private")
 			w.Header().Set("Expires", "Mon, 26 Jul 1997 05:00:00 GMT")
