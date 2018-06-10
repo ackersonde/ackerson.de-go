@@ -172,6 +172,8 @@ func bbDownloadStatus(w http.ResponseWriter, req *http.Request) {
 }
 
 func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
+	log.Printf("1. DANNY BOY! - downloading ?")
+
 	gameTitle := r.URL.Query().Get("gameTitle")
 	gameURL := r.URL.Query().Get("gameURL")
 	fileType := r.URL.Query().Get("fileType")
@@ -229,7 +231,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 		sendPayloadToJoinAPI(gameURL, gameTitle, icon, smallIcon)
 		return
 	} else if fileType == "dl" {
-		log.Printf("DANNY BOY! - downloading %s", gameURL)
+		log.Printf("2. DANNY BOY! - downloading %s", gameURL)
 		from, err := os.Open("/app/public/downloads/" + gameURL)
 		if err != nil {
 			log.Printf("couldn't find file: %s", err.Error())
