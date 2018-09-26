@@ -2,26 +2,14 @@ version: 2
 jobs:
   build:
     docker:
-      - image: golang:1.10-alpine
+      - image: golang:alpine
     working_directory: /go/src/github.com/danackerson/ackerson.de-go
     steps:
       - checkout
-      - setup_remote_docker
-
       - run:
-          name: "Install Docker CE"
+          name: "Fetch dependencies, build and test"
           command: |
-            apk add -U jq curl openssh-client build-base git
-
-            VER="18.03.1"
-            curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-$VER-ce.tgz && tar --strip-components=1 -xvzf docker-$VER-ce.tgz -C /usr/local/bin
-
-            rm docker-$VER-ce.tgz && rm -f /var/cache/apk/*
-
-      - run:
-          name: "Fetch dependencies and test"
-          command: |
-            set -eu
+            apk add -U curl openssh-client build-base git
 
             go get github.com/jstemmer/go-junit-report
             mkdir -p /tmp/test-results
@@ -33,13 +21,36 @@ jobs:
       - store_artifacts:
           path: /tmp/test-results
 
+      - setup_remote_docker
       - run:
-          name: "Build, run and test docker image"
+          name: "Install Docker CE"
+          command: |
+            VER="18.06.1"
+            curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-$VER-ce.tgz && tar --strip-components=1 -xvzf docker-$VER-ce.tgz -C /usr/local/bin
+            rm docker-$VER-ce.tgz && rm -f /var/cache/apk/*
+
+      - run:
+          name: "Build & push docker image"
           command: |
             env GOOS=linux GOARCH=386 go build server.go
             docker build --compress -t danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM .
             docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker tag danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM danackerson/ackerson.de:latest
             docker push danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
+            docker push danackerson/ackerson.de:latest
+            echo vc$CIRCLE_BUILD_NUM > last_docker_push
+
+      - persist_to_workspace:
+          root: /go/src/github.com/danackerson/ackerson.de-go
+          paths:
+            - last_docker_push
+
+  deploy:
+    docker:
+      -image: alpine
+    steps:
+      - attach_workspace:
+          at: /tmp
 
       - add-ssh-keys:
           fingerprints:
@@ -47,6 +58,8 @@ jobs:
       - run:
           name: Start ssh-agent
           command: |
+            apk add -U jq curl openssh-client
+            
             ssh-agent -s > ~/.ssh_agent_conf
             source ~/.ssh_agent_conf
             for _k in $(ls ${HOME}/.ssh/id_*); do
@@ -58,7 +71,7 @@ jobs:
           command: |
             curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/disableFW.sh | sh
 
-      - deploy:
+      - run:
           name: "Upload to DockerHub, deploy container to Digital Ocean Droplet & launch"
           command: |
             source ~/.ssh_agent_conf
@@ -72,10 +85,16 @@ jobs:
             echo "Deploy to $DEPLOY_SERVER"
 
             export DEPLOY_CONNECT="ssh -o StrictHostKeyChecking=no ackersond@$DEPLOY_SERVER"
-            $DEPLOY_CONNECT docker pull danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
+            
+            if [ -f /tmp/last_docker_push ]; then
+              export LAST_DOCKER_PUSH=`cat /tmp/last_docker_push`
+            else
+              export LAST_DOCKER_PUSH=latest
+            fi
+            $DEPLOY_CONNECT docker pull danackerson/ackerson.de:$LAST_DOCKER_PUSH
 
             export DOCKER_RUN="docker run -d --restart=always --network='web' \
-              -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM -e joinAPIKey=$joinAPIKey \
+              -e CIRCLE_BUILD_NUM=$LAST_DOCKER_PUSH -e joinAPIKey=$joinAPIKey \
               -e ackSecret=$ackSecret -e ackWunder=$ackWunder \
               --label='traefik.backend=homepage' \
               --label='traefik.docker.network=web' \
@@ -83,7 +102,7 @@ jobs:
               --label='traefik.enable=true' \
               --label='traefik.port=8080' \
               -v data-volume:/app/public/downloads \
-              --name homepage danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM"
+              --name homepage danackerson/ackerson.de:$LAST_DOCKER_PUSH"
 
             if [ $DEPLOY_SERVER_IP ]; then
               $DEPLOY_CONNECT $DOCKER_RUN
@@ -99,3 +118,12 @@ jobs:
               curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/reenableFW.sh | sh
             fi
           when: always
+
+workflows:
+  version: 2
+  build-deploy:
+    jobs:
+        - build
+        - deploy:
+            requires:
+              - build
