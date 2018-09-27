@@ -59,64 +59,6 @@ jobs:
             for _k in $(ls ${HOME}/.ssh/id_*); do
               ssh-add ${_k} || true
             done
-  
-        #- attach_workspace:
-        #  at: /tmp
-#      - add-ssh-keys:
-#          fingerprints:
-#            - "93:c4:61:21:a6:82:d8:6d:4f:73:11:79:37:23:83:07"
-      # - run:
-      #     name: Disable Digital Ocean firewall for deploy
-      #     command: |
-      #       curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/disableFW.sh | sh
-
-      # - run:
-      #     name: "Upload to DockerHub, deploy container to Digital Ocean Droplet & launch"
-      #     command: |
-      #       source ~/.ssh_agent_conf
-      #       ssh-add -l
-
-      #       export DEPLOY_SERVER=deploy.ackerson.de
-      #       if [ $DEPLOY_SERVER_IP ]; then
-      #         docker volume create --name data-volume
-      #         export DEPLOY_SERVER=$DEPLOY_SERVER_IP
-      #       fi
-      #       echo "Deploy to $DEPLOY_SERVER"
-
-      #       export DEPLOY_CONNECT="ssh -o StrictHostKeyChecking=no ackersond@$DEPLOY_SERVER"
-            
-      #       if [ -f /tmp/last_docker_push ]; then
-      #         export LAST_DOCKER_PUSH=`cat /tmp/last_docker_push`
-      #       else
-      #         export LAST_DOCKER_PUSH=latest
-      #       fi
-      #       $DEPLOY_CONNECT docker pull danackerson/ackerson.de:$LAST_DOCKER_PUSH
-
-      #       export DOCKER_RUN="docker run -d --restart=always --network='web' \
-      #         -e CIRCLE_BUILD_NUM=$LAST_DOCKER_PUSH -e joinAPIKey=$joinAPIKey \
-      #         -e ackSecret=$ackSecret -e ackWunder=$ackWunder \
-      #         --label='traefik.backend=homepage' \
-      #         --label='traefik.docker.network=web' \
-      #         --label='traefik.frontend.rule=Host:ackerson.de,www.ackerson.de' \
-      #         --label='traefik.enable=true' \
-      #         --label='traefik.port=8080' \
-      #         -v data-volume:/app/public/downloads \
-      #         --name homepage danackerson/ackerson.de:$LAST_DOCKER_PUSH"
-
-      #       if [ $DEPLOY_SERVER_IP ]; then
-      #         $DEPLOY_CONNECT $DOCKER_RUN
-      #       else
-      #         $DEPLOY_CONNECT docker rm -f homepage || true
-      #         $DEPLOY_CONNECT $DOCKER_RUN
-      #       fi
-
-      # - run:
-      #     name: Reenable Digital Ocean firewall
-      #     command: |
-      #       if [ -z $DEPLOY_SERVER_IP ]; then
-      #         curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/reenableFW.sh | sh
-      #       fi
-      #     when: always
 
 workflows:
   version: 2
