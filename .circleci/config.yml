@@ -51,7 +51,7 @@ jobs:
     steps:
       - add-ssh-keys:
           fingerprints:
-            - "e0:a3:4c:5a:5a:1b:9c:bb:b5:51:a7:7f:62:27:51:96"
+            - "93:c4:61:21:a6:82:d8:6d:4f:73:11:79:37:23:83:07"
       - run:
           name: Start ssh-agent
           command: |
@@ -62,14 +62,14 @@ jobs:
             for _k in $(ls ${HOME}/.ssh/id_*); do
               ssh-add ${_k} || true
             done
-
-      - attach_workspace:
-          at: /tmp
-
+      
       - run:
           name: Disable Digital Ocean firewall for deploy
           command: |
             curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/disableFW.sh | sh
+
+      - attach_workspace:
+          at: /tmp
 
       - run:
           name: "Upload to DockerHub, deploy container to Digital Ocean Droplet & launch"
@@ -79,7 +79,7 @@ jobs:
 
             export DEPLOY_SERVER=deploy.ackerson.de
             if [ $DEPLOY_SERVER_IP ]; then
-              docker volume create --name data-volume
+              #docker volume create --name data-volume
               export DEPLOY_SERVER=$DEPLOY_SERVER_IP
             fi
             echo "Deploy to $DEPLOY_SERVER"
