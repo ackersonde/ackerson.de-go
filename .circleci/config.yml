@@ -51,7 +51,7 @@ jobs:
     steps:
       - add-ssh-keys:
           fingerprints:
-            - "93:c4:61:21:a6:82:d8:6d:4f:73:11:79:37:23:83:07"
+            - "e0:a3:4c:5a:5a:1b:9c:bb:b5:51:a7:7f:62:27:51:96"
       - run:
           name: Start ssh-agent
           command: |
