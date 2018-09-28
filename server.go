@@ -429,8 +429,12 @@ func WhoAmIHandler(w http.ResponseWriter, req *http.Request) {
 
 // VersionHandler now commenteds
 func VersionHandler(w http.ResponseWriter, req *http.Request) {
+	if strings.HasPrefix(version, "vc") {
+		version = strings.TrimLeft(version, "vc")
+	}
+
 	buildURL := "https://circleci.com/gh/danackerson/ackerson.de-go/" + version
-	v := map[string]string{"version": buildURL, "build": version}
+	v := map[string]string{"version": buildURL, "build": "vc" + version}
 
 	data, _ := json.Marshal(v)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
