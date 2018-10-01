@@ -88,7 +88,7 @@ function mvvRoute(origin, destination) {
             break;
 
           case 'sw':
-            schwabhausen_weather = '//www.wunderground.com/forecast/de/sickertshofen/48.300000%2C11.350000?cm_ven=localwx_10day';
+            schwabhausen_weather = '//www.wunderground.com/forecast/de/sickertshofen/?cm_ven=localwx_10day';
             window.open(schwabhausen_weather);
             break;
 

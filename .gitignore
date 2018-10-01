@@ -10,6 +10,7 @@ _obj
 _test
 gin-bin
 tmp
+.vscode
 
 # Architecture specific extensions/prefixes
 *.[568vq]

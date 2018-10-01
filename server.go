@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -18,6 +19,7 @@ import (
 	"github.com/danackerson/ackerson.de-go/structures"
 	sessions "github.com/goincremental/negroni-sessions"
 	"github.com/goincremental/negroni-sessions/cookiestore"
+	"github.com/gorilla/mux"
 	"github.com/otium/ytdl"
 	"github.com/unrolled/render"
 	"github.com/urfave/negroni"
@@ -25,6 +27,7 @@ import (
 
 var httpPort = ":8080"
 var gameDownloadDir = "/app/public/downloads/"
+var uploadDir = "up/"
 
 func getHTTPPort() string {
 	return httpPort
@@ -33,13 +36,13 @@ func getHTTPPort() string {
 func main() {
 	parseEnvVariables()
 
-	mux := http.NewServeMux()
-	setUpMuxHandlers(mux)
+	r := mux.NewRouter()
+	setUpRoutes(r)
 	n := negroni.Classic()
 
 	store := cookiestore.New([]byte(secret))
 	n.Use(sessions.Sessions("gurkherpaderp", store))
-	n.UseHandler(mux)
+	n.UseHandler(r)
 	http.ListenAndServe(httpPort, n)
 }
 
@@ -50,40 +53,44 @@ var poem string
 var wunderground string
 var version string
 var port string
+var fileToken string
+var dropboxToken string
+var post = "POST"
 
 func parseEnvVariables() {
 	secret = os.Getenv("ackSecret")
 	joinAPIKey = os.Getenv("joinAPIKey")
 	wunderground = os.Getenv("ackWunder")
 	version = os.Getenv("CIRCLE_BUILD_NUM")
+	fileToken = os.Getenv("FILE_TOKEN")
+	dropboxToken = os.Getenv("DROPBOX_TOKEN")
 }
 
-func setUpMuxHandlers(mux *http.ServeMux) {
-	post := "POST"
+func setUpRoutes(router *mux.Router) {
 	homePageMap = baseball.InitHomePageMap()
 
 	// handlers
-	mux.HandleFunc("/date", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/date", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == post {
 			DateHandler(w, r)
 		}
 	})
-	mux.HandleFunc("/whoami", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/whoami", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == post {
 			WhoAmIHandler(w, r)
 		}
 	})
-	mux.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == post {
 			VersionHandler(w, r)
 		}
 	})
-	mux.HandleFunc("/weather", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "POST" {
+	router.HandleFunc("/weather", func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == post {
 			WeatherHandler(w, r)
 		}
 	})
-	mux.HandleFunc("/poems", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/poems", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == "GET" {
 			session := sessions.GetSession(r)
 			pass := session.Get("pass")
@@ -97,7 +104,7 @@ func setUpMuxHandlers(mux *http.ServeMux) {
 	})
 
 	// favTeamGameListing shows all games of selected team for last 30 days
-	mux.HandleFunc("/bbFavoriteTeam", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/bbFavoriteTeam", func(w http.ResponseWriter, r *http.Request) {
 		id := r.URL.Query().Get("id")
 		favTeamGameListing := baseball.FavoriteTeamGameListHandler(id, homePageMap)
 
@@ -113,29 +120,135 @@ func setUpMuxHandlers(mux *http.ServeMux) {
 	})
 
 	// gameDayListing for yesterday (default 'homepage')
-	mux.HandleFunc("/bb", bbHome)
+	router.HandleFunc("/bb", bbHome)
 
 	// ajax request for gameDayListing
-	mux.HandleFunc("/bbAjaxDay", bbAjaxDay)
+	router.HandleFunc("/bbAjaxDay", bbAjaxDay)
 
 	// play a single game
-	mux.HandleFunc("/bbStream", bbStream)
+	router.HandleFunc("/bbStream", bbStream)
 
 	// play all games of the day
-	mux.HandleFunc("/bbAll", bbAll)
+	router.HandleFunc("/bbAll", bbAll)
 
 	// download gameURL to ~/downloads (& eventually send to Join Push App)
-	mux.HandleFunc("/bb_download", bbDownloadPush)
+	router.HandleFunc("/bb_download", bbDownloadPush)
 
-	mux.HandleFunc("/bb_download_status", bbDownloadStatus)
+	router.HandleFunc("/bb_download_status", bbDownloadStatus)
 
 	icon := "https://ackerson.de/images/baseballSmall.png"
 	smallIcon := "https://connect.baseball.trackman.com/Images/spinner.png"
-	mux.HandleFunc("/bb_resend_join_push", func(w http.ResponseWriter, r *http.Request) {
+	router.HandleFunc("/bb_resend_join_push", func(w http.ResponseWriter, r *http.Request) {
 		response := sendPayloadToJoinAPI(r.URL.Query().Get("title"), r.URL.Query().Get("title"), icon, smallIcon)
 
 		w.Write([]byte(response))
 	})
+
+	router.HandleFunc("/up", func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "Directory index denied", http.StatusForbidden)
+	})
+	router.HandleFunc("/up/", func(w http.ResponseWriter, r *http.Request) {
+		http.Error(w, "Directory index denied", http.StatusForbidden)
+	})
+	router.HandleFunc("/up/{file}", storedFilesHandler)
+	router.HandleFunc("/drop/{boxPath:(?:.*\\/?.*)+}", dropboxFileDownloader)
+}
+
+func dropboxFileDownloader(w http.ResponseWriter, r *http.Request) {
+	token := r.URL.Query().Get("tok")
+
+	if token == "" || token != fileToken {
+		http.Error(w, "Authentication failed", http.StatusForbidden)
+	} else {
+		if r.Method == "GET" {
+			vars := mux.Vars(r)
+			filename := vars["boxPath"]
+			filename = strings.TrimPrefix(filename, "/")
+			filepath := fmt.Sprintf("{\"path\": \"/configs/%s\"}", filename)
+
+			req, err := http.NewRequest("POST", "https://content.dropboxapi.com/2/files/download", nil)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusServiceUnavailable)
+			}
+			req.Header.Set("Authorization", "Bearer "+dropboxToken)
+			req.Header.Set("Dropbox-Api-Arg", filepath)
+
+			resp, err := http.DefaultClient.Do(req)
+			if err != nil {
+				http.Error(w, err.Error()+" : "+resp.Status, http.StatusInternalServerError)
+				return
+			}
+			defer resp.Body.Close()
+
+			dropboxJSON := resp.Header.Get("dropbox-api-result")
+			//log.Println("DB JSON: " + dropboxJSON)
+
+			var dropboxAPIResult map[string]interface{}
+			json.Unmarshal([]byte(dropboxJSON), &dropboxAPIResult)
+
+			attachmentName := fmt.Sprintf("attachment; filename=%s", dropboxAPIResult["name"])
+			filesize := dropboxAPIResult["size"].(float64)
+
+			w.Header().Set("Content-Disposition", attachmentName)
+			w.Header().Set("Content-Type", resp.Header.Get("Content-Type"))
+			fileSizeStr := strconv.FormatFloat(filesize, 'f', -1, 64)
+			w.Header().Set("Content-Length", fileSizeStr)
+
+			io.Copy(w, resp.Body)
+		} else {
+			http.Error(w, "This endpoint only supports downloading.", http.StatusBadRequest)
+		}
+	}
+}
+
+func storedFilesHandler(w http.ResponseWriter, r *http.Request) {
+	token := r.URL.Query().Get("tok")
+	log.Printf("%s: %s => [tok:%s]\n", r.Method, r.URL, token)
+
+	if token == "" || token != fileToken {
+		http.Error(w, "Authentication failed", http.StatusForbidden)
+	} else {
+		if r.Method == "GET" {
+			vars := mux.Vars(r)
+			filename := vars["file"]
+			filepath := uploadDir + filename
+
+			log.Printf("preparing to download: %s\n", filepath)
+			fileObj, err := os.Open(filepath)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+				return
+			}
+			defer fileObj.Close()
+
+			fileinfo, err := fileObj.Stat()
+			attachmentName := fmt.Sprintf("attachment; filename=%s", fileinfo.Name())
+			filesize := fileinfo.Size()
+
+			w.Header().Set("Content-Disposition", attachmentName)
+			w.Header().Set("Content-Type", r.Header.Get("Content-Type"))
+			w.Header().Set("Content-Length", strconv.FormatInt(filesize, 10))
+
+			io.Copy(w, fileObj)
+		} else if r.Method == post {
+			file, handler, err := r.FormFile("fileupload")
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+			defer file.Close()
+
+			// copy example
+			f, err := os.OpenFile(uploadDir+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
+			if err != nil {
+				http.Error(w, err.Error(), http.StatusInternalServerError)
+			}
+			defer f.Close()
+			io.Copy(f, file)
+		} else {
+			errorMsg := fmt.Sprintf("%s http method not supported", r.Method)
+			http.Error(w, errorMsg, http.StatusBadRequest)
+		}
+	}
 }
 
 // FavGames is now commented
@@ -429,12 +542,8 @@ func WhoAmIHandler(w http.ResponseWriter, req *http.Request) {
 
 // VersionHandler now commenteds
 func VersionHandler(w http.ResponseWriter, req *http.Request) {
-	if strings.HasPrefix(version, "vc") {
-		version = strings.TrimLeft(version, "vc")
-	}
-
 	buildURL := "https://circleci.com/gh/danackerson/ackerson.de-go/" + version
-	v := map[string]string{"version": buildURL, "build": "vc" + version}
+	v := map[string]string{"version": buildURL, "build": version}
 
 	data, _ := json.Marshal(v)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
