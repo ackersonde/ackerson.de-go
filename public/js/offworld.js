@@ -28,21 +28,14 @@ function mvvRoute(origin, destination) {
 (function($) {
   var id = 1;
   var greeting = "Welcome Off World (type help)";
-  var drive_msg = "[[g;#FFFF00;]drive] <DESTINATION>: google directions from your location\r\n";
   var weather_msg = "[[g;#FFFF00;]weather]: show weather forecast\r\n";
   var whoami_msg = "[[g;#FFFF00;]whoami]: your browser info and IP address\r\n";
   var date_msg = "[[g;#FFFF00;]date]: my server date/time\r\n";
   var version_msg = "[[g;#FFFF00;]version]: build of this website\r\n";
   var sw_msg = "[[g;#FFFF00;]sw]: Schwabhausen weather \r\n";
   var clear_msg = "[[g;#FFFF00;]clear]: clear this terminal screen\r\n";
-  var help = drive_msg + weather_msg + whoami_msg + date_msg + sw_msg + version_msg + clear_msg;
+  var help = weather_msg + whoami_msg + date_msg + sw_msg + version_msg + clear_msg;
 
-  // TODO 'wp' (write poetry) => window.open('https://draftin.com/api')
-  // TODO 'poems' (see poems) => window.open('/poems')
-  // => curl -u dan@ackerson.de:<pass> https://draftin.com/api/v1/documents.json
-  // => filter by folder_id='20624' ('WRITINGS')
-
-  $( "#drivePopup" ).draggable({ handle: "p.border" });
   $( "#weatherPopup" ).draggable({ handle: "p.border" });
 
   var anim = false;
@@ -73,18 +66,6 @@ function mvvRoute(origin, destination) {
           case 'version':
           case 'whoami':
             simpleAjaxCall(command, "query-param");
-            break;
-
-          case 'drive':
-            showPopup(commands[0]);
-
-            if (commands[1]) {
-              document.getElementById('address').value = commands[1];
-            } else {
-              document.getElementById('address').value = 'Munich';
-            }
-
-            getDrivingDirections();
             break;
 
           case 'sw':
