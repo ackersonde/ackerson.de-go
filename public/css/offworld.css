@@ -94,11 +94,7 @@ div.framePopup {
   border: 1px solid transparent;
   font-size: 90%;
 }
-div#drivePopup {
-    background: white;
-    height:90%;
-    top:20px;
-}
+
 div#weatherPopup {
     display: none;
     position: fixed;
