@@ -14,12 +14,12 @@ function mvvRoute(origin, destination) {
   var hour = d.getHours();
   var minute = d.getMinutes();
 
-  var url = "https://efa.mvv-muenchen.de/mvv/XSLT_TRIP_REQUEST2?&language=de"+
+  var url = "https://efa.mvv-muenchen.de/index.html?&language=en"+
     "&anyObjFilter_origin=0&sessionID=0&itdTripDateTimeDepArr=dep&type_destination=any"+
     "&itdDateMonth="+month+"&itdTimeHour="+hour+"&anySigWhenPerfectNoOtherMatches=1"+
     "&locationServerActive=1&name_origin="+origin+"&itdDateDay="+day+"&type_origin=any"+
     "&name_destination="+destination+"&itdTimeMinute="+minute+"&Session=0&stateless=1"+
-    "&SpEncId=0&itdDateYear="+year;
+    "&SpEncId=0&itdDateYear="+year+"#trip@origdest";
 
   var win = window.open(url, '_blank');
   win.focus();
@@ -69,7 +69,7 @@ function mvvRoute(origin, destination) {
             break;
 
           case 'sw':
-            schwabhausen_weather = '//www.wunderground.com/forecast/de/sickertshofen/?cm_ven=localwx_10day';
+            schwabhausen_weather = '//darksky.net/forecast/48.3,11.357/ca24/en#week';
             window.open(schwabhausen_weather);
             break;
 
@@ -110,33 +110,56 @@ function mvvRoute(origin, destination) {
     }
   });
 
-  function getPosition() {
-    if (currentLatLng === undefined || currentLat === undefined || currentLng === undefined) {
-      navigator.geolocation.getCurrentPosition(function(position) {
-        currentLatLng = new google.maps.LatLng(parseFloat(position.coords.latitude), parseFloat(position.coords.longitude));
-        currentLat = currentLatLng.lat();
-        currentLng = currentLatLng.lng();
-        simpleAjaxCall('weather', {'lat':currentLat,'lng':currentLng});
-        homeLocation = geocoder.geocode({'latLng': currentLatLng}, function(results, status) {
-          if (status == google.maps.GeocoderStatus.OK) {
-            if (results[0]) {
-              // here we have to carefully scan through results and find city, country ('locality', 'political' in google geocode speak)
-              for (i = 0; i < results.length; i++) {
-                if (results[i].types[0] == 'locality' && results[i].types[1] == 'political') {
-                  homeLocation = results[i].formatted_address;
-                  break;
-                }
-              }
-            }
-          }
-        });
-      }, showGeoLocationError);
-    } else {
-      var currentLatLng = {"lat":currentLat,"lng":currentLng};
-      // JSON.stringify(currentLatLng)
-      simpleAjaxCall('weather', currentLatLng);
+  function showGeoLocationError(error) {
+    switch(error.code) {
+      case error.PERMISSION_DENIED:
+        alert("User denied the request for Geolocation.");
+        break;
+      case error.POSITION_UNAVAILABLE:
+        alert("Location information is unavailable.");
+        break;
+      case error.TIMEOUT:
+        alert("The request to get user location timed out.");
+        break;
+      case error.UNKNOWN_ERROR:
+        alert("An unknown error occurred.");
+        break;
     }
   }
+
+   var currentLat;
+   var currentLng;
+
+  function getPosition() {
+    navigator.geolocation.getCurrentPosition(function(position) {
+      currentLat = parseFloat(position.coords.latitude);
+      currentLng = parseFloat(position.coords.longitude);
+      simpleAjaxCall('weather', {'lat':currentLat,'lng':currentLng});
+    }, showGeoLocationError);
+  }
+
+  var today = new Date();
+  var weekday = new Array(7);
+  weekday[0] =  "Sun";
+  weekday[1] = "Mon";
+  weekday[2] = "Tue";
+  weekday[3] = "Wed";
+  weekday[4] = "Thu";
+  weekday[5] = "Fri";
+  weekday[6] = "Sat";
+  var month = new Array();
+  month[0] = "Jan";
+  month[1] = "Feb";
+  month[2] = "Mar";
+  month[3] = "Apr";
+  month[4] = "May";
+  month[5] = "Jun";
+  month[6] = "Jul";
+  month[7] = "Aug";
+  month[8] = "Sep";
+  month[9] = "Oct";
+  month[10] = "Nov";
+  month[11] = "Dec";
 
   /* simple ajax call where typed cmd string is SAME as remote URI AND data set */
   function simpleAjaxCall(command, query_param) {
@@ -159,49 +182,56 @@ function mvvRoute(origin, destination) {
           }
           else if (command == 'weather') {
             showPopup(command);
-            var forecast = responseText['forecastday']['forecast']['simpleforecast']['forecastday'];
-            var current = responseText['current']['current_observation']
+            var darkSkyIconsURL = "https://darksky.net/images/weather-icons/";
+            var forecast = responseText['forecastday']['data'];
+            var current = responseText['current'];
+            var units = responseText['units'] == 'us' ? '&#8457;' : '&#8451;';
             var weatherForecast = document.getElementById("forecastweather");
             weatherForecast.innerHTML = "";
-            for(var i=0;i<forecast.length;i++){
-                var sslImage = forecast[i]['icon_url'];
-                sslImage = sslImage.replace("http:", "https:");
+            for(var i=1;i<5;i++){
+                var sslImage = darkSkyIconsURL + forecast[i]['icon'] + ".png";
+                var dayWeather = new Date();
+                dayWeather.setDate(today.getDate() + i);
+                var dateWeather = weekday[dayWeather.getDay()]+",&nbsp;"+
+                  month[dayWeather.getMonth()]+"&nbsp;"+dayWeather.getDate();
 
-                /*jshint multistr: true */
                 weatherForecast.innerHTML += "\
                 <div style='float:left;margin:10px;'>\
-                    <span style='float:left;'>"+forecast[i]['date']['weekday_short']+",&nbsp;"+forecast[i]['date']['monthname']+" "+forecast[i]['date']['day']+"</span>\
+                    <span style='float:left;'>"+dateWeather+"</span>\
                     <div style='float:left;clear:left;margin-right:5px;'>\
-                        <span style='font-weight:bold;'>"+forecast[i]['low']['celsius']+"&nbsp;&#8451;</span>\
-                        <img src='"+sslImage+"' width='44' height='44' alt='"+forecast[i]['conditions']+"'>\
-                        <span style='font-weight:bold;'>"+forecast[i]['high']['celsius']+"&nbsp;&#8451;</span>\
+                        <span style='font-weight:bold;'>"+Math.round(forecast[i]['temperatureMin'])+"&nbsp;"+units+"</span>\
+                        <img src='"+sslImage+"' width='44' height='44'>\
+                        <span style='font-weight:bold;'>"+Math.round(forecast[i]['temperatureMax'])+"&nbsp;"+units+"</span>\
                     </div>";
-                    if (i+1 < forecast.length) {
+                    if (i+1 < 5) {
                         weatherForecast.innerHTML += "<div style='border-right:1px solid lightgray;float:left;height:90px;'>&nbsp;</div>";
                     }
                 weatherForecast.innerHTML += "</div>";
             }
 
             var weatherReport = document.getElementById("currentweather");
-            var sslCurrentImage = current['icon_url'];
-            sslCurrentImage = sslCurrentImage.replace("http:", "https:");
+            var sslCurrentImage = darkSkyIconsURL + current['icon'] + ".png";
+            var yourDarkSkyWeather = "https://darksky.net/forecast/" +
+              currentLat + "," + currentLng + "/auto24";
 
-            weatherReport.innerHTML = "<span style='font-weight:bold;color:white;'>Weather for "+homeLocation+"</span>\
+            weatherReport.innerHTML = "<span style='font-weight:bold;color:white;'>Your weather</span>\
                 <div id='weatherreport'>\
                     <div style='float:left;margin-left:10px;'>\
                         <div>\
-                            <a target='_blank' href='"+current['ob_url']+"'>\
-                            <img src='"+sslCurrentImage+"' width='44' height='44' alt='"+current['weather']+"'>\
+                            <a target='_blank' href='"+yourDarkSkyWeather+"'>\
+                            <img src='"+sslCurrentImage+"' width='44' height='44'>\
                             </a>\
                         </div>\
-                        <div style='margin-left:-10px;'>"+current['weather']+"</div>\
+                        <div style='margin-left:-10px;'>"+current['summary']+"</div>\
                     </div>\
                     <div style='float:left;margin-top:10px;margin-left:25px;text-align:left;'>\
                         <div style=''>Current \
-                            <span style='font-weight:bold;'>"+current['temperature_string']+"</span>\
+                            <span style='font-weight:bold;'>"+
+                            Math.round(current['temperature'])+"&nbsp;"+units+"</span>\
                         </div>\
                         <div>Feels Like\
-                            <span style='font-weight:bold;'>"+current['feelslike_string']+"</span>\
+                            <span style='font-weight:bold;'>"+
+                            Math.round(current['apparentTemperature'])+"&nbsp;"+units+"</span>\
                         </div>\
                     </div>\
                 </div>\

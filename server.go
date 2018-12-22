@@ -50,7 +50,7 @@ var mongo string
 var secret string
 var joinAPIKey string
 var poem string
-var wunderground string
+var darksky string
 var version string
 var port string
 var fileToken string
@@ -60,7 +60,7 @@ var post = "POST"
 func parseEnvVariables() {
 	secret = os.Getenv("ackSecret")
 	joinAPIKey = os.Getenv("joinAPIKey")
-	wunderground = os.Getenv("ackWunder")
+	darksky = os.Getenv("ackWunder")
 	version = os.Getenv("CIRCLE_BUILD_NUM")
 	fileToken = os.Getenv("FILE_TOKEN")
 	dropboxToken = os.Getenv("DROPBOX_TOKEN")
@@ -582,38 +582,31 @@ func WeatherHandler(w http.ResponseWriter, req *http.Request) {
 	latString := strconv.FormatFloat(float64(geoLocation.Params.Lat), 'f', 15, 32)
 	lngString := strconv.FormatFloat(float64(geoLocation.Params.Lng), 'f', 15, 32)
 
-	// call wunderground API for Conditions & Forecast
-	conditionsURI := "http://api.wunderground.com/api/" + wunderground + "/conditions/q/"
-	forecastURI := "http://api.wunderground.com/api/" + wunderground + "/forecast/q/"
-	locationParams := latString + "," + lngString + ".json"
+	// call DarkSky.net for Conditions & Forecast
+	encodedURLParams := "?units=auto&exclude=minutely,hourly,alerts"
+	locationParams := latString + "," + lngString + "/" + encodedURLParams
+	conditionsURI := "https://api.darksky.net/forecast/" + darksky + "/"
 
 	currentWeather := new(structures.CurrentWeatherConditions)
 	currentWeatherResp, err := http.Get(conditionsURI + locationParams)
 	if err != nil {
-		log.Printf("wunderground ERR: %s", err)
+		log.Printf("darksky ERR: %s", err)
 	} else {
 		defer currentWeatherResp.Body.Close()
 		currentWeatherJSON, err2 := ioutil.ReadAll(currentWeatherResp.Body)
 		if err2 != nil {
-			log.Printf("wunderground ERR2: %s", err2)
+			log.Printf("darksky ERR2: %s", err2)
 		}
 		json.Unmarshal([]byte(currentWeatherJSON), &currentWeather)
 	}
 
-	currentForecast := new(structures.CurrentWeatherForecast)
-	currentForecastResp, err := http.Get(forecastURI + locationParams)
-	if err != nil {
-		log.Printf("%s", err)
-	} else {
-		defer currentForecastResp.Body.Close()
-		currentForecastJSON, err := ioutil.ReadAll(currentForecastResp.Body)
-		if err != nil {
-			log.Printf("%s", err)
-		}
-		json.Unmarshal([]byte(currentForecastJSON), &currentForecast)
+	// Go thru the response and overwrite the Summary fields with "Mon, Dec 25"
+	// taken from the int Time fields
+	code := map[string]interface{}{
+		"current":     currentWeather.Currently,
+		"forecastday": currentWeather.Daily,
+		"flags":       currentWeather.Flags,
 	}
-
-	code := map[string]interface{}{"current": currentWeather, "forecastday": currentForecast}
 	data, _ := json.Marshal(code)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 	w.Write(data)
