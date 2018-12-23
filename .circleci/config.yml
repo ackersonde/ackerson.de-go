@@ -56,6 +56,7 @@ jobs:
       - run:
           name: Disable Digital Ocean firewall for deploy
           command: |
+            apk add -U jq ca-certificates curl
             curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/disableFW.sh | sh
 
       - attach_workspace:
@@ -64,6 +65,7 @@ jobs:
       - run:
           name: "Upload to DockerHub, deploy container to Digital Ocean Droplet & launch"
           command: |
+            source ~/.ssh_agent_conf
             ssh-add -l
 
             export DEPLOY_SERVER=deploy.ackerson.de
