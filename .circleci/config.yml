@@ -56,7 +56,7 @@ jobs:
       - run:
           name: Disable Digital Ocean firewall for deploy
           command: |
-            apk add -U jq ca-certificates curl
+            apk add -U jq ca-certificates curl openssh-client
             curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/disableFW.sh | sh
 
       - attach_workspace:
@@ -67,13 +67,12 @@ jobs:
           command: |
             export DEPLOY_SERVER=deploy.ackerson.de
             if [ $DEPLOY_SERVER_IP ]; then
-              #docker volume create --name data-volume
               export DEPLOY_SERVER=$DEPLOY_SERVER_IP
             fi
             echo "Deploy to $DEPLOY_SERVER"
 
-            #ssh-keyscan $DEPLOY_SERVER >> ~/.ssh/known_hosts
-            export DEPLOY_CONNECT="ssh -o StrictHostKeyChecking=no ackersond@$DEPLOY_SERVER"
+            ssh-keyscan $DEPLOY_SERVER >> ~/.ssh/known_hosts
+            export DEPLOY_CONNECT="ssh ackersond@$DEPLOY_SERVER"
 
             if [ -f /tmp/last_docker_push ]; then
               export LAST_DOCKER_PUSH=`cat /tmp/last_docker_push`
