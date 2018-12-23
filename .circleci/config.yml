@@ -52,16 +52,6 @@ jobs:
       - add-ssh-keys:
           fingerprints:
             - "93:c4:61:21:a6:82:d8:6d:4f:73:11:79:37:23:83:07"
-      - run:
-          name: Start ssh-agent
-          command: |
-            apk add -U jq ca-certificates curl openssh-client
-
-            ssh-agent -s > ~/.ssh_agent_conf
-            source ~/.ssh_agent_conf
-            for _k in $(ls ${HOME}/.ssh/id_*); do
-              ssh-add ${_k} || true
-            done
 
       - run:
           name: Disable Digital Ocean firewall for deploy
@@ -74,7 +64,6 @@ jobs:
       - run:
           name: "Upload to DockerHub, deploy container to Digital Ocean Droplet & launch"
           command: |
-            source ~/.ssh_agent_conf
             ssh-add -l
 
             export DEPLOY_SERVER=deploy.ackerson.de
