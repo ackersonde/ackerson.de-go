@@ -72,8 +72,8 @@ jobs:
             fi
             echo "Deploy to $DEPLOY_SERVER"
 
-            ssh-keyscan $DEPLOY_SERVER >> ~/.ssh/known_hosts
-            export DEPLOY_CONNECT="ssh ackersond@$DEPLOY_SERVER"
+            #ssh-keyscan $DEPLOY_SERVER >> ~/.ssh/known_hosts
+            export DEPLOY_CONNECT="ssh -o StrictHostKeyChecking=no ackersond@$DEPLOY_SERVER"
 
             if [ -f /tmp/last_docker_push ]; then
               export LAST_DOCKER_PUSH=`cat /tmp/last_docker_push`
