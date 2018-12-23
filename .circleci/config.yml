@@ -69,10 +69,11 @@ jobs:
             if [ $DEPLOY_SERVER_IP ]; then
               export DEPLOY_SERVER=$DEPLOY_SERVER_IP
             fi
-            echo "Deploy to $DEPLOY_SERVER"
+            echo "Deploying to $DEPLOY_SERVER..."
 
+            ssh-add -l
             ssh-keyscan $DEPLOY_SERVER >> ~/.ssh/known_hosts
-            export DEPLOY_CONNECT="ssh ackersond@$DEPLOY_SERVER"
+            export DEPLOY_CONNECT="ssh -vvv ackersond@$DEPLOY_SERVER"
 
             if [ -f /tmp/last_docker_push ]; then
               export LAST_DOCKER_PUSH=`cat /tmp/last_docker_push`
