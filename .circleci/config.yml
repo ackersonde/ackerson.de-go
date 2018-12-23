@@ -26,7 +26,7 @@ jobs:
           name: "Install Docker CE"
           command: |
             VER="18.09.0"
-            curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-$VER-ce.tgz && tar --strip-components=1 -xvzf docker-$VER-ce.tgz -C /usr/local/bin
+            curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz && tar --strip-components=1 -xvzf docker-$VER-ce.tgz -C /usr/local/bin
             rm docker-$VER-ce.tgz && rm -f /var/cache/apk/*
 
       - run:
