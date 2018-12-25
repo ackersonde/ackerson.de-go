@@ -57,7 +57,6 @@ jobs:
           name: Disable Digital Ocean firewall for deploy
           command: |
             apk add -U jq ca-certificates curl openssh-client
-            public_ip_address=$(curl -s https://checkip.amazonaws.com)
             curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/addSSHipFW.sh | sh
 
 
@@ -104,7 +103,6 @@ jobs:
       - run:
           name: Reenable Digital Ocean firewall
           command: |
-            public_ip_address=$(curl -s https://checkip.amazonaws.com)
             curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/dropSSHipFW.sh | sh
           when: always
 
