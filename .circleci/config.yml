@@ -57,7 +57,9 @@ jobs:
           name: Disable Digital Ocean firewall for deploy
           command: |
             apk add -U jq ca-certificates curl openssh-client
-            curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/disableFW.sh | sh
+            public_ip_address=$(curl -s https://checkip.amazonaws.com)
+            curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/addSSHipFW.sh | sh
+
 
       - attach_workspace:
           at: /tmp
@@ -102,9 +104,8 @@ jobs:
       - run:
           name: Reenable Digital Ocean firewall
           command: |
-            if [ -z $DEPLOY_SERVER_IP ]; then
-              curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/reenableFW.sh | sh
-            fi
+            public_ip_address=$(curl -s https://checkip.amazonaws.com)
+            curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/dropSSHipFW.sh | sh
           when: always
 
 workflows:
