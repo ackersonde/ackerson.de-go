@@ -200,7 +200,7 @@ function mvvRoute(origin, destination) {
                     <span style='float:left;'>"+dateWeather+"</span>\
                     <div style='float:left;clear:left;margin-right:5px;'>\
                         <span style='font-weight:bold;'>"+Math.round(forecast[i]['temperatureMin'])+"&nbsp;"+units+"</span>\
-                        <img src='"+sslImage+"' width='44' height='44'>\
+                        <img src='"+sslImage+"' width='44' height='44' style='background:white;'>\
                         <span style='font-weight:bold;'>"+Math.round(forecast[i]['temperatureMax'])+"&nbsp;"+units+"</span>\
                     </div>";
                     if (i+1 < 5) {
@@ -219,7 +219,7 @@ function mvvRoute(origin, destination) {
                     <div style='float:left;margin-left:10px;'>\
                         <div>\
                             <a target='_blank' href='"+yourDarkSkyWeather+"'>\
-                            <img src='"+sslCurrentImage+"' width='44' height='44'>\
+                            <img src='"+sslCurrentImage+"' width='44' height='44' style='background:white;'>\
                             </a>\
                         </div>\
                         <div style='margin-left:-10px;'>"+current['summary']+"</div>\
