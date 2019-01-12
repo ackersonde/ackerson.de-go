@@ -9,6 +9,7 @@ import (
 	"log"
 	"net"
 	"net/http"
+	"net/http/httputil"
 	"net/url"
 	"os"
 	"strconv"
@@ -267,11 +268,11 @@ func bbDownloadStatus(w http.ResponseWriter, req *http.Request) {
 	filepath := gameDownloadDir + title
 	file, err := os.Open(filepath)
 	if err != nil {
-		log.Printf("%s", err)
+		log.Printf("%s\n", err)
 	}
 	fi, err := file.Stat()
 	if err != nil {
-		log.Printf("%s", err)
+		log.Printf("%s\n", err)
 		size = -10
 	} else {
 		size = fi.Size()
@@ -322,7 +323,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 		humanFilename = downloadFilename
 		res, err := http.Head(gameURL)
 		if err != nil {
-			log.Printf("ERR: unable to find game size")
+			log.Printf("ERR: unable to find game size\n")
 		}
 		gameLength = res.ContentLength
 
@@ -365,7 +366,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 		log.Println(URI.String())
 		res, err := http.Head(URI.String())
 		if err != nil {
-			log.Printf("ERR: unable to find video size")
+			log.Printf("ERR: unable to find video size\n")
 		} else {
 			log.Println(strconv.FormatInt(res.ContentLength, 10) + " bytes")
 		}
@@ -409,11 +410,11 @@ func sendPayloadToJoinAPI(downloadFilename string, humanFilename string, icon st
 	log.Printf("joinPushURL: %s\n", completeURL)
 	resp, err := http.Get(completeURL)
 	if err != nil {
-		log.Printf("ERR: unable to call Join Push")
+		log.Printf("ERR: unable to call Join Push\n")
 	}
 	defer resp.Body.Close()
 	if resp.StatusCode == 200 {
-		log.Printf("successfully sent payload to Join!")
+		log.Printf("successfully sent payload to Join!\n")
 		response = "Success!"
 	}
 
@@ -516,7 +517,10 @@ func bbAjaxDay(w http.ResponseWriter, r *http.Request) {
 
 // GetIP now commented
 func GetIP(r *http.Request) string {
-	ip := r.Header.Get("X-Forwarded-For")
+	requestDump, _ := httputil.DumpRequest(r, false)
+	log.Printf("GetIP Request: %v\n", requestDump)
+
+	ip := r.Header.Get("X-Real-Ip")
 
 	if len(ip) <= 0 {
 		ipRemote, _, _ := net.SplitHostPort(r.RemoteAddr)
@@ -532,7 +536,7 @@ func WhoAmIHandler(w http.ResponseWriter, req *http.Request) {
 	rawData := strings.Join(s, "\r\n")
 	rawDataJSON := map[string]string{"whoami": rawData}
 	for header, value := range req.Header {
-		log.Printf("%s: %s", header, value)
+		log.Printf("%s: %s\n", header, value)
 	}
 	data, _ := json.Marshal(rawDataJSON)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
@@ -571,9 +575,9 @@ func WeatherHandler(w http.ResponseWriter, req *http.Request) {
 	//body := string(structures.TestGeoLocationPost) // in case you are testing :)
 	body, err := ioutil.ReadAll(req.Body)
 	if err != nil {
-		log.Printf("err: %s", err)
+		log.Printf("err: %s\n", err)
 	} else {
-		log.Printf("body: %s", body)
+		log.Printf("body: %s\n", body)
 	}
 
 	geoLocation := new(structures.JSONGeoLocationRequest)
@@ -590,12 +594,12 @@ func WeatherHandler(w http.ResponseWriter, req *http.Request) {
 	currentWeather := new(structures.CurrentWeatherConditions)
 	currentWeatherResp, err := http.Get(conditionsURI + locationParams)
 	if err != nil {
-		log.Printf("darksky ERR: %s", err)
+		log.Printf("darksky ERR: %s\n", err)
 	} else {
 		defer currentWeatherResp.Body.Close()
 		currentWeatherJSON, err2 := ioutil.ReadAll(currentWeatherResp.Body)
 		if err2 != nil {
-			log.Printf("darksky ERR2: %s", err2)
+			log.Printf("darksky ERR2: %s\n", err2)
 		}
 		json.Unmarshal([]byte(currentWeatherJSON), &currentWeather)
 	}
