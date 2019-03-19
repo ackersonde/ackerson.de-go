@@ -1,9 +1,9 @@
 package main
 
 import (
+	"bufio"
 	"encoding/json"
 	"errors"
-	"fmt"
 	"io"
 	"io/ioutil"
 	"log"
@@ -151,14 +151,6 @@ func setUpRoutes(router *mux.Router) {
 		w.Write([]byte(response))
 	})
 
-	router.HandleFunc("/up", func(w http.ResponseWriter, r *http.Request) {
-		http.Error(w, "Directory index denied", http.StatusForbidden)
-	})
-	router.HandleFunc("/up/", func(w http.ResponseWriter, r *http.Request) {
-		http.Error(w, "Directory index denied", http.StatusForbidden)
-	})
-	router.HandleFunc("/up/{file}", storedFilesHandler)
-	router.HandleFunc("/drop/{boxPath:(?:.*\\/?.*)+}", dropboxFileDownloader)
 	router.HandleFunc("/down/{file:.*}", doSpacesFileDownloader)
 }
 
@@ -182,103 +174,6 @@ func doSpacesFileDownloader(w http.ResponseWriter, r *http.Request) {
 	if _, err = io.Copy(w, file); err != nil {
 		http.Error(w, "Couldn't write "+bucketName+"/"+fileName, http.StatusBadRequest)
 		return
-	}
-}
-
-func dropboxFileDownloader(w http.ResponseWriter, r *http.Request) {
-	token := r.URL.Query().Get("tok")
-
-	if token == "" || token != fileToken {
-		http.Error(w, "Authentication failed", http.StatusForbidden)
-	} else {
-		if r.Method == "GET" {
-			vars := mux.Vars(r)
-			filename := vars["boxPath"]
-			filename = strings.TrimPrefix(filename, "/")
-			filepath := fmt.Sprintf("{\"path\": \"/configs/%s\"}", filename)
-
-			req, err := http.NewRequest("POST", "https://content.dropboxapi.com/2/files/download", nil)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusServiceUnavailable)
-			}
-			req.Header.Set("Authorization", "Bearer "+dropboxToken)
-			req.Header.Set("Dropbox-Api-Arg", filepath)
-
-			resp, err := http.DefaultClient.Do(req)
-			if err != nil {
-				http.Error(w, err.Error()+" : "+resp.Status, http.StatusInternalServerError)
-				return
-			}
-			defer resp.Body.Close()
-
-			dropboxJSON := resp.Header.Get("dropbox-api-result")
-			//log.Println("DB JSON: " + dropboxJSON)
-
-			var dropboxAPIResult map[string]interface{}
-			json.Unmarshal([]byte(dropboxJSON), &dropboxAPIResult)
-
-			attachmentName := fmt.Sprintf("attachment; filename=%s", dropboxAPIResult["name"])
-			filesize := dropboxAPIResult["size"].(float64)
-
-			w.Header().Set("Content-Disposition", attachmentName)
-			w.Header().Set("Content-Type", resp.Header.Get("Content-Type"))
-			fileSizeStr := strconv.FormatFloat(filesize, 'f', -1, 64)
-			w.Header().Set("Content-Length", fileSizeStr)
-
-			io.Copy(w, resp.Body)
-		} else {
-			http.Error(w, "This endpoint only supports downloading.", http.StatusBadRequest)
-		}
-	}
-}
-
-func storedFilesHandler(w http.ResponseWriter, r *http.Request) {
-	token := r.URL.Query().Get("tok")
-	log.Printf("%s: %s => [tok:%s]\n", r.Method, r.URL, token)
-
-	if token == "" || token != fileToken {
-		http.Error(w, "Authentication failed", http.StatusForbidden)
-	} else {
-		if r.Method == "GET" {
-			vars := mux.Vars(r)
-			filename := vars["file"]
-			filepath := uploadDir + filename
-
-			log.Printf("preparing to download: %s\n", filepath)
-			fileObj, err := os.Open(filepath)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-				return
-			}
-			defer fileObj.Close()
-
-			fileinfo, err := fileObj.Stat()
-			attachmentName := fmt.Sprintf("attachment; filename=%s", fileinfo.Name())
-			filesize := fileinfo.Size()
-
-			w.Header().Set("Content-Disposition", attachmentName)
-			w.Header().Set("Content-Type", r.Header.Get("Content-Type"))
-			w.Header().Set("Content-Length", strconv.FormatInt(filesize, 10))
-
-			io.Copy(w, fileObj)
-		} else if r.Method == post {
-			file, handler, err := r.FormFile("fileupload")
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
-			defer file.Close()
-
-			// copy example
-			f, err := os.OpenFile(uploadDir+handler.Filename, os.O_WRONLY|os.O_CREATE, 0666)
-			if err != nil {
-				http.Error(w, err.Error(), http.StatusInternalServerError)
-			}
-			defer f.Close()
-			io.Copy(f, file)
-		} else {
-			errorMsg := fmt.Sprintf("%s http method not supported", r.Method)
-			http.Error(w, errorMsg, http.StatusBadRequest)
-		}
 	}
 }
 
@@ -451,6 +346,20 @@ func sendPayloadToJoinAPI(downloadFilename string, humanFilename string, icon st
 	}
 
 	return response
+}
+
+func downloadFileToDOSpaces(filepath string, url string, filesize int64) (err error) {
+
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	reader := bufio.NewReader(resp.Body)
+
+	doSpacesClient := common.AccessDigitalOceanSpaces()
+	doSpacesClient.PutObject("pubackde", filepath, reader, filesize, minio.PutObjectOptions{})
+
+	return nil
 }
 
 // TODO: download from DO spaces here instead of DO droplet
