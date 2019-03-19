@@ -16,8 +16,11 @@ import (
 	"strings"
 	"time"
 
+	"github.com/minio/minio-go"
+
 	"github.com/danackerson/ackerson.de-go/baseball"
 	"github.com/danackerson/ackerson.de-go/structures"
+	"github.com/danackerson/digitalocean/common"
 	sessions "github.com/goincremental/negroni-sessions"
 	"github.com/goincremental/negroni-sessions/cookiestore"
 	"github.com/gorilla/mux"
@@ -56,6 +59,7 @@ var version string
 var port string
 var fileToken string
 var dropboxToken string
+var spacesKey, spacesSecret string
 var post = "POST"
 
 func parseEnvVariables() {
@@ -65,6 +69,8 @@ func parseEnvVariables() {
 	version = os.Getenv("CIRCLE_BUILD_NUM")
 	fileToken = os.Getenv("FILE_TOKEN")
 	dropboxToken = os.Getenv("DROPBOX_TOKEN")
+	spacesKey = os.Getenv("SPACES_KEY")
+	spacesSecret = os.Getenv("SPACES_SECRET")
 }
 
 func setUpRoutes(router *mux.Router) {
@@ -153,6 +159,26 @@ func setUpRoutes(router *mux.Router) {
 	})
 	router.HandleFunc("/up/{file}", storedFilesHandler)
 	router.HandleFunc("/drop/{boxPath:(?:.*\\/?.*)+}", dropboxFileDownloader)
+	router.HandleFunc("/down/{file:.*}", doSpacesFileDownloader)
+}
+
+func doSpacesFileDownloader(w http.ResponseWriter, r *http.Request) {
+	minioClient := common.AccessDigitalOceanSpaces()
+	bucketName := "pubackde"
+
+	vars := mux.Vars(r)
+	fileName := vars["file"]
+
+	file, err := minioClient.GetObject(bucketName, fileName, minio.GetObjectOptions{})
+	if err != nil {
+		http.Error(w, "Couldn't find "+bucketName+"/"+fileName, http.StatusBadRequest)
+		return
+	}
+
+	if _, err = io.Copy(w, file); err != nil {
+		http.Error(w, "Couldn't write "+bucketName+"/"+fileName, http.StatusBadRequest)
+		return
+	}
 }
 
 func dropboxFileDownloader(w http.ResponseWriter, r *http.Request) {
