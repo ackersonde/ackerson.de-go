@@ -169,9 +169,13 @@ func doSpacesFileDownloader(w http.ResponseWriter, r *http.Request) {
 	vars := mux.Vars(r)
 	fileName := vars["file"]
 
+	if fileName == "" {
+		http.Error(w, "Listing not allowed", http.StatusUnauthorized)
+		return
+	}
 	file, err := minioClient.GetObject(bucketName, fileName, minio.GetObjectOptions{})
 	if err != nil {
-		http.Error(w, "Couldn't find "+bucketName+"/"+fileName, http.StatusBadRequest)
+		http.Error(w, "Couldn't find '"+fileName+"'", http.StatusBadRequest)
 		return
 	}
 
@@ -311,6 +315,7 @@ func bbDownloadStatus(w http.ResponseWriter, req *http.Request) {
 	w.Write(data)
 }
 
+// TODO: move the download dir to DO Spaces
 func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 	gameTitle := r.URL.Query().Get("gameTitle")
 	gameURL := r.URL.Query().Get("gameURL")
@@ -420,6 +425,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 	}()
 }
 
+// TODO: don't use ackerson.de/downloads -> use DO Spaces
 func sendPayloadToJoinAPI(downloadFilename string, humanFilename string, icon string, smallIcon string) string {
 	response := "Sorry, couldn't resend..."
 	humanFilenameEnc := &url.URL{Path: humanFilename}
@@ -447,6 +453,7 @@ func sendPayloadToJoinAPI(downloadFilename string, humanFilename string, icon st
 	return response
 }
 
+// TODO: download from DO spaces here instead of DO droplet
 func downloadFile(filepath string, url string, filesize int64) (err error) {
 	// check if file exists and is same size as MLB.com (meaning we already downloaded it)
 	fi, err := os.Stat(filepath)
@@ -465,7 +472,7 @@ func downloadFile(filepath string, url string, filesize int64) (err error) {
 		}
 		defer resp.Body.Close()
 
-		// Writer the body to file
+		// Write the body to file
 		_, err = io.Copy(out, resp.Body)
 		if err != nil {
 			return err
