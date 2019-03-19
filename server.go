@@ -309,7 +309,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 	filepath := gameDownloadDir + downloadFilename
 
 	go func() {
-		err := downloadFile(filepath, gameURL, gameLength)
+		err := downloadFileToDOSpaces(filepath, gameURL, gameLength)
 		if err != nil {
 			// Check if file was already downloaded & don't resend to Join!
 			log.Printf("ERR: unable to download/save %s: %s\n", gameURL, err.Error())
