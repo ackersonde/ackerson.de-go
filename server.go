@@ -357,7 +357,11 @@ func downloadFileToDOSpaces(filepath string, url string, filesize int64) (err er
 	reader := bufio.NewReader(resp.Body)
 
 	doSpacesClient := common.AccessDigitalOceanSpaces()
-	doSpacesClient.PutObject("pubackde", filepath, reader, filesize, minio.PutObjectOptions{})
+	wrote, err := doSpacesClient.PutObject("pubackde", filepath, reader, filesize, minio.PutObjectOptions{})
+	if err != nil {
+		return err
+	}
+	log.Printf("successfully wrote %d bytes to DO Spaces (%s)\n", wrote, filepath)
 
 	return nil
 }
