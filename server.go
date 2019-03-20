@@ -7,11 +7,13 @@ import (
 	"io"
 	"io/ioutil"
 	"log"
+	"mime"
 	"net"
 	"net/http"
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -30,7 +32,7 @@ import (
 )
 
 var httpPort = ":8080"
-var gameDownloadDir = "/app/public/downloads/"
+var downloadDir = "bender"
 
 func getHTTPPort() string {
 	return httpPort
@@ -150,10 +152,10 @@ func setUpRoutes(router *mux.Router) {
 		w.Write([]byte(response))
 	})
 
-	router.HandleFunc("/down/{file:.*}", doSpacesFileDownloader)
+	router.HandleFunc("/down/{file:.*}", downloadFromDOSpaces)
 }
 
-func doSpacesFileDownloader(w http.ResponseWriter, r *http.Request) {
+func downloadFromDOSpaces(w http.ResponseWriter, r *http.Request) {
 	minioClient := common.AccessDigitalOceanSpaces()
 	bucketName := "pubackde"
 
@@ -189,7 +191,7 @@ func bbDownloadStatus(w http.ResponseWriter, req *http.Request) {
 
 	title := req.URL.Query().Get("title")
 
-	filepath := gameDownloadDir + title
+	filepath := downloadDir + title
 	file, err := os.Open(filepath)
 	if err != nil {
 		log.Printf("%s\n", err)
@@ -308,7 +310,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 	filepath := gameDownloadDir + downloadFilename
 
 	go func() {
-		err := downloadFileToDOSpaces(filepath, gameURL, gameLength)
+		err := copyFileToDOSpaces("pubackde", filepath, gameURL, gameLength)
 		if err != nil {
 			// Check if file was already downloaded & don't resend to Join!
 			log.Printf("ERR: unable to download/save %s: %s\n", gameURL, err.Error())
@@ -320,26 +322,29 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 }
 
 // Helpful ideas: https://github.com/minio/minio-go/tree/master/examples/s3
-func downloadFileToDOSpaces(filepath string, url string, filesize int64) (err error) {
-	bucket := "pubackde"
-
+func copyFileToDOSpaces(bucket string, remoteFile string, url string, filesize int64) (err error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return err
 	}
 	reader := bufio.NewReader(resp.Body)
 
-	filepath = strings.TrimPrefix(filepath, "/")
+	remoteFile = strings.TrimPrefix(remoteFile, "/")
+	mimeType := mime.TypeByExtension(filepath.Ext(remoteFile))
+	if mimeType == "" {
+		mimeType = "application/octet-stream"
+	}
 
 	doSpacesClient := common.AccessDigitalOceanSpaces()
 
 	userMetaData := map[string]string{"x-amz-acl": "public-read"}
-	wrote, err := doSpacesClient.PutObject(bucket, filepath, reader, filesize, minio.PutObjectOptions{UserMetadata: userMetaData})
+	wrote, err := doSpacesClient.PutObject(bucket, remoteFile, reader, filesize,
+		minio.PutObjectOptions{UserMetadata: userMetaData, ContentType: mimeType})
 	if err != nil {
 		return err
 	}
 
-	log.Printf("successfully wrote %d bytes to DO Spaces (%s)\n", wrote, filepath)
+	log.Printf("successfully wrote %d bytes to DO Spaces (%s)\n", wrote, remoteFile)
 
 	return nil
 }
@@ -372,7 +377,6 @@ func sendPayloadToJoinAPI(downloadFilename string, humanFilename string, icon st
 	return response
 }
 
-// TODO: download from DO spaces here instead of DO droplet
 func downloadFile(filepath string, url string, filesize int64) (err error) {
 	// check if file exists and is same size as MLB.com (meaning we already downloaded it)
 	fi, err := os.Stat(filepath)
