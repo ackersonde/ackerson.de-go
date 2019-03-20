@@ -307,7 +307,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 	}
 
 	// and download it to ~/downloads/
-	filepath := gameDownloadDir + downloadFilename
+	filepath := downloadDir + downloadFilename
 
 	go func() {
 		err := copyFileToDOSpaces("pubackde", filepath, gameURL, gameLength)
