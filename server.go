@@ -326,8 +326,13 @@ func downloadFileToDOSpaces(filepath string, url string, filesize int64) (err er
 	}
 	reader := bufio.NewReader(resp.Body)
 
+	filepath = strings.TrimPrefix(filePath, "/")
+	opts := minio.PutObjectOptions = { PUBLIC }
+doSpacesClient.SetBucketPolicy()
+	SetBucketPolicy('testbucket', '2015/photos', BucketPolicy.ReadOnly
+
 	doSpacesClient := common.AccessDigitalOceanSpaces()
-	wrote, err := doSpacesClient.PutObject("pubackde", filepath, reader, filesize, minio.PutObjectOptions{})
+	wrote, err := doSpacesClient.PutObject("pubackde", filepath, reader, filesize, opts)
 	if err != nil {
 		return err
 	}
