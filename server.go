@@ -31,7 +31,6 @@ import (
 
 var httpPort = ":8080"
 var gameDownloadDir = "/app/public/downloads/"
-var uploadDir = "up/"
 
 func getHTTPPort() string {
 	return httpPort
@@ -309,7 +308,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 	filepath := gameDownloadDir + downloadFilename
 
 	go func() {
-		err := downloadFileToDOSpaces(filepath, gameURL, gameLength)
+		err := downloadFileToDOSpaces(downloadFilename, gameURL, gameLength)
 		if err != nil {
 			// Check if file was already downloaded & don't resend to Join!
 			log.Printf("ERR: unable to download/save %s: %s\n", gameURL, err.Error())
@@ -318,6 +317,23 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 			sendPayloadToJoinAPI(downloadFilename, humanFilename, icon, smallIcon)
 		}
 	}()
+}
+
+func downloadFileToDOSpaces(filepath string, url string, filesize int64) (err error) {
+	resp, err := http.Get(url)
+	if err != nil {
+		return err
+	}
+	reader := bufio.NewReader(resp.Body)
+
+	doSpacesClient := common.AccessDigitalOceanSpaces()
+	wrote, err := doSpacesClient.PutObject("pubackde", filepath, reader, filesize, minio.PutObjectOptions{})
+	if err != nil {
+		return err
+	}
+	log.Printf("successfully wrote %d bytes to DO Spaces (%s)\n", wrote, filepath)
+
+	return nil
 }
 
 // TODO: don't use ackerson.de/downloads -> use DO Spaces
@@ -346,24 +362,6 @@ func sendPayloadToJoinAPI(downloadFilename string, humanFilename string, icon st
 	}
 
 	return response
-}
-
-func downloadFileToDOSpaces(filepath string, url string, filesize int64) (err error) {
-
-	resp, err := http.Get(url)
-	if err != nil {
-		return err
-	}
-	reader := bufio.NewReader(resp.Body)
-
-	doSpacesClient := common.AccessDigitalOceanSpaces()
-	wrote, err := doSpacesClient.PutObject("pubackde", filepath, reader, filesize, minio.PutObjectOptions{})
-	if err != nil {
-		return err
-	}
-	log.Printf("successfully wrote %d bytes to DO Spaces (%s)\n", wrote, filepath)
-
-	return nil
 }
 
 // TODO: download from DO spaces here instead of DO droplet
