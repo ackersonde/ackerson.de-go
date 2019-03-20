@@ -319,23 +319,26 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 	}()
 }
 
+// Helpful ideas: https://github.com/minio/minio-go/tree/master/examples/s3
 func downloadFileToDOSpaces(filepath string, url string, filesize int64) (err error) {
+	bucket := "pubackde"
+
 	resp, err := http.Get(url)
 	if err != nil {
 		return err
 	}
 	reader := bufio.NewReader(resp.Body)
 
-	filepath = strings.TrimPrefix(filePath, "/")
-	opts := minio.PutObjectOptions = { PUBLIC }
-doSpacesClient.SetBucketPolicy()
-	SetBucketPolicy('testbucket', '2015/photos', BucketPolicy.ReadOnly
+	filepath = strings.TrimPrefix(filepath, "/")
 
 	doSpacesClient := common.AccessDigitalOceanSpaces()
-	wrote, err := doSpacesClient.PutObject("pubackde", filepath, reader, filesize, opts)
+
+	userMetaData := map[string]string{"x-amz-acl": "public-read"}
+	wrote, err := doSpacesClient.PutObject(bucket, filepath, reader, filesize, minio.PutObjectOptions{UserMetadata: userMetaData})
 	if err != nil {
 		return err
 	}
+
 	log.Printf("successfully wrote %d bytes to DO Spaces (%s)\n", wrote, filepath)
 
 	return nil
