@@ -84,6 +84,7 @@ jobs:
               -e CIRCLE_BUILD_NUM=$LAST_DOCKER_PUSH -e joinAPIKey=$joinAPIKey \
               -e ackSecret=$ackSecret -e ackWunder=$ackWunder \
               -e SPACES_KEY=$SPACES_KEY -e SPACES_SECRET=$SPACES_SECRET \
+              -e SPACES_NAME_PUBLIC=$SPACES_NAME_PUBLIC \
               --label='traefik.backend=homepage' \
               --label='traefik.docker.network=web' \
               --label='traefik.frontend.passHostHeader=true'

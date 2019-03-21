@@ -32,7 +32,7 @@ import (
 )
 
 var httpPort = ":8080"
-var downloadDir = "bender"
+var downloadDir = "bender/"
 
 func getHTTPPort() string {
 	return httpPort
@@ -60,7 +60,7 @@ var version string
 var port string
 var fileToken string
 var dropboxToken string
-var spacesKey, spacesSecret string
+var spacesKey, spacesSecret, spacesNamePublic string
 var post = "POST"
 
 func parseEnvVariables() {
@@ -72,6 +72,7 @@ func parseEnvVariables() {
 	dropboxToken = os.Getenv("DROPBOX_TOKEN")
 	spacesKey = os.Getenv("SPACES_KEY")
 	spacesSecret = os.Getenv("SPACES_SECRET")
+	spacesNamePublic = os.Getenv("SPACES_NAME_PUBLIC")
 }
 
 func setUpRoutes(router *mux.Router) {
@@ -157,7 +158,6 @@ func setUpRoutes(router *mux.Router) {
 
 func downloadFromDOSpaces(w http.ResponseWriter, r *http.Request) {
 	minioClient := common.AccessDigitalOceanSpaces()
-	bucketName := "pubackde"
 
 	vars := mux.Vars(r)
 	fileName := vars["file"]
@@ -166,14 +166,14 @@ func downloadFromDOSpaces(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Listing not allowed", http.StatusUnauthorized)
 		return
 	}
-	file, err := minioClient.GetObject(bucketName, fileName, minio.GetObjectOptions{})
+	file, err := minioClient.GetObject(spacesNamePublic, fileName, minio.GetObjectOptions{})
 	if err != nil {
 		http.Error(w, "Couldn't find '"+fileName+"'", http.StatusBadRequest)
 		return
 	}
 
 	if _, err = io.Copy(w, file); err != nil {
-		http.Error(w, "Couldn't write "+bucketName+"/"+fileName, http.StatusBadRequest)
+		http.Error(w, "Couldn't write "+spacesNamePublic+"/"+fileName, http.StatusBadRequest)
 		return
 	}
 }
