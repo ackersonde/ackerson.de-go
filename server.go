@@ -357,7 +357,7 @@ func sendPayloadToJoinAPI(downloadFilename string, humanFilename string, icon st
 	pushURL := "https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush"
 	defaultParams := "?deviceId=d888b2e9a3a24a29a15178b2304a40b3&icon=" + icon + "&smallicon=" + smallIcon
 	fileOnPhone := "&title=" + humanFilenameEncoded
-	fileURL := "&file=https://" + spacesNamePublic + "/" + downloadFilename
+	fileURL := "&file=https://" + spacesNamePublic + ".ams3.digitaloceanspaces.com/" + downloadFilename
 	apiKey := "&apikey=" + joinAPIKey
 
 	completeURL := pushURL + defaultParams + fileOnPhone + fileURL + apiKey
