@@ -316,7 +316,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 			log.Printf("ERR: unable to download/save %s: %s\n", gameURL, err.Error())
 		} else {
 			log.Printf("Finished downloading %s\n", filepath)
-			sendPayloadToJoinAPI(downloadFilename, humanFilename, icon, smallIcon)
+			sendPayloadToJoinAPI(filepath, humanFilename, icon, smallIcon)
 		}
 	}()
 }
@@ -349,7 +349,6 @@ func copyFileToDOSpaces(remoteFile string, url string, filesize int64) (err erro
 	return nil
 }
 
-// TODO: don't use ackerson.de/downloads -> use DO Spaces
 func sendPayloadToJoinAPI(downloadFilename string, humanFilename string, icon string, smallIcon string) string {
 	response := "Sorry, couldn't resend..."
 	humanFilenameEnc := &url.URL{Path: humanFilename}
@@ -358,7 +357,7 @@ func sendPayloadToJoinAPI(downloadFilename string, humanFilename string, icon st
 	pushURL := "https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush"
 	defaultParams := "?deviceId=d888b2e9a3a24a29a15178b2304a40b3&icon=" + icon + "&smallicon=" + smallIcon
 	fileOnPhone := "&title=" + humanFilenameEncoded
-	fileURL := "&file=https://ackerson.de/downloads/" + downloadFilename
+	fileURL := "&file=https://" + spacesNamePublic + "/" + downloadFilename
 	apiKey := "&apikey=" + joinAPIKey
 
 	completeURL := pushURL + defaultParams + fileOnPhone + fileURL + apiKey
