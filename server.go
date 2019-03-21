@@ -310,7 +310,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 	filepath := downloadDir + downloadFilename
 
 	go func() {
-		err := copyFileToDOSpaces("pubackde", filepath, gameURL, gameLength)
+		err := copyFileToDOSpaces(filepath, gameURL, gameLength)
 		if err != nil {
 			// Check if file was already downloaded & don't resend to Join!
 			log.Printf("ERR: unable to download/save %s: %s\n", gameURL, err.Error())
@@ -322,7 +322,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 }
 
 // Helpful ideas: https://github.com/minio/minio-go/tree/master/examples/s3
-func copyFileToDOSpaces(bucket string, remoteFile string, url string, filesize int64) (err error) {
+func copyFileToDOSpaces(remoteFile string, url string, filesize int64) (err error) {
 	resp, err := http.Get(url)
 	if err != nil {
 		return err
@@ -338,7 +338,7 @@ func copyFileToDOSpaces(bucket string, remoteFile string, url string, filesize i
 	doSpacesClient := common.AccessDigitalOceanSpaces()
 
 	userMetaData := map[string]string{"x-amz-acl": "public-read"}
-	wrote, err := doSpacesClient.PutObject(bucket, remoteFile, reader, filesize,
+	wrote, err := doSpacesClient.PutObject(spacesNamePublic, remoteFile, reader, filesize,
 		minio.PutObjectOptions{UserMetadata: userMetaData, ContentType: mimeType})
 	if err != nil {
 		return err
