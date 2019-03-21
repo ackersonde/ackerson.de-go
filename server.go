@@ -357,12 +357,12 @@ func sendPayloadToJoinAPI(downloadFilename string, humanFilename string, icon st
 	pushURL := "https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush"
 	defaultParams := "?deviceId=d888b2e9a3a24a29a15178b2304a40b3&icon=" + icon + "&smallicon=" + smallIcon
 	fileOnPhone := "&title=" + humanFilenameEncoded
-	fileURL := "https://" + spacesNamePublic + ".ams3.digitaloceanspaces.com/" + downloadFilename
+	fileURL := spacesNamePublic + ".ams3.digitaloceanspaces.com/" + downloadFilename
 	apiKey := "&apikey=" + joinAPIKey
 
 	fileURLEnc := &url.URL{Path: fileURL}
 	fileURL = fileURLEnc.String()
-	completeURL := pushURL + defaultParams + apiKey + fileOnPhone + "&file=" + fileURL
+	completeURL := pushURL + defaultParams + apiKey + fileOnPhone + "&file=https://" + fileURL
 	// Get the data
 	log.Printf("joinPushURL: %s\n", completeURL)
 	resp, err := http.Get(completeURL)
