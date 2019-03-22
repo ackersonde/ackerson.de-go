@@ -1,5 +1,5 @@
 <div id="responseBB">
-  <section id="panel" style="display: table; background-color: white; text-align:center;">
+  <section id="gamepanel" class="gamepaneltop">
     <div style="display: table-row; padding:10px;">
       <div style="display: table-cell;padding:5px;"><a href="javascript:fetchGames(prepareDate('{{$.Date}}'), -1);"><img class="selectors prev-resized" alt="Prev" title="Prev" src="images/img_trans.gif"></a></div>
       <div style="display: table-cell;padding:5px;"><a href="https://www.mlb.com/standings">MLB</a> Games from<br><input type='text' id='searchDate' value='{{ $.ReadableDate }}'></div>
@@ -11,7 +11,7 @@
       <div style="display: table-cell;padding:5px;">&nbsp;</div>
     </div>
   </section>
-  <section id="panel" style="display: table; background-color: white; text-align:center;">
+  <section id="gamepanel" class="gamepanelbottom">
     {{ range $key, $value := .Games }}
     <div style="display: table-row; margin-top: 20px;">
       {{ $away_team := index $value 0}}

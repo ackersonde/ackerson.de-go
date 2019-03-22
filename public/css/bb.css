@@ -54,6 +54,30 @@ img.ui-datepicker-trigger {
   color: white;
   font-weight: bolder;
 }
+#gamepaneltop {
+  border-top-right-radius:15px;
+  border-top-left-radius:15px
+}
+
+#gamepanelbottom {
+  border-bottom-right-radius:15px;
+  border-bottom-left-radius:15px
+}
+
+#gamepanel {
+  display: table;
+  background-color: white;
+  text-align:center;
+  position: relative;
+  top: 0;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  width: 25%;
+  height: 50%;
+  margin: auto;
+}
+
 #panel {
   display: inline-block;
   position: relative;

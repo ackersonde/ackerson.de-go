@@ -1,5 +1,5 @@
 <div id="responseBB">
-  <section id="panel" style="display: table; background-color: white; text-align:center;">
+  <section id="gamepanel" class="gamepaneltop" style="">
     <div style="display: table-row; padding:10px;">
       <div style="display: table-cell;padding:5px;">
         <a href="/bb" title="Play Ball!"><img src="images/glove.jpg" width="48px" style="vertical-align:middle;"></a>
@@ -17,7 +17,7 @@
     </div>
   </section>
   {{ range .FavGamesList }}
-  <section id="panel" style="display: table; background-color: white; text-align:center;">
+  <section id="gamepanel" class="gamepanelbottom">
       {{ $date := .ReadableDate }}
       {{ range $key, $value := .Games }}
       <div style="display: table-row; margin-top: 20px;">
