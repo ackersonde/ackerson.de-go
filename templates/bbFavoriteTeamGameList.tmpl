@@ -16,8 +16,8 @@
       </div>
     </div>
   </section>
-  {{ range .FavGamesList }}
   <section id="gamepanel" class="gamepanelbottom">
+  {{ range .FavGamesList }}
       {{ $date := .ReadableDate }}
       {{ range $key, $value := .Games }}
       <div style="display: table-row; margin-top: 20px;">
@@ -40,6 +40,6 @@
         </div>
       </div>
       {{ end }}
-  </section>
   {{ end }}
+  </section>
 </div>
