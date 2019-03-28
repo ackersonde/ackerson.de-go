@@ -15,12 +15,8 @@
     <title>Download and Push</title>
   </head>
   <body>
-    <div>Downloading <span style="font-weight:bold;">{{ $.GameTitle }}</span> from {{ $.GameDate }} to Digital Ocean Spaces.
-      <br/>It should appear on your phone shortly (please allow up to 10 minutes).
-    </div>
-    <div>
-      <br/>
-      <input type="button" id="render" style="display:none" onclick="location.href='/bb_resend_join_push?title={{ $.GameDownloadTitle }}';" value="Resend ballgame" />
+    <div>Downloading <span style="font-weight:bold;"><a href="{{ $.GameDownloadTitle }}">{{ $.GameTitle }}</a></span> (from {{ $.GameDate }}) to <a href="https://cloud.digitalocean.com/spaces?i=7d8740">Digital Ocean Spaces</a>.
+      <br/><br/>It should appear on your phone shortly (please allow up to 10 minutes).
     </div>
   </body>
 </html>
