@@ -261,10 +261,8 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 		render.HTML(w, http.StatusOK, "bbDownloadGameAndPushPhone",
 			GameMeta{
 				GameTitle:         awayTeam.Name + "@" + homeTeam.Name,
-				GameDownloadTitle: downloadFilename,
-				GameLength:        res.ContentLength,
+				GameDownloadTitle: gameURL,
 				GameDate:          humanDate,
-				GameFile:          downloadFilename,
 			})
 	} else if fileType == "vpn" {
 		icon = "http://www.setaram.com/wp-content/themes/setaram/library/images/lock.png"
