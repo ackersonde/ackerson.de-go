@@ -147,11 +147,13 @@ func setUpRoutes(router *mux.Router) {
 
 	icon := "https://ackerson.de/images/baseballSmall.png"
 	smallIcon := "https://connect.baseball.trackman.com/Images/spinner.png"
-	router.HandleFunc("/bb_resend_join_push", func(w http.ResponseWriter, r *http.Request) {
-		response := sendPayloadToJoinAPI(r.URL.Query().Get("title"), r.URL.Query().Get("title"), icon, smallIcon)
+	router.HandleFunc("/bb_resend_join_push",
+		func(w http.ResponseWriter, r *http.Request) {
+			response := sendPayloadToJoinAPI(downloadDir+r.URL.Query().Get("title"),
+				r.URL.Query().Get("title"), icon, smallIcon)
 
-		w.Write([]byte(response))
-	})
+			w.Write([]byte(response))
+		})
 
 	router.HandleFunc("/down/{file:.*}", downloadFromDOSpaces)
 }
@@ -186,6 +188,7 @@ type FavGames struct {
 
 var homePageMap map[int]baseball.Team
 
+// TODO: check file @ DO Spaces
 func bbDownloadStatus(w http.ResponseWriter, req *http.Request) {
 	var size int64
 
