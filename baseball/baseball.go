@@ -165,8 +165,14 @@ func FetchGameURLFromID(contentURL string) string {
 	}
 
 	mediaJSON := string(raw)
-	video := gjson.Get(mediaJSON, `media.epgAlternate.#[title="Extended Highlights"].items.#.playbacks.#[name="FLASH_2500K_1280X720"].url`)
 
+	video := gjson.Get(mediaJSON, `media.epgAlternate.#[title="Extended Highlights"].items.#.playbacks.#[name="mp4Avc"].url`)
+	if len(video.Array()) <= 0 {
+		video = gjson.Get(mediaJSON, `media.epg.#[title="Extended Highlights"].items.#.playbacks.#[name="mp4Avc"].url`)
+	}
+	if len(video.Array()) <= 0 {
+		video = gjson.Get(mediaJSON, `media.epgAlternate.#[title="Extended Highlights"].items.#.playbacks.#[name="FLASH_2500K_1280X720"].url`)
+	}
 	if len(video.Array()) <= 0 {
 		video = gjson.Get(mediaJSON, `media.epg.#[title="Extended Highlights"].items.#.playbacks.#[name="FLASH_2500K_1280X720"].url`)
 	}
