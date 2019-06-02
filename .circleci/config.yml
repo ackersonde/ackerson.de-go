@@ -25,16 +25,15 @@ jobs:
       - run:
           name: "Install Docker CE"
           command: |
-            VER="18.09.0"
-            curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-$VER.tgz && tar --strip-components=1 -xvzf docker-$VER.tgz -C /usr/local/bin
-            rm docker-$VER.tgz && rm -f /var/cache/apk/*
+            curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-$CTX_DOCKER_ENGINE_VERSION.tgz && tar --strip-components=1 -xvzf docker-$CTX_DOCKER_ENGINE_VERSION.tgz -C /usr/local/bin
+            rm docker-$CTX_DOCKER_ENGINE_VERSION.tgz && rm -f /var/cache/apk/*
 
       - run:
           name: "Build & push docker image"
           command: |
             env GOOS=linux GOARCH=386 go build server.go
             docker build --compress -t danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM .
-            docker login -u $DOCKER_USER -p $DOCKER_PASS
+            docker login -u $CTX_DOCKER_USER -p $CTX_DOCKER_PASS
             docker tag danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM danackerson/ackerson.de:latest
             docker push danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
             docker push danackerson/ackerson.de:latest
@@ -51,7 +50,7 @@ jobs:
     steps:
       - add-ssh-keys:
           fingerprints:
-            - "93:c4:61:21:a6:82:d8:6d:4f:73:11:79:37:23:83:07"
+            - $CTX_SSH_DEPLOY_FINGERPRINT
 
       - run:
           name: Disable Digital Ocean firewall for deploy
@@ -81,10 +80,12 @@ jobs:
             $DEPLOY_CONNECT docker pull danackerson/ackerson.de:$LAST_DOCKER_PUSH
 
             export DOCKER_RUN="docker run -d --restart=always --network='web' \
-              -e CIRCLE_BUILD_NUM=$LAST_DOCKER_PUSH -e joinAPIKey=$joinAPIKey \
+              -e CIRCLE_BUILD_NUM=$LAST_DOCKER_PUSH \
+              -e CTX_JOIN_API_KEY=$CTX_JOIN_API_KEY \
               -e ackSecret=$ackSecret -e ackWunder=$ackWunder \
-              -e SPACES_KEY=$SPACES_KEY -e SPACES_SECRET=$SPACES_SECRET \
-              -e SPACES_NAME_PUBLIC=$SPACES_NAME_PUBLIC \
+              -e CTX_DIGITALOCEAN_SPACES_KEY=$CTX_DIGITALOCEAN_SPACES_KEY \
+              -e CTX_DIGITALOCEAN_SPACES_SECRET=$CTX_DIGITALOCEAN_SPACES_SECRET \
+              -e CTX_DIGITALOCEAN_SPACES_NAME_PUBLIC=$CTX_DIGITALOCEAN_SPACES_NAME_PUBLIC \
               --label='traefik.backend=homepage' \
               --label='traefik.docker.network=web' \
               --label='traefik.frontend.passHostHeader=true'
@@ -111,7 +112,9 @@ workflows:
   version: 2
   build-deploy:
     jobs:
-        - build
+        - build:
+            context: org-global
         - deploy:
+            context: org-global
             requires:
               - build

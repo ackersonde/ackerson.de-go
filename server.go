@@ -53,21 +53,17 @@ var poem string
 var darksky string
 var version string
 var port string
-var fileToken string
-var dropboxToken string
 var spacesKey, spacesSecret, spacesNamePublic string
 var post = "POST"
 
 func parseEnvVariables() {
 	secret = os.Getenv("ackSecret")
-	joinAPIKey = os.Getenv("joinAPIKey")
+	joinAPIKey = os.Getenv("CTX_JOIN_API_KEY")
 	darksky = os.Getenv("ackWunder")
 	version = os.Getenv("CIRCLE_BUILD_NUM")
-	fileToken = os.Getenv("FILE_TOKEN")
-	dropboxToken = os.Getenv("DROPBOX_TOKEN")
-	spacesKey = os.Getenv("SPACES_KEY")
-	spacesSecret = os.Getenv("SPACES_SECRET")
-	spacesNamePublic = os.Getenv("SPACES_NAME_PUBLIC")
+	spacesKey = os.Getenv("CTX_DIGITALOCEAN_SPACES_KEY")
+	spacesSecret = os.Getenv("CTX_DIGITALOCEAN_SPACES_SECRET")
+	spacesNamePublic = os.Getenv("CTX_DIGITALOCEAN_SPACES_NAME_PUBLIC")
 }
 
 func setUpRoutes(router *mux.Router) {
@@ -189,7 +185,6 @@ func bbDownloadStatus(w http.ResponseWriter, req *http.Request) {
 	w.Write(data)
 }
 
-// TODO: move the download dir to DO Spaces
 func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 	gameTitle := r.URL.Query().Get("gameTitle")
 	gameURL := r.URL.Query().Get("gameURL")
