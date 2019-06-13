@@ -11,6 +11,7 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
+	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -18,6 +19,7 @@ import (
 	"github.com/danackerson/ackerson.de-go/baseball"
 	"github.com/danackerson/ackerson.de-go/structures"
 	"github.com/danackerson/digitalocean/common"
+	"github.com/gobuffalo/packr"
 	sessions "github.com/goincremental/negroni-sessions"
 	"github.com/goincremental/negroni-sessions/cookiestore"
 	"github.com/gorilla/mux"
@@ -33,6 +35,28 @@ func getHTTPPort() string {
 	return httpPort
 }
 
+func newRender(templateBox packr.Box, templateName string) *render.Render {
+	dummyDir := "___"
+	r := render.New(render.Options{
+		Directory: dummyDir,
+		Asset: func(name string) ([]byte, error) {
+			name = strings.TrimPrefix(name, dummyDir)
+			return templateBox.MustBytes(name)
+		},
+		AssetNames: func() []string {
+			names := templateBox.List()
+			for k, v := range names {
+				names[k] = path.Join(dummyDir, v)
+			}
+			return names
+		},
+		Layout:        templateName,
+		IsDevelopment: false,
+	})
+
+	return r
+}
+
 func main() {
 	parseEnvVariables()
 
@@ -43,6 +67,7 @@ func main() {
 	store := cookiestore.New([]byte(secret))
 	n.Use(sessions.Sessions("gurkherpaderp", store))
 	n.UseHandler(r)
+
 	http.ListenAndServe(httpPort, n)
 }
 
@@ -55,6 +80,9 @@ var version string
 var port string
 var spacesKey, spacesSecret, spacesNamePublic string
 var post = "POST"
+
+var tmpl = packr.NewBox("./templates")
+var static = packr.NewBox("./public")
 
 func parseEnvVariables() {
 	secret = os.Getenv("ackSecret")
@@ -109,10 +137,7 @@ func setUpRoutes(router *mux.Router) {
 		favTeamGameListing := baseball.FavoriteTeamGameListHandler(id, homePageMap)
 
 		w.Header().Set("Cache-Control", "max-age=10800")
-		render := render.New(render.Options{
-			Layout:        "content",
-			IsDevelopment: false,
-		})
+		render := newRender(tmpl, "content")
 
 		teamID, _ := strconv.Atoi(id)
 		favTeam := homePageMap[teamID]
@@ -149,6 +174,9 @@ func setUpRoutes(router *mux.Router) {
 	router.HandleFunc("/down/{file:.*}", func(w http.ResponseWriter, r *http.Request) {
 		common.DownloadFromDOSpaces(spacesNamePublic, w, r)
 	})
+
+	// catch all static file requests
+	router.PathPrefix("/").Handler(http.FileServer(static))
 }
 
 // FavGames is now commented
@@ -227,7 +255,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 		}
 		gameLength = res.ContentLength
 
-		render := render.New(render.Options{IsDevelopment: true})
+		render := newRender(tmpl, "")
 		render.HTML(w, http.StatusOK, "bbDownloadGameAndPushPhone",
 			GameMeta{
 				GameTitle:         awayTeam.Name + "@" + homeTeam.Name,
@@ -366,10 +394,7 @@ func bbHome(w http.ResponseWriter, r *http.Request) {
 	gameDayListing := baseball.GameDayListingHandler(date1, offset, homePageMap)
 
 	w.Header().Set("Cache-Control", "max-age=10800")
-	render := render.New(render.Options{
-		Layout:        "content",
-		IsDevelopment: false,
-	})
+	render := newRender(tmpl, "content")
 
 	render.HTML(w, http.StatusOK, "bbGameDayListing", gameDayListing)
 }
@@ -378,9 +403,7 @@ func bbStream(w http.ResponseWriter, r *http.Request) {
 	URL := r.URL.Query().Get("url")
 	log.Print("render URL: " + URL)
 
-	render := render.New(render.Options{
-		IsDevelopment: false,
-	})
+	render := newRender(tmpl, "")
 
 	if strings.Contains(URL, "youtube") {
 		http.Redirect(w, r, URL, http.StatusFound)
@@ -397,9 +420,7 @@ func bbAll(w http.ResponseWriter, r *http.Request) {
 	// prepare response page
 	w.Header().Set("Cache-Control", "max-age=10800")
 
-	render := render.New(render.Options{
-		IsDevelopment: false,
-	})
+	render := newRender(tmpl, "")
 	render.HTML(w, http.StatusOK, "bbPlayAllGamesOfDay", allGames)
 }
 
@@ -410,9 +431,7 @@ func bbAjaxDay(w http.ResponseWriter, r *http.Request) {
 
 	// prepare response page
 	w.Header().Set("Cache-Control", "max-age=10800")
-	render := render.New(render.Options{
-		IsDevelopment: false,
-	})
+	render := newRender(tmpl, "")
 
 	render.HTML(w, http.StatusOK, "bbGameDayListing", gameDayListing)
 }
