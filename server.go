@@ -42,7 +42,34 @@ var post = "POST"
 
 var tmpl = packr.New("templates", "./templates")
 var static = packr.New("static", "./public")
-var renderer *template.Template
+var root = template.New("root")
+
+func parseHTMLTemplateFiles() {
+	var files []string
+	// Go thru ./templates dir and load them for rendering
+	for _, path := range tmpl.List() {
+		files = append(files, path)
+
+		bytes, err := tmpl.Find(path)
+		if err != nil || len(bytes) == 0 {
+			log.Printf("Couldn't find %s: %s", path, err.Error())
+		} else {
+			//log.Printf("%s", string(bytes))
+		}
+		t, err2 := template.New(path).Parse(string(bytes))
+		if err2 != nil {
+			log.Printf("WTF? %s", err.Error())
+		}
+		root, err = root.AddParseTree(path, t.Tree)
+
+		if err != nil {
+			panic("OHH NOEESSS: " + err.Error())
+		} else {
+			log.Printf("renderer: %v", root)
+		}
+	}
+	log.Printf("files: %v", files)
+}
 
 func getHTTPPort() string {
 	return httpPort
@@ -50,25 +77,8 @@ func getHTTPPort() string {
 
 func main() {
 	parseEnvVariables()
-
-	var files []string
-	// Go thru ./templates dir and load them for rendering
-	for _, path := range tmpl.List() {
-		files = append(files, tmpl.ResolutionDir+"/"+path)
-	}
-	log.Printf("files: %v", files)
-
-	var err error
-	// I need todo something different here - I just can't pass the filenames
-	// to the rendering template. Instead, I need to use Packr.Box to provide
-	// the file contents themselves!! (so maybe ParseFiles is wrong?)
-	renderer, err = template.ParseFiles(files...)
-	if err != nil {
-		panic("OHH NOEESSS: " + err.Error())
-	} else {
-		log.Printf("renderer: %v", renderer)
-	}
-
+	parseHTMLTemplateFiles()
+	log.Printf("root template engine: %v", root)
 	r := mux.NewRouter()
 	setUpRoutes(r)
 	n := negroni.Classic()
@@ -137,8 +147,7 @@ func setUpRoutes(router *mux.Router) {
 		teamID, _ := strconv.Atoi(id)
 		favTeam := homePageMap[teamID]
 
-		// "content"
-		renderer.ExecuteTemplate(w, "bbFavoriteTeamGameList.tmpl", FavGames{FavGamesList: favTeamGameListing, FavTeam: favTeam})
+		root.Execute(w, FavGames{FavGamesList: favTeamGameListing, FavTeam: favTeam})
 	})
 
 	// gameDayListing for yesterday (default 'homepage')
@@ -252,12 +261,11 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 		}
 		gameLength = res.ContentLength
 
-		renderer.ExecuteTemplate(w, "bbDownloadGameAndPushPhone.tmpl", // ""
-			GameMeta{
-				GameTitle:         awayTeam.Name + "@" + homeTeam.Name,
-				GameDownloadTitle: gameURL,
-				GameDate:          humanDate,
-			})
+		root.Execute(w, GameMeta{
+			GameTitle:         awayTeam.Name + "@" + homeTeam.Name,
+			GameDownloadTitle: gameURL,
+			GameDate:          humanDate,
+		})
 	} else if fileType == "vpn" {
 		icon = "http://www.setaram.com/wp-content/themes/setaram/library/images/lock.png"
 		smallIcon = "http://www.setaram.com/wp-content/themes/setaram/library/images/lock.png"
@@ -390,7 +398,8 @@ func bbHome(w http.ResponseWriter, r *http.Request) {
 	gameDayListing := baseball.GameDayListingHandler(date1, offset, homePageMap)
 
 	w.Header().Set("Cache-Control", "max-age=10800")
-	renderer.ExecuteTemplate(w, "bbGameDayListing.tmpl", gameDayListing) // "content"
+	w.Header().Set("Content-Type", "text/html;charset=utf-8")
+	root.Execute(w, gameDayListing)
 }
 
 func bbStream(w http.ResponseWriter, r *http.Request) {
@@ -400,7 +409,7 @@ func bbStream(w http.ResponseWriter, r *http.Request) {
 	if strings.Contains(URL, "youtube") {
 		http.Redirect(w, r, URL, http.StatusFound)
 	} else {
-		renderer.ExecuteTemplate(w, "bbPlaySingleGameOfDay.tmpl", URL) // ""
+		root.Execute(w, URL)
 	}
 }
 
@@ -411,8 +420,8 @@ func bbAll(w http.ResponseWriter, r *http.Request) {
 
 	// prepare response page
 	w.Header().Set("Cache-Control", "max-age=10800")
-
-	renderer.ExecuteTemplate(w, "bbPlayAllGamesOfDay.tmpl", allGames) // ""
+	w.Header().Set("Content-Type", "text/html;charset=utf-8")
+	root.Execute(w, allGames)
 }
 
 func bbAjaxDay(w http.ResponseWriter, r *http.Request) {
@@ -422,8 +431,8 @@ func bbAjaxDay(w http.ResponseWriter, r *http.Request) {
 
 	// prepare response page
 	w.Header().Set("Cache-Control", "max-age=10800")
-
-	renderer.ExecuteTemplate(w, "bbGameDayListing.tmpl", gameDayListing) // ""
+	w.Header().Set("Content-Type", "text/html;charset=utf-8")
+	root.Execute(w, gameDayListing)
 }
 
 // GetIP now commented
