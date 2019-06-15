@@ -3,6 +3,7 @@ package main
 import (
 	"encoding/json"
 	"errors"
+	"html/template"
 	"io"
 	"io/ioutil"
 	"log"
@@ -11,7 +12,6 @@ import (
 	"net/http/httputil"
 	"net/url"
 	"os"
-	"path"
 	"strconv"
 	"strings"
 	"time"
@@ -19,57 +19,16 @@ import (
 	"github.com/danackerson/ackerson.de-go/baseball"
 	"github.com/danackerson/ackerson.de-go/structures"
 	"github.com/danackerson/digitalocean/common"
-	"github.com/gobuffalo/packr"
+	"github.com/gobuffalo/packr/v2"
 	sessions "github.com/goincremental/negroni-sessions"
 	"github.com/goincremental/negroni-sessions/cookiestore"
 	"github.com/gorilla/mux"
 	"github.com/otium/ytdl"
-	"github.com/unrolled/render"
 	"github.com/urfave/negroni"
 )
 
 var httpPort = ":8080"
 var downloadDir = "bender/"
-
-func getHTTPPort() string {
-	return httpPort
-}
-
-func newRender(templateBox packr.Box, templateName string) *render.Render {
-	dummyDir := "___"
-	r := render.New(render.Options{
-		Directory: dummyDir,
-		Asset: func(name string) ([]byte, error) {
-			name = strings.TrimPrefix(name, dummyDir)
-			return templateBox.MustBytes(name)
-		},
-		AssetNames: func() []string {
-			names := templateBox.List()
-			for k, v := range names {
-				names[k] = path.Join(dummyDir, v)
-			}
-			return names
-		},
-		Layout:        templateName,
-		IsDevelopment: false,
-	})
-
-	return r
-}
-
-func main() {
-	parseEnvVariables()
-
-	r := mux.NewRouter()
-	setUpRoutes(r)
-	n := negroni.Classic()
-
-	store := cookiestore.New([]byte(secret))
-	n.Use(sessions.Sessions("gurkherpaderp", store))
-	n.UseHandler(r)
-
-	http.ListenAndServe(httpPort, n)
-}
 
 var mongo string
 var secret string
@@ -81,8 +40,45 @@ var port string
 var spacesKey, spacesSecret, spacesNamePublic string
 var post = "POST"
 
-var tmpl = packr.NewBox("./templates")
-var static = packr.NewBox("./public")
+var tmpl = packr.New("templates", "./templates")
+var static = packr.New("static", "./public")
+var renderer *template.Template
+
+func getHTTPPort() string {
+	return httpPort
+}
+
+func main() {
+	parseEnvVariables()
+
+	var files []string
+	// Go thru ./templates dir and load them for rendering
+	for _, path := range tmpl.List() {
+		files = append(files, tmpl.ResolutionDir+"/"+path)
+	}
+	log.Printf("files: %v", files)
+
+	var err error
+	// I need todo something different here - I just can't pass the filenames
+	// to the rendering template. Instead, I need to use Packr.Box to provide
+	// the file contents themselves!! (so maybe ParseFiles is wrong?)
+	renderer, err = template.ParseFiles(files...)
+	if err != nil {
+		panic("OHH NOEESSS: " + err.Error())
+	} else {
+		log.Printf("renderer: %v", renderer)
+	}
+
+	r := mux.NewRouter()
+	setUpRoutes(r)
+	n := negroni.Classic()
+
+	store := cookiestore.New([]byte(secret))
+	n.Use(sessions.Sessions("gurkherpaderp", store))
+	n.UseHandler(r)
+
+	http.ListenAndServe(httpPort, n)
+}
 
 func parseEnvVariables() {
 	secret = os.Getenv("ackSecret")
@@ -137,11 +133,12 @@ func setUpRoutes(router *mux.Router) {
 		favTeamGameListing := baseball.FavoriteTeamGameListHandler(id, homePageMap)
 
 		w.Header().Set("Cache-Control", "max-age=10800")
-		render := newRender(tmpl, "content")
 
 		teamID, _ := strconv.Atoi(id)
 		favTeam := homePageMap[teamID]
-		render.HTML(w, http.StatusOK, "bbFavoriteTeamGameList", FavGames{FavGamesList: favTeamGameListing, FavTeam: favTeam})
+
+		// "content"
+		renderer.ExecuteTemplate(w, "bbFavoriteTeamGameList.tmpl", FavGames{FavGamesList: favTeamGameListing, FavTeam: favTeam})
 	})
 
 	// gameDayListing for yesterday (default 'homepage')
@@ -255,8 +252,7 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 		}
 		gameLength = res.ContentLength
 
-		render := newRender(tmpl, "")
-		render.HTML(w, http.StatusOK, "bbDownloadGameAndPushPhone",
+		renderer.ExecuteTemplate(w, "bbDownloadGameAndPushPhone.tmpl", // ""
 			GameMeta{
 				GameTitle:         awayTeam.Name + "@" + homeTeam.Name,
 				GameDownloadTitle: gameURL,
@@ -394,21 +390,17 @@ func bbHome(w http.ResponseWriter, r *http.Request) {
 	gameDayListing := baseball.GameDayListingHandler(date1, offset, homePageMap)
 
 	w.Header().Set("Cache-Control", "max-age=10800")
-	render := newRender(tmpl, "content")
-
-	render.HTML(w, http.StatusOK, "bbGameDayListing", gameDayListing)
+	renderer.ExecuteTemplate(w, "bbGameDayListing.tmpl", gameDayListing) // "content"
 }
 
 func bbStream(w http.ResponseWriter, r *http.Request) {
 	URL := r.URL.Query().Get("url")
 	log.Print("render URL: " + URL)
 
-	render := newRender(tmpl, "")
-
 	if strings.Contains(URL, "youtube") {
 		http.Redirect(w, r, URL, http.StatusFound)
 	} else {
-		render.HTML(w, http.StatusOK, "bbPlaySingleGameOfDay", URL)
+		renderer.ExecuteTemplate(w, "bbPlaySingleGameOfDay.tmpl", URL) // ""
 	}
 }
 
@@ -420,8 +412,7 @@ func bbAll(w http.ResponseWriter, r *http.Request) {
 	// prepare response page
 	w.Header().Set("Cache-Control", "max-age=10800")
 
-	render := newRender(tmpl, "")
-	render.HTML(w, http.StatusOK, "bbPlayAllGamesOfDay", allGames)
+	renderer.ExecuteTemplate(w, "bbPlayAllGamesOfDay.tmpl", allGames) // ""
 }
 
 func bbAjaxDay(w http.ResponseWriter, r *http.Request) {
@@ -431,9 +422,8 @@ func bbAjaxDay(w http.ResponseWriter, r *http.Request) {
 
 	// prepare response page
 	w.Header().Set("Cache-Control", "max-age=10800")
-	render := newRender(tmpl, "")
 
-	render.HTML(w, http.StatusOK, "bbGameDayListing", gameDayListing)
+	renderer.ExecuteTemplate(w, "bbGameDayListing.tmpl", gameDayListing) // ""
 }
 
 // GetIP now commented
