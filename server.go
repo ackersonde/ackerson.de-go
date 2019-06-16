@@ -41,7 +41,7 @@ var spacesKey, spacesSecret, spacesNamePublic string
 var post = "POST"
 
 var tmpl = packr.New("templates", "./templates")
-var static = packr.New("static", "./public/")
+var static = packr.New("static", "./public")
 var root = template.New("root")
 
 func parseHTMLTemplateFiles() {
@@ -76,7 +76,7 @@ func main() {
 	parseEnvVariables()
 	parseHTMLTemplateFiles()
 
-	r := mux.NewRouter()
+	r := mux.NewRouter().StrictSlash(true)
 	setUpRoutes(r)
 	n := negroni.Classic()
 
@@ -179,7 +179,7 @@ func setUpRoutes(router *mux.Router) {
 	})
 
 	// catch all static file requests
-	router.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(static)))
+	router.PathPrefix("/").Handler(http.FileServer(static))
 }
 
 // FavGames is now commented
