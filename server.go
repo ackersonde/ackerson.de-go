@@ -180,12 +180,19 @@ func setUpRoutes(router *mux.Router) {
 	})
 
 	// catch all static file requests
-	//router.Handle("/", http.ServeFile(w, r, public.Find("index.html")))
-	router.PathPrefix("/").Handler(http.StripPrefix("./public", httpgzip.FileServer(
+	router.HandleFunc("/", handleIndex)
+	router.PathPrefix("/").Handler(httpgzip.FileServer(
 		static,
 		httpgzip.FileServerOptions{
 			IndexHTML: true,
-		})))
+		}))
+}
+
+func handleIndex(w http.ResponseWriter, r *http.Request) {
+	indexPage, _ := static.Find("index.html")
+	w.Header().Set("Cache-Control", "max-age=30800")
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	w.Write(indexPage)
 }
 
 // FavGames is now commented
