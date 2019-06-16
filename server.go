@@ -179,7 +179,7 @@ func setUpRoutes(router *mux.Router) {
 	})
 
 	// catch all static file requests
-	router.PathPrefix("/").Handler(http.FileServer(static))
+	router.PathPrefix("/").Handler(http.StripPrefix("/", http.FileServer(static)))
 }
 
 // FavGames is now commented
