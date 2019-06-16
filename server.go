@@ -41,7 +41,7 @@ var spacesKey, spacesSecret, spacesNamePublic string
 var post = "POST"
 
 var tmpl = packr.New("templates", "./templates")
-var static = packr.New("static", "./public")
+var static = packr.New("static", "./public/")
 var root = template.New("root")
 
 func parseHTMLTemplateFiles() {
