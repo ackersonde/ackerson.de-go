@@ -77,7 +77,7 @@ func main() {
 	parseEnvVariables()
 	parseHTMLTemplateFiles()
 
-	r := mux.NewRouter().StrictSlash(true)
+	r := mux.NewRouter()
 	setUpRoutes(r)
 	n := negroni.Classic()
 
@@ -180,10 +180,11 @@ func setUpRoutes(router *mux.Router) {
 	})
 
 	// catch all static file requests
+	//router.Handle("/", http.ServeFile)
 	router.PathPrefix("/").Handler(httpgzip.FileServer(
 		static,
 		httpgzip.FileServerOptions{
-			IndexHTML: false,
+			IndexHTML: true,
 		}))
 }
 
