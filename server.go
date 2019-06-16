@@ -183,7 +183,7 @@ func setUpRoutes(router *mux.Router) {
 	router.PathPrefix("/").Handler(httpgzip.FileServer(
 		static,
 		httpgzip.FileServerOptions{
-			IndexHTML: true,
+			IndexHTML: false,
 		}))
 }
 
