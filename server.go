@@ -24,6 +24,7 @@ import (
 	"github.com/goincremental/negroni-sessions/cookiestore"
 	"github.com/gorilla/mux"
 	"github.com/otium/ytdl"
+	"github.com/shurcooL/httpgzip"
 	"github.com/urfave/negroni"
 )
 
@@ -179,8 +180,11 @@ func setUpRoutes(router *mux.Router) {
 	})
 
 	// catch all static file requests
-	http.Handle("/", http.FileServer(http.Dir("/tmp")))
-	router.PathPrefix("/").Handler(http.FileServer(static))
+	router.PathPrefix("/").Handler(httpgzip.FileServer(
+		static,
+		httpgzip.FileServerOptions{
+			IndexHTML: true,
+		}))
 }
 
 // FavGames is now commented
