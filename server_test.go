@@ -9,6 +9,10 @@ import (
 
 var testDay = "?date1=year_2016%2fmonth_06%2fday_26&offset=0"
 
+func init() {
+	parseHTMLTemplateFiles()
+}
+
 func Test_bbHome(t *testing.T) {
 	t.Parallel()
 	req, err := http.NewRequest("GET", "http://localhost"+getHTTPPort()+"/bb"+testDay, nil)

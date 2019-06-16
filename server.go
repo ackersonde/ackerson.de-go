@@ -45,17 +45,17 @@ var static = packr.New("static", "./public")
 var root = template.New("root")
 
 func parseHTMLTemplateFiles() {
-	var files []string
 	// Go thru ./templates dir and load them for rendering
 	for _, path := range tmpl.List() {
-		files = append(files, path)
+		//files = append(files, path)
 
 		bytes, err := tmpl.Find(path)
 		if err != nil || len(bytes) == 0 {
 			log.Printf("Couldn't find %s: %s", path, err.Error())
-		} else {
-			//log.Printf("%s", string(bytes))
 		}
+
+		// most important line in the whole goddamn program :(
+		path := strings.TrimSuffix(path, ".tmpl")
 		t, err2 := template.New(path).Parse(string(bytes))
 		if err2 != nil {
 			log.Printf("WTF? %s", err.Error())
@@ -64,11 +64,8 @@ func parseHTMLTemplateFiles() {
 
 		if err != nil {
 			panic("OHH NOEESSS: " + err.Error())
-		} else {
-			log.Printf("renderer: %v", root)
 		}
 	}
-	log.Printf("files: %v", files)
 }
 
 func getHTTPPort() string {
@@ -78,7 +75,7 @@ func getHTTPPort() string {
 func main() {
 	parseEnvVariables()
 	parseHTMLTemplateFiles()
-	log.Printf("root template engine: %v", root)
+
 	r := mux.NewRouter()
 	setUpRoutes(r)
 	n := negroni.Classic()
@@ -147,7 +144,7 @@ func setUpRoutes(router *mux.Router) {
 		teamID, _ := strconv.Atoi(id)
 		favTeam := homePageMap[teamID]
 
-		root.Execute(w, FavGames{FavGamesList: favTeamGameListing, FavTeam: favTeam})
+		root.ExecuteTemplate(w, "bbFavoriteTeamGameList", FavGames{FavGamesList: favTeamGameListing, FavTeam: favTeam})
 	})
 
 	// gameDayListing for yesterday (default 'homepage')
@@ -261,11 +258,12 @@ func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
 		}
 		gameLength = res.ContentLength
 
-		root.Execute(w, GameMeta{
-			GameTitle:         awayTeam.Name + "@" + homeTeam.Name,
-			GameDownloadTitle: gameURL,
-			GameDate:          humanDate,
-		})
+		root.ExecuteTemplate(w, "bbDownloadGameAndPushPhone",
+			GameMeta{
+				GameTitle:         awayTeam.Name + "@" + homeTeam.Name,
+				GameDownloadTitle: gameURL,
+				GameDate:          humanDate,
+			})
 	} else if fileType == "vpn" {
 		icon = "http://www.setaram.com/wp-content/themes/setaram/library/images/lock.png"
 		smallIcon = "http://www.setaram.com/wp-content/themes/setaram/library/images/lock.png"
@@ -398,8 +396,8 @@ func bbHome(w http.ResponseWriter, r *http.Request) {
 	gameDayListing := baseball.GameDayListingHandler(date1, offset, homePageMap)
 
 	w.Header().Set("Cache-Control", "max-age=10800")
-	w.Header().Set("Content-Type", "text/html;charset=utf-8")
-	root.Execute(w, gameDayListing)
+	w.Header().Set("Content-Type", "text/html; charset=utf-8")
+	root.ExecuteTemplate(w, "bbGameDayListing", gameDayListing)
 }
 
 func bbStream(w http.ResponseWriter, r *http.Request) {
@@ -409,7 +407,7 @@ func bbStream(w http.ResponseWriter, r *http.Request) {
 	if strings.Contains(URL, "youtube") {
 		http.Redirect(w, r, URL, http.StatusFound)
 	} else {
-		root.Execute(w, URL)
+		root.ExecuteTemplate(w, "bbPlaySingleGameOfDay", URL)
 	}
 }
 
@@ -421,7 +419,7 @@ func bbAll(w http.ResponseWriter, r *http.Request) {
 	// prepare response page
 	w.Header().Set("Cache-Control", "max-age=10800")
 	w.Header().Set("Content-Type", "text/html;charset=utf-8")
-	root.Execute(w, allGames)
+	root.ExecuteTemplate(w, "bbPlayAllGamesOfDay", allGames)
 }
 
 func bbAjaxDay(w http.ResponseWriter, r *http.Request) {
@@ -432,13 +430,13 @@ func bbAjaxDay(w http.ResponseWriter, r *http.Request) {
 	// prepare response page
 	w.Header().Set("Cache-Control", "max-age=10800")
 	w.Header().Set("Content-Type", "text/html;charset=utf-8")
-	root.Execute(w, gameDayListing)
+	root.ExecuteTemplate(w, "bbGameDayListing", gameDayListing)
 }
 
 // GetIP now commented
 func GetIP(r *http.Request) string {
 	requestDump, _ := httputil.DumpRequest(r, false)
-	log.Printf("GetIP Request: %v\n", requestDump)
+	log.Printf("GetIP Request: %s\n", requestDump)
 
 	ip := r.Header.Get("X-Real-Ip")
 
