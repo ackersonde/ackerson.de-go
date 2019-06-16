@@ -179,6 +179,7 @@ func setUpRoutes(router *mux.Router) {
 	})
 
 	// catch all static file requests
+	http.Handle("/", http.FileServer(http.Dir("/tmp")))
 	router.PathPrefix("/").Handler(http.FileServer(static))
 }
 
