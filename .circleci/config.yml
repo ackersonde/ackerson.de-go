@@ -11,7 +11,7 @@ jobs:
           command: |
             apk add -U curl build-base git
 
-            go get github.com/gobuffalo/packr/packr
+            go get github.com/gobuffalo/packr/v2/packr2
             go get github.com/jstemmer/go-junit-report
             mkdir -p /tmp/test-results
 
@@ -32,7 +32,7 @@ jobs:
       - run:
           name: "Build & push docker image"
           command: |
-            env GOOS=linux GOARCH=386 packr build server.go
+            env GOOS=linux GOARCH=386 packr2 build server.go
             docker build --compress -t danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM .
             docker login -u $CTX_DOCKER_USER -p $CTX_DOCKER_PASS
             docker tag danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM danackerson/ackerson.de:latest
