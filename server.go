@@ -180,12 +180,12 @@ func setUpRoutes(router *mux.Router) {
 	})
 
 	// catch all static file requests
-	//router.Handle("/", http.ServeFile)
-	router.PathPrefix("/").Handler(httpgzip.FileServer(
+	//router.Handle("/", http.ServeFile(w, r, public.Find("index.html")))
+	router.PathPrefix("/").Handler(http.StripPrefix("./public", httpgzip.FileServer(
 		static,
 		httpgzip.FileServerOptions{
 			IndexHTML: true,
-		}))
+		})))
 }
 
 // FavGames is now commented
