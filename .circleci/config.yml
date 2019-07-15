@@ -28,8 +28,8 @@ jobs:
       - run:
           name: "Build & push docker image"
           command: |
-            packr2
-            env GOOS=linux GOARCH=arm GOARM=7 go build -o homepage server.go
+            #packr2
+            env GOOS=linux GOARCH=arm GOARM=7 packr2 build -o homepage server.go
       - persist_to_workspace:
           root: /go/src/github.com/danackerson/ackerson.de-go
           paths:
