@@ -53,7 +53,8 @@ commands:
               $SSH_USER@$SSH_HOST:~/homepage_app/
 
             # Run homepage
-            ssh $SSH_USER@$SSH_HOST "docker run -d --restart=always --network='web' \
+            ssh $SSH_USER@$SSH_HOST "chmod u+x ~/homepage_app/run_homepage.sh && \
+            docker run -d --restart=always --network='web' \
               -v ~/homepage_app:/tmp/ \
               -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM \
               -e CTX_JOIN_API_KEY=$CTX_JOIN_API_KEY \
