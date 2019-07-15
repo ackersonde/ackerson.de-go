@@ -63,7 +63,7 @@ commands:
               -e CTX_DIGITALOCEAN_SPACES_NAME_PUBLIC=$CTX_DIGITALOCEAN_SPACES_NAME_PUBLIC \
               --label='traefik.backend=homepage' \
               --label='traefik.docker.network=web' \
-              --label='traefik.frontend.passHostHeader=true'
+              --label='traefik.frontend.passHostHeader=true' \
               --label='traefik.frontend.rule=Host:ackerson.de,www.ackerson.de' \
               --label='traefik.enable=true' \
               --label='traefik.port=8080' \
