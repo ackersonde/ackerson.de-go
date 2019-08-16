@@ -54,6 +54,7 @@ commands:
 
             # Run homepage
             ssh $SSH_USER@$SSH_HOST "chmod u+x ~/homepage_app/run_homepage.sh && \
+            docker pull arm32v7/alpine && \
             docker run -d --restart=always --network='web' \
               -v ~/homepage_app:/tmp/ \
               -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM \
