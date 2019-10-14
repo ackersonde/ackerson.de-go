@@ -1,0 +1,38 @@
+{{define "headerMobile"}}
+<!DOCTYPE HTML>
+<html>
+  <head>
+      <!-- Global site tag (gtag.js) - Google Analytics -->
+      <script async src="https://www.googletagmanager.com/gtag/js?id=UA-35450644-1"></script>
+      <script>
+        window.dataLayer = window.dataLayer || [];
+        function gtag(){dataLayer.push(arguments);}
+        gtag('js', new Date());
+        gtag('config', 'GA_TRACKING_ID', { 'anonymize_ip': true });
+        gtag('config', 'UA-35450644-1');
+      </script>
+
+      <meta charset="UTF-8" />
+      <title>Play ball!</title>
+
+      <link rel="apple-touch-icon" sizes="120x120" href="/bb_favico/apple-touch-icon.png">
+      <link rel="icon" type="image/png" sizes="32x32" href="/bb_favico/favicon-32x32.png">
+      <link rel="icon" type="image/png" sizes="16x16" href="/bb_favico/favicon-16x16.png">
+      <link rel="manifest" href="/bb_favico/manifest.json">
+      <link rel="mask-icon" href="/bb_favico/safari-pinned-tab.svg" color="#5bbad5">
+      <link rel="shortcut icon" href="/bb_favico/favicon.ico">
+      <meta name="msapplication-config" content="/bb_favico/browserconfig.xml">
+      <meta name="theme-color" content="#ffffff">
+      <meta name="viewport" content="initial-scale=1.25, maximum-scale=2.0, minimum-scale=1.5">
+
+      <link rel="stylesheet" href="/css/bbMobile.css"/>
+      <link rel="stylesheet" href="/css/logos.css"/>
+      <link rel="stylesheet" href="//code.jquery.com/ui/1.11.4/themes/smoothness/jquery-ui.css">
+      <script src="js/bb.js" type="text/javascript" charset="utf-8"></script>
+      <script src="//code.jquery.com/jquery-3.0.0.js"></script>
+      <script src="//code.jquery.com/ui/1.11.4/jquery-ui.js"></script>
+      <script src="js/consent.js"></script>
+  </head>
+
+  <body>
+{{end}}

@@ -1,4 +1,8 @@
-version: 2
+version: 2.1
+
+orbs:
+  ipsec: danackerson/ipsec@0.2.4
+
 jobs:
   build:
     docker:
@@ -21,67 +25,39 @@ jobs:
           path: /tmp/test-results
       - store_artifacts:
           path: /tmp/test-results
-
-      - setup_remote_docker
-      - run:
-          name: "Install Docker CE"
-          command: |
-            curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-$CTX_DOCKER_ENGINE_VERSION.tgz && tar --strip-components=1 -xvzf docker-$CTX_DOCKER_ENGINE_VERSION.tgz -C /usr/local/bin
-            rm docker-$CTX_DOCKER_ENGINE_VERSION.tgz && rm -f /var/cache/apk/*
-
       - run:
           name: "Build & push docker image"
           command: |
-            env GOOS=linux GOARCH=386 packr2 build server.go
-            docker build --compress -t danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM .
-            docker login -u $CTX_DOCKER_USER -p $CTX_DOCKER_PASS
-            docker tag danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM danackerson/ackerson.de:latest
-            docker push danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
-            docker push danackerson/ackerson.de:latest
-            echo vc$CIRCLE_BUILD_NUM > last_docker_push
-
+            packr2
+            env GOOS=linux GOARCH=arm GOARM=7 go build -o homepage
       - persist_to_workspace:
           root: /go/src/github.com/danackerson/ackerson.de-go
           paths:
-            - last_docker_push
+            - homepage
+            - run_homepage.sh
 
-  deploy:
-    docker:
-      - image: alpine
+commands:
+  prepare_deploy_script:
     steps:
-      - add-ssh-keys:
-          fingerprints:
-            - $CTX_SSH_DEPLOY_FINGERPRINT
-
-      - run:
-          name: Disable Digital Ocean firewall for deploy
-          command: |
-            apk add -U jq ca-certificates curl openssh-client
-            curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/addSSHipFW.sh | sh
-
       - attach_workspace:
           at: /tmp
-
       - run:
-          name: "Upload to DockerHub, deploy container to Digital Ocean Droplet & launch"
+          name: "Prepare deploy script"
           command: |
-            export DEPLOY_SERVER=deploy.ackerson.de
-            if [ $DEPLOY_SERVER_IP ]; then
-              export DEPLOY_SERVER=$DEPLOY_SERVER_IP
-            fi
-            echo "Deploying to $DEPLOY_SERVER..."
+            cat \<<EOF >deploy_script.sh
+            # Prepare docker env
+            ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "\
+              mkdir homepage_app || true"
+            ssh $SSH_USER@$SSH_HOST "docker rm -f homepage || true"
+            scp /tmp/homepage /tmp/run_homepage.sh \
+              $SSH_USER@$SSH_HOST:~/homepage_app/
 
-            export DEPLOY_CONNECT="ssh -o StrictHostKeyChecking=no ackersond@$DEPLOY_SERVER"
-
-            if [ -f /tmp/last_docker_push ]; then
-              export LAST_DOCKER_PUSH=`cat /tmp/last_docker_push`
-            else
-              export LAST_DOCKER_PUSH=latest
-            fi
-            $DEPLOY_CONNECT docker pull danackerson/ackerson.de:$LAST_DOCKER_PUSH
-
-            export DOCKER_RUN="docker run -d --restart=always --network='web' \
-              -e CIRCLE_BUILD_NUM=$LAST_DOCKER_PUSH \
+            # Run homepage
+            ssh $SSH_USER@$SSH_HOST "chmod u+x ~/homepage_app/run_homepage.sh && \
+            docker pull arm32v7/alpine && \
+            docker run -d --restart=always --network='web' \
+              -v ~/homepage_app:/tmp/ \
+              -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM \
               -e CTX_JOIN_API_KEY=$CTX_JOIN_API_KEY \
               -e ackSecret=$ackSecret -e ackWunder=$ackWunder \
               -e CTX_DIGITALOCEAN_SPACES_KEY=$CTX_DIGITALOCEAN_SPACES_KEY \
@@ -89,33 +65,23 @@ jobs:
               -e CTX_DIGITALOCEAN_SPACES_NAME_PUBLIC=$CTX_DIGITALOCEAN_SPACES_NAME_PUBLIC \
               --label='traefik.backend=homepage' \
               --label='traefik.docker.network=web' \
-              --label='traefik.frontend.passHostHeader=true'
+              --label='traefik.frontend.passHostHeader=true' \
               --label='traefik.frontend.rule=Host:ackerson.de,www.ackerson.de' \
               --label='traefik.enable=true' \
               --label='traefik.port=8080' \
-              -v data-volume:/app/public/downloads \
-              --name homepage danackerson/ackerson.de:$LAST_DOCKER_PUSH"
+              --name homepage arm32v7/alpine /tmp/run_homepage.sh"
+            EOF
 
-            if [ $DEPLOY_SERVER_IP ]; then
-              $DEPLOY_CONNECT $DOCKER_RUN
-            else
-              $DEPLOY_CONNECT docker rm -f homepage || true
-              $DEPLOY_CONNECT $DOCKER_RUN
-            fi
-
-      - run:
-          name: Reenable Digital Ocean firewall
-          command: |
-            curl -s https://raw.githubusercontent.com/danackerson/digitalocean/master/utils/dropSSHipFW.sh | sh
-          when: always
+            chmod u+x deploy_script.sh
 
 workflows:
-  version: 2
   build-deploy:
     jobs:
         - build:
             context: org-global
-        - deploy:
+        - ipsec/remote-deploy:
             context: org-global
             requires:
               - build
+            pre-steps:
+              - prepare_deploy_script

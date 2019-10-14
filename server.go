@@ -23,6 +23,7 @@ import (
 	sessions "github.com/goincremental/negroni-sessions"
 	"github.com/goincremental/negroni-sessions/cookiestore"
 	"github.com/gorilla/mux"
+	"github.com/mssola/user_agent"
 	"github.com/otium/ytdl"
 	"github.com/shurcooL/httpgzip"
 	"github.com/urfave/negroni"
@@ -145,7 +146,12 @@ func setUpRoutes(router *mux.Router) {
 		teamID, _ := strconv.Atoi(id)
 		favTeam := homePageMap[teamID]
 
-		root.ExecuteTemplate(w, "bbFavoriteTeamGameList", FavGames{FavGamesList: favTeamGameListing, FavTeam: favTeam})
+		ua := user_agent.New(r.UserAgent())
+		if ua.Mobile() {
+			root.ExecuteTemplate(w, "bbFavoriteTeamGameListMobile", FavGames{FavGamesList: favTeamGameListing, FavTeam: favTeam})
+		} else {
+			root.ExecuteTemplate(w, "bbFavoriteTeamGameList", FavGames{FavGamesList: favTeamGameListing, FavTeam: favTeam})
+		}
 	})
 
 	// gameDayListing for yesterday (default 'homepage')
@@ -203,7 +209,6 @@ type FavGames struct {
 
 var homePageMap map[int]baseball.Team
 
-// TODO: check file @ DO Spaces
 func bbDownloadStatus(w http.ResponseWriter, req *http.Request) {
 	var size int64
 
@@ -410,7 +415,13 @@ func bbHome(w http.ResponseWriter, r *http.Request) {
 
 	w.Header().Set("Cache-Control", "max-age=10800")
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	root.ExecuteTemplate(w, "bbGameDayListing", gameDayListing)
+
+	ua := user_agent.New(r.UserAgent())
+	if ua.Mobile() {
+		root.ExecuteTemplate(w, "bbGameDayListingMobile", gameDayListing)
+	} else {
+		root.ExecuteTemplate(w, "bbGameDayListing", gameDayListing)
+	}
 }
 
 func bbStream(w http.ResponseWriter, r *http.Request) {
@@ -443,7 +454,13 @@ func bbAjaxDay(w http.ResponseWriter, r *http.Request) {
 	// prepare response page
 	w.Header().Set("Cache-Control", "max-age=10800")
 	w.Header().Set("Content-Type", "text/html;charset=utf-8")
-	root.ExecuteTemplate(w, "bbGameDayListing", gameDayListing)
+
+	ua := user_agent.New(r.UserAgent())
+	if ua.Mobile() {
+		root.ExecuteTemplate(w, "bbGameDayListingMobile", gameDayListing)
+	} else {
+		root.ExecuteTemplate(w, "bbGameDayListing", gameDayListing)
+	}
 }
 
 // GetIP now commented
