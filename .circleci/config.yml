@@ -65,7 +65,7 @@ commands:
               -e CTX_DIGITALOCEAN_SPACES_NAME_PUBLIC=$CTX_DIGITALOCEAN_SPACES_NAME_PUBLIC \
               --label='traefik.enable=true' \
               --label='traefik.http.routers.homepage.entrypoints=http,httpsecure' \
-              --label='traefik.http.routers.homepage.rule=Host(\\`$HOMEPAGE_HOSTNAME\\`)' \
+              --label='traefik.http.routers.homepage.rule=Host(\\\`$HOMEPAGE_HOSTNAME\\\`)' \
               --label='traefik.http.routers.homepage.tls.certResolver=traefikdash' \
               --label='traefik.http.routers.homepage.tls.domains=$HOMEPAGE_HOSTNAME' \
               -p8080 --name homepage arm32v7/alpine /tmp/run_homepage.sh"
