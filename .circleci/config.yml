@@ -63,13 +63,14 @@ commands:
               -e CTX_DIGITALOCEAN_SPACES_KEY=$CTX_DIGITALOCEAN_SPACES_KEY \
               -e CTX_DIGITALOCEAN_SPACES_SECRET=$CTX_DIGITALOCEAN_SPACES_SECRET \
               -e CTX_DIGITALOCEAN_SPACES_NAME_PUBLIC=$CTX_DIGITALOCEAN_SPACES_NAME_PUBLIC \
-              --label='traefik.backend=homepage' \
-              --label='traefik.docker.network=web' \
-              --label='traefik.frontend.passHostHeader=true' \
-              --label='traefik.frontend.rule=Host:ackerson.de,www.ackerson.de' \
               --label='traefik.enable=true' \
-              --label='traefik.port=8080' \
-              --name homepage arm32v7/alpine /tmp/run_homepage.sh"
+              --label='traefik.http.routers.homepage.entrypoints=http,httpsecure' \
+              --label='traefik.http.routers.homepage.middlewares=https-redirect@docker' \
+              --label='traefik.http.routers.homepage.rule=Host(`ackerson.de`)' \
+              --label='traefik.http.routers.homepage.tls.certResolver=traefikdash' \
+              --label='traefik.http.routers.homepage.tls.domains=ackerson.de' \
+              -p8080 --name homepage arm32v7/alpine /tmp/run_homepage.sh"
+
             EOF
 
             chmod u+x deploy_script.sh
