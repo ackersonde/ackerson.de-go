@@ -404,13 +404,12 @@ func bbHome(w http.ResponseWriter, r *http.Request) {
 	date1 := r.URL.Query().Get("date1")
 	offset := r.URL.Query().Get("offset")
 
-	/*if date1 == "" {
-		// from https://en.wikipedia.org/wiki/2019_Major_League_Baseball_season
-		// HINT: replace year with current to figure out Game 1 date
+	if date1 == "" {
+		// from https://en.wikipedia.org/wiki/2020_Major_League_Baseball_season
 		//2019 is over - make default /bb goto Game 1, 2019 World Series
 		date1 = "year_2019/month_10/day_22"
 		offset = "0"
-	}*/
+	}
 	gameDayListing := baseball.GameDayListingHandler(date1, offset, homePageMap)
 
 	w.Header().Set("Cache-Control", "max-age=10800")
