@@ -68,6 +68,8 @@ commands:
               --label='traefik.http.routers.homepage.rule=Host(\\\`$HOMEPAGE_HOSTNAME\\\`)' \
               --label='traefik.http.routers.homepage.tls.certResolver=traefikdash' \
               --label='traefik.http.routers.homepage.tls.domains=$HOMEPAGE_HOSTNAME' \
+              --label='traefik.http.middlewares.homepage.redirectregex.regex=www.$HOMEPAGE_HOSTNAME/(.*)' \
+              --label='traefik.http.middlewares.homepage.redirectregex.replacement=$HOMEPAGE_HOSTNAME/$${1}' \
               -p8080 --name homepage arm32v7/alpine /tmp/run_homepage.sh"
 
             EOF
