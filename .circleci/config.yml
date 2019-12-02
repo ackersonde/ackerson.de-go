@@ -68,6 +68,7 @@ commands:
               --label='traefik.http.routers.homepage.rule=Host(\\\`$HOMEPAGE_HOSTNAME\\\`)' \
               --label='traefik.http.routers.homepage.tls.certResolver=traefikdash' \
               --label='traefik.http.routers.homepage.tls.domains.main=$HOMEPAGE_HOSTNAME' \
+              --label='traefik.http.routers.homepage.tls.domains[0].sans=www.$HOMEPAGE_HOSTNAME' \
               --label='traefik.http.routers.homepage.middlewares=homepage-wo-www' \
               --label='traefik.http.middlewares.homepage-wo-www.redirectregex.regex=\\\"^https?://(?:www\\.)?(.+)\\\"' \
               --label='traefik.http.middlewares.homepage-wo-www.redirectregex.replacement=\\\"https://$${1}\\\"' \
@@ -76,7 +77,6 @@ commands:
 
             EOF
 
-            #--label='traefik.http.routers.homepage.tls.domains[0].sans=www.$HOMEPAGE_HOSTNAME' \
 
             chmod u+x deploy_script.sh
 
