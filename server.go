@@ -2,15 +2,12 @@ package main
 
 import (
 	"encoding/json"
-	"errors"
 	"html/template"
-	"io"
 	"io/ioutil"
 	"log"
 	"net"
 	"net/http"
 	"net/http/httputil"
-	"net/url"
 	"os"
 	"strconv"
 	"strings"
@@ -18,13 +15,11 @@ import (
 
 	"github.com/danackerson/ackerson.de-go/baseball"
 	"github.com/danackerson/ackerson.de-go/structures"
-	"github.com/danackerson/digitalocean/common"
 	"github.com/gobuffalo/packr/v2"
 	sessions "github.com/goincremental/negroni-sessions"
 	"github.com/goincremental/negroni-sessions/cookiestore"
 	"github.com/gorilla/mux"
 	"github.com/mssola/user_agent"
-	"github.com/otium/ytdl"
 	"github.com/shurcooL/httpgzip"
 	"github.com/urfave/negroni"
 )
@@ -39,7 +34,6 @@ var poem string
 var darksky string
 var version string
 var port string
-var spacesKey, spacesSecret, spacesNamePublic string
 var post = "POST"
 
 var tmpl = packr.New("templates", "./templates")
@@ -94,9 +88,6 @@ func parseEnvVariables() {
 	joinAPIKey = os.Getenv("CTX_JOIN_API_KEY")
 	darksky = os.Getenv("ackWunder")
 	version = os.Getenv("CIRCLE_BUILD_NUM")
-	spacesKey = os.Getenv("CTX_DIGITALOCEAN_SPACES_KEY")
-	spacesSecret = os.Getenv("CTX_DIGITALOCEAN_SPACES_SECRET")
-	spacesNamePublic = os.Getenv("CTX_DIGITALOCEAN_SPACES_NAME_PUBLIC")
 }
 
 func setUpRoutes(router *mux.Router) {
@@ -166,25 +157,6 @@ func setUpRoutes(router *mux.Router) {
 	// play all games of the day
 	router.HandleFunc("/bbAll", bbAll)
 
-	// download gameURL to ~/downloads (& eventually send to Join Push App)
-	router.HandleFunc("/bb_download", bbDownloadPush)
-
-	router.HandleFunc("/bb_download_status", bbDownloadStatus)
-
-	icon := "https://ackerson.de/images/baseballSmall.png"
-	smallIcon := "https://connect.baseball.trackman.com/Images/spinner.png"
-	router.HandleFunc("/bb_resend_join_push",
-		func(w http.ResponseWriter, r *http.Request) {
-			response := sendPayloadToJoinAPI(downloadDir+r.URL.Query().Get("title"),
-				r.URL.Query().Get("title"), icon, smallIcon)
-
-			w.Write([]byte(response))
-		})
-
-	router.HandleFunc("/down/{file:.*}", func(w http.ResponseWriter, r *http.Request) {
-		common.DownloadFromDOSpaces(spacesNamePublic, w, r)
-	})
-
 	// catch all static file requests
 	router.HandleFunc("/", handleIndex)
 	router.PathPrefix("/").Handler(httpgzip.FileServer(
@@ -232,172 +204,6 @@ func bbDownloadStatus(w http.ResponseWriter, req *http.Request) {
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 
 	w.Write(data)
-}
-
-func bbDownloadPush(w http.ResponseWriter, r *http.Request) {
-	gameTitle := r.URL.Query().Get("gameTitle")
-	gameURL := r.URL.Query().Get("gameURL")
-	fileType := r.URL.Query().Get("fileType")
-	var gameLength int64
-	icon := "https://ackerson.de/images/baseballSmall.png"
-	smallIcon := "https://connect.baseball.trackman.com/Images/spinner.png"
-
-	downloadFilename := ""
-	humanFilename := ""
-	type GameMeta struct {
-		GameTitle         string
-		GameDownloadTitle string
-		GameLength        int64
-		GameDate          string
-		GameFile          string
-	}
-
-	if fileType == "bb" {
-		//gameTitle: 112-114__Wed, Nov  2 2016
-		result := strings.Split(gameTitle, "__")
-		gameDate, _ := time.Parse("Mon, Jan _2 2006", result[1])
-		humanDate := gameDate.Format("Mon, Jan _2 2006")
-		formattedDate := gameDate.Format("Mon_Jan02_2006")
-
-		// parse out teams "<awayID>-<homeID>"
-		teams := strings.Split(result[0], "-")
-		awayID, _ := strconv.Atoi(teams[0])
-		homeID, _ := strconv.Atoi(teams[1])
-		awayTeam := homePageMap[awayID]
-		homeTeam := homePageMap[homeID]
-
-		// create download filename: "Cubs@Diamondbacks-Wed_Nov02_2017.mp4"
-		downloadFilename = awayTeam.Name + "@" + homeTeam.Name + "-" + formattedDate + ".mp4"
-		downloadFilename = strings.Replace(downloadFilename, " ", "_", -1)
-		humanFilename = downloadFilename
-		res, err := http.Head(gameURL)
-		if err != nil {
-			log.Printf("ERR: unable to find game size\n")
-		}
-		gameLength = res.ContentLength
-
-		root.ExecuteTemplate(w, "bbDownloadGameAndPushPhone",
-			GameMeta{
-				GameTitle:         awayTeam.Name + "@" + homeTeam.Name,
-				GameDownloadTitle: gameURL,
-				GameDate:          humanDate,
-			})
-	} else if fileType == "vpn" {
-		icon = "http://www.setaram.com/wp-content/themes/setaram/library/images/lock.png"
-		smallIcon = "http://www.setaram.com/wp-content/themes/setaram/library/images/lock.png"
-
-		sendPayloadToJoinAPI(gameURL, gameTitle, icon, smallIcon)
-		return
-	} else if fileType == "dl" {
-		from, err := os.Open("/app/public/downloads/" + gameURL)
-		if err != nil {
-			http.Error(w, err.Error(), http.StatusNotFound)
-		} else {
-			fi, _ := from.Stat()
-			gameLength = fi.Size()
-
-			w.Header().Set("Content-Length", strconv.FormatInt(gameLength, 10))
-			w.Header().Set("Content-Disposition", `attachment; filename="`+gameTitle+`"`)
-			w.Header().Set("Cache-Control", "private")
-			w.Header().Set("Pragma", "private")
-			w.Header().Set("Expires", "Mon, 26 Jul 1997 05:00:00 GMT")
-
-			http.ServeContent(w, r, gameTitle, time.Now(), from)
-		}
-		return
-	} else {
-		// will be a YouTube video
-		vid, _ := ytdl.GetVideoInfo(gameURL)
-		URI, _ := vid.GetDownloadURL(vid.Formats[0])
-		log.Println(URI.String())
-		res, err := http.Head(URI.String())
-		if err != nil {
-			log.Printf("ERR: unable to find video size\n")
-		} else {
-			log.Println(strconv.FormatInt(res.ContentLength, 10) + " bytes")
-		}
-		icon = "https://emoji.slack-edge.com/T092UA8PR/youtube/a9a89483b7536f8a.png"
-		smallIcon = "http://icons.iconarchive.com/icons/iconsmind/outline/16/Youtube-icon.png"
-		gameLength = res.ContentLength
-		downloadFilename = vid.ID + "." + vid.Formats[0].Extension
-		humanFilename = vid.Title + "." + vid.Formats[0].Extension
-		// TODO: split this download up into humanFileName and diskFileID (e.g. YouTube ID)
-		gameURL = URI.String()
-	}
-
-	// and download it to ~/downloads/
-	filepath := downloadDir + downloadFilename
-
-	go func() {
-		err := common.CopyFileToDOSpaces(spacesNamePublic, filepath, gameURL, gameLength)
-		if err != nil {
-			// Check if file was already downloaded & don't resend to Join!
-			log.Printf("ERR: unable to download/save %s: %s\n", gameURL, err.Error())
-		} else {
-			log.Printf("Finished downloading %s\n", filepath)
-			sendPayloadToJoinAPI(filepath, humanFilename, icon, smallIcon)
-		}
-	}()
-}
-
-func sendPayloadToJoinAPI(downloadFilename string, humanFilename string, icon string, smallIcon string) string {
-	response := "Sorry, couldn't resend..."
-	humanFilenameEnc := &url.URL{Path: humanFilename}
-	humanFilenameEncoded := humanFilenameEnc.String()
-	// NOW send this URL to the Join Push App API
-	pushURL := "https://joinjoaomgcd.appspot.com/_ah/api/messaging/v1/sendPush"
-	defaultParams := "?deviceId=d888b2e9a3a24a29a15178b2304a40b3&icon=" + icon + "&smallicon=" + smallIcon
-	fileOnPhone := "&title=" + humanFilenameEncoded
-	fileURL := spacesNamePublic + ".ams3.digitaloceanspaces.com/" + downloadFilename
-	apiKey := "&apikey=" + joinAPIKey
-
-	fileURLEnc := &url.URL{Path: fileURL}
-	fileURL = fileURLEnc.String()
-	completeURL := pushURL + defaultParams + apiKey + fileOnPhone + "&file=https://" + fileURL
-	// Get the data
-	log.Printf("joinPushURL: %s\n", completeURL)
-	resp, err := http.Get(completeURL)
-	if err != nil {
-		log.Printf("ERR: unable to call Join Push\n")
-	}
-	defer resp.Body.Close()
-	if resp.StatusCode == 200 {
-		log.Printf("successfully sent payload to Join!\n")
-		response = "Success!"
-	}
-
-	return response
-}
-
-func downloadFile(filepath string, url string, filesize int64) (err error) {
-	// check if file exists and is same size as MLB.com (meaning we already downloaded it)
-	fi, err := os.Stat(filepath)
-	if err != nil {
-		// Create the file
-		out, err := os.Create(filepath)
-		if err != nil {
-			return err
-		}
-		defer out.Close()
-
-		// Get the data
-		resp, err := http.Get(url)
-		if err != nil {
-			return err
-		}
-		defer resp.Body.Close()
-
-		// Write the body to file
-		_, err = io.Copy(out, resp.Body)
-		if err != nil {
-			return err
-		}
-	} else {
-		if fi.Size() == filesize {
-			return errors.New("file exists")
-		}
-	}
-	return nil
 }
 
 func bbHome(w http.ResponseWriter, r *http.Request) {
