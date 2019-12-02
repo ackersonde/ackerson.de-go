@@ -67,7 +67,7 @@ commands:
               --label='traefik.http.routers.homepage.tls.domains.main=$HOMEPAGE_HOSTNAME' \
               --label='traefik.http.routers.homepage.tls.domains[0].sans=www.$HOMEPAGE_HOSTNAME' \
               --label='traefik.http.routers.homepage.middlewares=homepage-wo-www@docker' \
-              --label='traefik.http.middlewares.homepage-wo-www.redirectregex.regex=^.*www.$HOMEPAGE_HOSTNAME(.*)$$' \
+              --label='traefik.http.middlewares.homepage-wo-www.redirectregex.regex=www.$HOMEPAGE_HOSTNAME(.*)' \
               --label='traefik.http.middlewares.homepage-wo-www.redirectregex.replacement=https://$HOMEPAGE_HOSTNAME\\\$\\\${1}' \
               --label='traefik.http.middlewares.homepage-wo-www.redirectregex.permanent=true' \
               -p8080 --name homepage arm32v7/alpine /tmp/run_homepage.sh"
