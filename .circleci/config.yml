@@ -68,6 +68,7 @@ jobs:
             export DEPLOY_IP=`curl -s https://icanhazip.com`
             gcloud compute firewall-rules update default-allow-ssh \
               --source-ranges=$ORIG_RANGE,$DEPLOY_IP
+      - checkout
       - run:
           name: "Prepare & deploy K8S config"
           command: |
