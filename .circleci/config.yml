@@ -45,7 +45,7 @@ jobs:
   deploy:
     docker:
         - image: google/cloud-sdk:alpine
-      working_directory: ~/deploy
+    working_directory: ~/deploy
     steps:
       - run:
           name: Store Service Accounts
@@ -79,7 +79,6 @@ jobs:
 
             scp -o StrictHostKeyChecking=no homepage.yml ackersond@$K8S_SERVER:~/
             ssh ackersond@$K8S_SERVER -- "sudo kubectl apply -f homepage.yml"
-
       - run:
           name: Remove deploy network access
           command: |
