@@ -1,8 +1,5 @@
 version: 2.1
 
-orbs:
-  ipsec: danackerson/ipsec@0.2.4
-
 jobs:
   build:
     docker:
@@ -25,66 +22,80 @@ jobs:
           path: /tmp/test-results
       - store_artifacts:
           path: /tmp/test-results
+      - setup_remote_docker
+      - run:
+          name: "Install Docker CE"
+          command: |
+            curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-$CTX_DOCKER_ENGINE_VERSION.tgz && tar --strip-components=1 -xvzf docker-$CTX_DOCKER_ENGINE_VERSION.tgz -C /usr/local/bin
+            rm docker-$CTX_DOCKER_ENGINE_VERSION.tgz && rm -f /var/cache/apk/*
       - run:
           name: "Build & push docker image"
           command: |
             packr2
-            env GOOS=linux GOARCH=arm GOARM=7 go build -o homepage
-      - persist_to_workspace:
-          root: /go/src/github.com/danackerson/ackerson.de-go
-          paths:
-            - homepage
-            - run_homepage.sh
+            env GOOS=linux GOARCH=386 go build -o homepage
 
-commands:
-  prepare_deploy_script:
+            echo vc$CIRCLE_BUILD_NUM > last_docker_push
+
+            docker build --compress -t danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM .
+            docker login -u $CTX_DOCKER_USER -p $CTX_DOCKER_PASS
+            docker tag danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM danackerson/ackerson.de:latest
+            docker push danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
+            docker push danackerson/ackerson.de:latest
+
+  deploy:
+    docker:
+        - image: google/cloud-sdk:alpine
+      working_directory: ~/deploy
     steps:
-      - attach_workspace:
-          at: /tmp
       - run:
-          name: "Prepare deploy script"
+          name: Store Service Accounts
           command: |
-            cat \<<EOF >deploy_script.sh
-            # Prepare docker env
-            ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "\
-              mkdir homepage_app || true"
-            ssh $SSH_USER@$SSH_HOST "docker rm -f homepage || true"
-            scp /tmp/homepage /tmp/run_homepage.sh \
-              $SSH_USER@$SSH_HOST:~/homepage_app/
+            apk -u add jq
+            echo $CTX_GOOGLE_DEPLOY_SERVICE_JSON > ${HOME}/gcloud-service-key.json
+            chmod 600 $HOME/gcloud-service-key.json
 
-            # Run homepage
-            ssh $SSH_USER@$SSH_HOST "chmod u+x ~/homepage_app/run_homepage.sh && \
-            docker pull arm32v7/alpine && \
-            docker run -d --restart=always --network='web' \
-              -v ~/homepage_app:/tmp/ \
-              -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM \
-              -e CTX_JOIN_API_KEY=$CTX_JOIN_API_KEY \
-              -e ackSecret=$ackSecret -e ackWunder=$ackWunder \
-              --label='traefik.enable=true' \
-              --label='traefik.http.routers.homepage.entrypoints=http,httpsecure' \
-              --label='traefik.http.routers.homepage.rule=Host(\\\`$HOMEPAGE_HOSTNAME\\\`,\\\`www.$HOMEPAGE_HOSTNAME\\\`)' \
-              --label='traefik.http.routers.homepage.tls.certResolver=traefikdash' \
-              --label='traefik.http.routers.homepage.tls.domains.main=$HOMEPAGE_HOSTNAME' \
-              --label='traefik.http.routers.homepage.tls.domains[0].sans=www.$HOMEPAGE_HOSTNAME' \
-              --label='traefik.http.routers.homepage.middlewares=homepage-wo-www@docker' \
-              --label='traefik.http.middlewares.homepage-wo-www.redirectregex.regex=https://www.$HOMEPAGE_HOSTNAME/(.*)' \
-              --label='traefik.http.middlewares.homepage-wo-www.redirectregex.replacement=https://$HOMEPAGE_HOSTNAME/\\\${1}' \
-              --label='traefik.http.middlewares.homepage-wo-www.redirectregex.permanent=true' \
-              -p8080 --name homepage arm32v7/alpine /tmp/run_homepage.sh"
+            gcloud auth activate-service-account --key-file=${HOME}/gcloud-service-key.json
+            gcloud --quiet config set project ${CTX_GOOGLE_PROJECT_ID}
+            gcloud --quiet config set compute/zone europe-west3-c
+      - run:
+          name: Prepare deploy network access
+          command: |
+            ORIG_RANGE=`gcloud compute firewall-rules describe default-allow-ssh \
+              --format=json | jq -r '.sourceRanges | @csv'`
+            ORIG_RANGE=`echo ${ORIG_RANGE//\"}`
+            echo $ORIG_RANGE > /tmp/orig_range.txt
 
-            EOF
+            export DEPLOY_IP=`curl -s https://icanhazip.com`
+            gcloud compute firewall-rules update default-allow-ssh \
+              --source-ranges=$ORIG_RANGE,$DEPLOY_IP
+      - run:
+          name: "Prepare & deploy K8S config"
+          command: |
+            sed -i -e "s@{{HOMEPAGE_GCP_DOMAIN}}@$HOMEPAGE_GCP_DOMAIN@" homepage.yml
+            sed -i -e "s@{{CIRCLE_BUILD_NUM}}@$CIRCLE_BUILD_NUM@" homepage.yml
+            sed -i -e "s@{{CTX_JOIN_API_KEY}}@$CTX_JOIN_API_KEY@" homepage.yml
+            sed -i -e "s@{{ACK_SECRET}}@$ackSecret@" homepage.yml
+            sed -i -e "s@{{ACK_WUNDER}}@$ackWunder@" homepage.yml
 
+            scp -o StrictHostKeyChecking=no homepage.yml ackersond@$K8S_SERVER:~/
+            ssh ackersond@$K8S_SERVER -- "sudo kubectl apply -f homepage.yml"
 
-            chmod u+x deploy_script.sh
+      - run:
+          name: Remove deploy network access
+          command: |
+            export ORIG_RANGE=`cat /tmp/orig_range.txt`
+            if [ ! -z "$ORIG_RANGE" ]; then
+              gcloud compute firewall-rules update default-allow-ssh \
+                --source-ranges=$ORIG_RANGE
+            fi
+          when: always
 
 workflows:
   build-deploy:
     jobs:
         - build:
             context: org-global
-        - ipsec/remote-deploy:
+        - deploy:
             context: org-global
             requires:
               - build
-            pre-steps:
-              - prepare_deploy_script
