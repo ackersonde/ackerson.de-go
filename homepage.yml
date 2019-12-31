@@ -43,7 +43,7 @@ spec:
             - name: CTX_JOIN_API_KEY
               value: {{CTX_JOIN_API_KEY}}
             - name: CIRCLE_BUILD_NUM
-              value: {{CIRCLE_BUILD_NUM}}
+              value: "{{CIRCLE_BUILD_NUM}}"
 
 ---
 apiVersion: traefik.containo.us/v1alpha1
