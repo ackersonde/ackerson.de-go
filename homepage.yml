@@ -36,20 +36,20 @@ spec:
             - name: homepage
               containerPort: 8080
           env:
-          - name: ackSecret
-            value: {{ACK_SECRET}}
-          - name: ackWunder
-            value: {{ACK_WUNDER}}
-          - name: CTX_JOIN_API_KEY
-            value: {{CTX_JOIN_API_KEY}}
-          - name: CIRCLE_BUILD_NUM
-            value: {{CIRCLE_BUILD_NUM}}
+            - name: ackSecret
+              value: {{ACK_SECRET}}
+            - name: ackWunder
+              value: {{ACK_WUNDER}}
+            - name: CTX_JOIN_API_KEY
+              value: {{CTX_JOIN_API_KEY}}
+            - name: CIRCLE_BUILD_NUM
+              value: {{CIRCLE_BUILD_NUM}}
 
 ---
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: homepage_unsecure_ingress
+  name: homepage-unsecure-ingress
   namespace: default
 spec:
   entryPoints:
@@ -67,7 +67,7 @@ spec:
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: homepage_secure_ingress
+  name: homepage-secure-ingress
   namespace: default
 spec:
   entryPoints:
