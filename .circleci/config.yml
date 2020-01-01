@@ -44,7 +44,7 @@ jobs:
 
   deploy:
     docker:
-        - image: google/cloud-sdk:alpine
+      - image: google/cloud-sdk:alpine
     working_directory: ~/deploy
     steps:
       - run:
