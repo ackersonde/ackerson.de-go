@@ -35,15 +35,20 @@ spec:
           ports:
             - name: homepage
               containerPort: 8080
-          env:
-            - name: ackSecret
-              value: {{ACK_SECRET}}
-            - name: ackWunder
-              value: {{ACK_WUNDER}}
-            - name: CTX_JOIN_API_KEY
-              value: {{CTX_JOIN_API_KEY}}
-            - name: CIRCLE_BUILD_NUM
-              value: "{{CIRCLE_BUILD_NUM}}"
+          envFrom:
+            - secretRef:
+                name: homepage-env-secrets
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: homepage-env-secrets
+data:
+  CIRCLE_BUILD_NUM: {{CIRCLE_BUILD_NUM_B64}}
+  ackSecret: {{ACK_SECRET_B64}}
+  ackWunder: {{ACK_WUNDER_B64}}
+  CTX_JOIN_API_KEY: {{CTX_JOIN_API_KEY_B64}}
 
 ---
 apiVersion: traefik.containo.us/v1alpha1

@@ -72,12 +72,24 @@ jobs:
       - run:
           name: "Prepare & deploy K8S config"
           command: |
-            sed -i -e "s@{{HOMEPAGE_GCP_DOMAIN}}@$HOMEPAGE_GCP_DOMAIN@" homepage.yml
-            sed -i -e "s@{{CIRCLE_BUILD_NUM}}@$CIRCLE_BUILD_NUM@" homepage.yml
-            sed -i -e "s@{{CTX_JOIN_API_KEY}}@$CTX_JOIN_API_KEY@" homepage.yml
-            sed -i -e "s@{{ACK_SECRET}}@$ackSecret@" homepage.yml
-            sed -i -e "s@{{ACK_WUNDER}}@$ackWunder@" homepage.yml
+            export CIRCLE_BUILD_NUM_B64=`echo -n $CIRCLE_BUILD_NUM | base64`
+            sed -i -e "s@{{CIRCLE_BUILD_NUM_B64}}@$CIRCLE_BUILD_NUM_B64@" homepage.yml
 
+            echo -n "$ACK_SECRET" | base64 | tr -d \\n > .base64_enc
+            export ACK_SECRET_B64=`cat .base64_enc`
+            sed -i -e "s@{{ACK_SECRET_B64}}@$ACK_SECRET_B64@" homepage.yml
+
+            echo -n "$ACK_WUNDER" | base64 | tr -d \\n > .base64_enc
+            export ACK_WUNDER_B64=`cat .base64_enc`
+            sed -i -e "s@{{ACK_WUNDER_B64}}@$ACK_WUNDER_B64@" homepage.yml
+
+            echo -n "$CTX_JOIN_API_KEY" | base64 | tr -d \\n > .base64_enc
+            export CTX_JOIN_API_KEY_B64=`cat .base64_enc`
+            sed -i -e "s@{{CTX_JOIN_API_KEY_B64}}@$CTX_JOIN_API_KEY_B64@" homepage.yml
+
+            sed -i -e "s@{{HOMEPAGE_GCP_DOMAIN}}@$HOMEPAGE_GCP_DOMAIN@" homepage.yml
+
+            rm .base64_enc
             scp -o StrictHostKeyChecking=no homepage.yml ackersond@$K8S_SERVER:~/
             ssh ackersond@$K8S_SERVER -- "sudo kubectl apply -f homepage.yml"
       - run:
