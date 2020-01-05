@@ -45,9 +45,8 @@ kind: Secret
 metadata:
   name: homepage-env-secrets
 data:
-  CIRCLE_BUILD_NUM: {{CIRCLE_BUILD_NUM_B64}}
   ackSecret: {{ACK_SECRET_B64}}
-  ackWunder: {{ACK_WUNDER_B64}}
+  CIRCLE_BUILD_NUM: {{CIRCLE_BUILD_NUM_B64}}
   CTX_JOIN_API_KEY: {{CTX_JOIN_API_KEY_B64}}
 
 ---

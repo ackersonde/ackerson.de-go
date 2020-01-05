@@ -79,10 +79,6 @@ jobs:
             export ACK_SECRET_B64=`cat .base64_enc`
             sed -i -e "s@{{ACK_SECRET_B64}}@$ACK_SECRET_B64@" homepage.yml
 
-            echo -n "$ACK_WUNDER" | base64 | tr -d \\n > .base64_enc
-            export ACK_WUNDER_B64=`cat .base64_enc`
-            sed -i -e "s@{{ACK_WUNDER_B64}}@$ACK_WUNDER_B64@" homepage.yml
-
             echo -n "$CTX_JOIN_API_KEY" | base64 | tr -d \\n > .base64_enc
             export CTX_JOIN_API_KEY_B64=`cat .base64_enc`
             sed -i -e "s@{{CTX_JOIN_API_KEY_B64}}@$CTX_JOIN_API_KEY_B64@" homepage.yml
