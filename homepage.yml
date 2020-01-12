@@ -1,0 +1,87 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: homepage
+spec:
+  ports:
+    - name: homepage
+      port: 8080
+      protocol: TCP
+  selector:
+    app: homepage
+
+---
+kind: Deployment
+apiVersion: apps/v1
+metadata:
+  namespace: default
+  name: homepage
+  labels:
+    app: homepage
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: homepage
+  template:
+    metadata:
+      labels:
+        app: homepage
+    spec:
+      restartPolicy: Always
+      containers:
+        - name: homepage
+          image: danackerson/ackerson.de
+          ports:
+            - name: homepage
+              containerPort: 8080
+          envFrom:
+            - secretRef:
+                name: homepage-env-secrets
+
+---
+apiVersion: v1
+kind: Secret
+metadata:
+  name: homepage-env-secrets
+data:
+  CIRCLE_BUILD_NUM: {{CIRCLE_BUILD_NUM_B64}}
+  ackSecret: {{ACK_SECRET_B64}}
+  ackWunder: {{ACK_WUNDER_B64}}
+  CTX_JOIN_API_KEY: {{CTX_JOIN_API_KEY_B64}}
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: homepage-unsecure-ingress
+  namespace: default
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`{{HOMEPAGE_DOMAIN}}`)
+    middlewares:
+        - name: tls-redirect
+    kind: Rule
+    services:
+    - name: homepage
+      port: 8080
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: homepage-secure-ingress
+  namespace: default
+spec:
+  entryPoints:
+    - secure
+  routes:
+  - match: Host(`{{HOMEPAGE_DOMAIN}}`)
+    kind: Rule
+    services:
+    - name: homepage
+      port: 8080
+  tls:
+    certResolver: letsencrypt

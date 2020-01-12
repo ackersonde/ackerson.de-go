@@ -1,5 +1,5 @@
 FROM alpine:latest
 RUN apk --no-cache add curl mailcap
-ADD server /app/
+ADD homepage /app/
 WORKDIR /app
-ENTRYPOINT ["/app/server"]
+ENTRYPOINT ["/app/homepage"]
