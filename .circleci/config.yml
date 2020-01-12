@@ -60,7 +60,7 @@ jobs:
             export CTX_JOIN_API_KEY_B64=`cat .base64_enc`
             sed -i -e "s@{{CTX_JOIN_API_KEY_B64}}@$CTX_JOIN_API_KEY_B64@" homepage.yml
 
-            sed -i -e "s@{{HOMEPAGE_DOMAIN}}@$HOMEPAGE_DOMAIN@" homepage.yml
+            sed -i -e "s@{{HOMEPAGE_HOSTNAME}}@$HOMEPAGE_HOSTNAME@" homepage.yml
             rm .base64_enc
       - persist_to_workspace:
           root: /go/src/github.com/danackerson/ackerson.de-go
@@ -76,8 +76,8 @@ commands:
           name: "Prepare deploy script"
           command: |
             cat \<<EOF >deploy_script.sh
-            scp -o StrictHostKeyChecking=no /tmp/homepage.yml $SSH_USER@$SSH_HOST:~/
-            ssh $SSH_USER@$SSH_HOST -- "sudo kubectl apply -f homepage.yml"
+            scp -o StrictHostKeyChecking=no /tmp/homepage.yml $SSH_USER@$SSH_HOST:~/k3s/
+            ssh $SSH_USER@$SSH_HOST -- "sudo kubectl apply -f k3s/homepage.yml"
             EOF
 
             chmod u+x deploy_script.sh
