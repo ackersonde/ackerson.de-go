@@ -60,7 +60,7 @@ spec:
   entryPoints:
     - web
   routes:
-  - match: Host(`{{HOMEPAGE_DOMAIN}}`)
+  - match: Host(`{{HOMEPAGE_HOSTNAME}}`)
     middlewares:
         - name: tls-redirect
     kind: Rule
@@ -78,7 +78,7 @@ spec:
   entryPoints:
     - secure
   routes:
-  - match: Host(`{{HOMEPAGE_DOMAIN}}`)
+  - match: Host(`{{HOMEPAGE_HOSTNAME}}`)
     kind: Rule
     services:
     - name: homepage
