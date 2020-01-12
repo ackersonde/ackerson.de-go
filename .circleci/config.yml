@@ -7,7 +7,7 @@ jobs:
   build:
     docker:
       - image: golang:alpine
-    working_directory: /setup
+    working_directory: /go/src/github.com/danackerson/ackerson.de-go
     steps:
       - checkout
       - run:
@@ -63,7 +63,7 @@ jobs:
             sed -i -e "s@{{HOMEPAGE_DOMAIN}}@$HOMEPAGE_DOMAIN@" homepage.yml
             rm .base64_enc
       - persist_to_workspace:
-          root: /setup
+          root: /go/src/github.com/danackerson/ackerson.de-go
           paths:
             - homepage.yml
 
