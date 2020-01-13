@@ -47,6 +47,7 @@ jobs:
           command: |
             export CIRCLE_BUILD_NUM_B64=`echo -n $CIRCLE_BUILD_NUM | base64`
             sed -i -e "s@{{CIRCLE_BUILD_NUM_B64}}@$CIRCLE_BUILD_NUM_B64@" homepage.yml
+            sed -i -e "s@{{CIRCLE_BUILD_NUM}}@$CIRCLE_BUILD_NUM" homepage.yml
 
             echo -n "$ackSecret" | base64 | tr -d \\n > .base64_enc
             export ACK_SECRET_B64=`cat .base64_enc`

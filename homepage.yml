@@ -31,7 +31,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: homepage
-          image: danackerson/ackerson.de
+          image: danackerson/ackerson.de:vc{{CIRCLE_BUILD_NUM}}
           ports:
             - name: homepage
               containerPort: 8080
