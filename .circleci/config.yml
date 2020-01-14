@@ -13,7 +13,7 @@ jobs:
       - run:
           name: "Fetch dependencies, build and test"
           command: |
-            apk add -U curl build-base git
+            apk add -U curl build-base git docker-cli
 
             go get -u github.com/gobuffalo/packr/v2/packr2
             go get -u github.com/jstemmer/go-junit-report
@@ -25,18 +25,15 @@ jobs:
           path: /tmp/test-results
       - store_artifacts:
           path: /tmp/test-results
-      - setup_remote_docker
-      - run:
-          name: "Install Docker CE"
-          command: |
-            curl -fsSLO https://download.docker.com/linux/static/stable/x86_64/docker-$CTX_DOCKER_ENGINE_VERSION.tgz && tar --strip-components=1 -xvzf docker-$CTX_DOCKER_ENGINE_VERSION.tgz -C /usr/local/bin
-            rm docker-$CTX_DOCKER_ENGINE_VERSION.tgz && rm -f /var/cache/apk/*
+      - setup_remote_docker:
+          version: 18.09.3
       - run:
           name: "Build & push docker image"
           command: |
             packr2
             env GOOS=linux GOARCH=arm GOARM=7 go build -o homepage
 
+            docker run --rm --privileged multiarch/qemu-user-static:register
             docker build --compress -t danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM .
             docker login -u $CTX_DOCKER_USER -p $CTX_DOCKER_PASS
             docker tag danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM danackerson/ackerson.de:latest
