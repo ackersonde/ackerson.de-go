@@ -80,7 +80,7 @@ spec:
   routes:
   - match: Host(`{{HOMEPAGE_HOSTNAME}}`,`www.{{HOMEPAGE_HOSTNAME}}`)
     middlewares:
-        - name: tls-redirect
+    - name: tls-redirect
     kind: Rule
     services:
     - name: homepage
@@ -115,3 +115,4 @@ spec:
   redirectRegex:
     regex: ^https://www.{{HOMEPAGE_HOSTNAME}}/(.*)
     replacement: https://{{HOMEPAGE_HOSTNAME}}/${1}
+    permanent: true
