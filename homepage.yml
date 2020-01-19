@@ -54,24 +54,6 @@ data:
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
-  name: homepage-unsecure-ingress
-  namespace: default
-spec:
-  entryPoints:
-    - web
-  routes:
-  - match: Host(`{{HOMEPAGE_HOSTNAME}}`)
-    middlewares:
-        - name: tls-redirect
-    kind: Rule
-    services:
-    - name: homepage
-      port: 8080
-
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
   name: homepage-secure-ingress
   namespace: default
 spec:
@@ -85,3 +67,51 @@ spec:
       port: 8080
   tls:
     certResolver: letsencrypt
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: homepage-unsecure-ingress
+  namespace: default
+spec:
+  entryPoints:
+    - web
+  routes:
+  - match: Host(`{{HOMEPAGE_HOSTNAME}}`,`www.{{HOMEPAGE_HOSTNAME}}`)
+    middlewares:
+        - name: tls-redirect
+    kind: Rule
+    services:
+    - name: homepage
+      port: 8080
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: www-secure-redirect
+  namespace: default
+spec:
+  entryPoints:
+    - secure
+  routes:
+  - match: Host(`www.{{HOMEPAGE_HOSTNAME}}`)
+    middlewares:
+    - name: www-redirect
+    kind: Rule
+    services:
+    - name: homepage
+      port: 8080
+  tls:
+    certResolver: letsencrypt
+
+---
+apiVersion: traefik.containo.us/v1alpha1
+kind: Middleware
+metadata:
+  name: www-redirect
+spec:
+  redirectRegex:
+    regex: ^https://www.{{HOMEPAGE_HOSTNAME}}/(.*)
+    replacement: https://{{HOMEPAGE_HOSTNAME}}/${1}
