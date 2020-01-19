@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  ipsec: danackerson/ipsec@1.0.3
+  ipsec: danackerson/ipsec@1.1.0
 
 jobs:
   build:
@@ -73,12 +73,12 @@ commands:
       - run:
           name: "Prepare deploy script"
           command: |
-            cat \<<EOF >deploy_script.sh
+            cat \<<EOF >/tmp/deploy_script.sh
             scp -o StrictHostKeyChecking=no /tmp/homepage.yml $SSH_USER@$SSH_HOST:~/k3s/
             ssh $SSH_USER@$SSH_HOST -- "sudo kubectl apply -f k3s/homepage.yml"
             EOF
 
-            chmod u+x deploy_script.sh
+            chmod u+x /tmp/deploy_script.sh
 
 workflows:
   build-deploy:
