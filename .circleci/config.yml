@@ -58,7 +58,7 @@ jobs:
             export CTX_JOIN_API_KEY_B64=`cat .base64_enc`
             sed -i -e "s@{{CTX_JOIN_API_KEY_B64}}@$CTX_JOIN_API_KEY_B64@" homepage.yml
 
-            sed -i -e "s@{{HOMEPAGE_HOSTNAME}}@$HOMEPAGE_HOSTNAME@" homepage.yml
+            sed -i -e "s@{{HOMEPAGE_HOSTNAME}}@$HOMEPAGE_HOSTNAME@g" homepage.yml
             rm .base64_enc
       - persist_to_workspace:
           root: /go/src/github.com/danackerson/ackerson.de-go
