@@ -270,7 +270,8 @@ func bbAjaxDay(w http.ResponseWriter, r *http.Request) {
 
 // GetIP now commented
 func GetIP(r *http.Request) string {
-	requestDump, _ := httputil.DumpRequest(r, false)
+	requestDump, _ := httputil.DumpRequest(r, true)
+	log.Printf("requestDump: %v\n", requestDump)
 	log.Printf("GetIP Request: %s\n", requestDump)
 
 	ip := r.Header.Get("X-Real-Ip")
