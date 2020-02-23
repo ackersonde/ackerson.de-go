@@ -30,7 +30,7 @@ jobs:
       - run:
           name: "Build & push docker image"
           command: |
-            GO111MODULE=off packr2
+            GO111MODULE=on packr2
             env GOOS=linux GOARCH=arm GOARM=7 go build -o homepage
 
             docker run --rm --privileged multiarch/qemu-user-static:register
