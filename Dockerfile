@@ -1,5 +1,5 @@
-FROM alpine:latest
+FROM multiarch/alpine:armv7-v3.10
 RUN apk --no-cache add curl mailcap
-ADD server /app/
+ADD homepage /app/
 WORKDIR /app
-ENTRYPOINT ["/app/server"]
+ENTRYPOINT ["/app/homepage"]

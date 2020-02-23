@@ -1,7 +1,7 @@
 version: 2.1
 
 orbs:
-  ipsec: danackerson/ipsec@0.2.4
+  ipsec: danackerson/ipsec@1.1.1
 
 jobs:
   build:
@@ -13,10 +13,10 @@ jobs:
       - run:
           name: "Fetch dependencies, build and test"
           command: |
-            apk add -U curl build-base git
+            apk add -U curl build-base git docker-cli
 
-            go get github.com/gobuffalo/packr/v2/packr2
-            go get github.com/jstemmer/go-junit-report
+            go get -u github.com/gobuffalo/packr/v2/packr2
+            go get -u github.com/jstemmer/go-junit-report
             mkdir -p /tmp/test-results
 
             go get -t -d -v ./...
@@ -25,16 +25,45 @@ jobs:
           path: /tmp/test-results
       - store_artifacts:
           path: /tmp/test-results
+      - setup_remote_docker:
+          version: 18.09.3
       - run:
           name: "Build & push docker image"
           command: |
             packr2
             env GOOS=linux GOARCH=arm GOARM=7 go build -o homepage
+
+            docker run --rm --privileged multiarch/qemu-user-static:register
+            docker build --compress -t danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM .
+            docker login -u $CTX_DOCKER_USER -p $CTX_DOCKER_PASS
+            docker tag danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM danackerson/ackerson.de:latest
+            docker push danackerson/ackerson.de:vc$CIRCLE_BUILD_NUM
+            docker push danackerson/ackerson.de:latest
+      - run:
+          name: "Prepare K8S YAML config"
+          command: |
+            export CIRCLE_BUILD_NUM_B64=`echo -n $CIRCLE_BUILD_NUM | base64`
+            sed -i -e "s@{{CIRCLE_BUILD_NUM_B64}}@$CIRCLE_BUILD_NUM_B64@" homepage.yml
+            sed -i -e "s@{{CIRCLE_BUILD_NUM}}@$CIRCLE_BUILD_NUM@" homepage.yml
+
+            echo -n "$ackSecret" | base64 | tr -d \\n > .base64_enc
+            export ACK_SECRET_B64=`cat .base64_enc`
+            sed -i -e "s@{{ACK_SECRET_B64}}@$ACK_SECRET_B64@" homepage.yml
+
+            echo -n "$ackWunder" | base64 | tr -d \\n > .base64_enc
+            export ACK_WUNDER_B64=`cat .base64_enc`
+            sed -i -e "s@{{ACK_WUNDER_B64}}@$ACK_WUNDER_B64@" homepage.yml
+
+            echo -n "$CTX_JOIN_API_KEY" | base64 | tr -d \\n > .base64_enc
+            export CTX_JOIN_API_KEY_B64=`cat .base64_enc`
+            sed -i -e "s@{{CTX_JOIN_API_KEY_B64}}@$CTX_JOIN_API_KEY_B64@" homepage.yml
+
+            sed -i -e "s@{{HOMEPAGE_HOSTNAME}}@$HOMEPAGE_HOSTNAME@g" homepage.yml
+            rm .base64_enc
       - persist_to_workspace:
           root: /go/src/github.com/danackerson/ackerson.de-go
           paths:
-            - homepage
-            - run_homepage.sh
+            - homepage.yml
 
 commands:
   prepare_deploy_script:
@@ -44,38 +73,12 @@ commands:
       - run:
           name: "Prepare deploy script"
           command: |
-            cat \<<EOF >deploy_script.sh
-            # Prepare docker env
-            ssh -o StrictHostKeyChecking=no $SSH_USER@$SSH_HOST "\
-              mkdir homepage_app || true"
-            ssh $SSH_USER@$SSH_HOST "docker rm -f homepage || true"
-            scp /tmp/homepage /tmp/run_homepage.sh \
-              $SSH_USER@$SSH_HOST:~/homepage_app/
-
-            # Run homepage
-            ssh $SSH_USER@$SSH_HOST "chmod u+x ~/homepage_app/run_homepage.sh && \
-            docker pull arm32v7/alpine && \
-            docker run -d --restart=always --network='web' \
-              -v ~/homepage_app:/tmp/ \
-              -e CIRCLE_BUILD_NUM=$CIRCLE_BUILD_NUM \
-              -e CTX_JOIN_API_KEY=$CTX_JOIN_API_KEY \
-              -e ackSecret=$ackSecret -e ackWunder=$ackWunder \
-              --label='traefik.enable=true' \
-              --label='traefik.http.routers.homepage.entrypoints=http,httpsecure' \
-              --label='traefik.http.routers.homepage.rule=Host(\\\`$HOMEPAGE_HOSTNAME\\\`,\\\`www.$HOMEPAGE_HOSTNAME\\\`)' \
-              --label='traefik.http.routers.homepage.tls.certResolver=traefikdash' \
-              --label='traefik.http.routers.homepage.tls.domains.main=$HOMEPAGE_HOSTNAME' \
-              --label='traefik.http.routers.homepage.tls.domains[0].sans=www.$HOMEPAGE_HOSTNAME' \
-              --label='traefik.http.routers.homepage.middlewares=homepage-wo-www@docker' \
-              --label='traefik.http.middlewares.homepage-wo-www.redirectregex.regex=https://www.$HOMEPAGE_HOSTNAME/(.*)' \
-              --label='traefik.http.middlewares.homepage-wo-www.redirectregex.replacement=https://$HOMEPAGE_HOSTNAME/\\\${1}' \
-              --label='traefik.http.middlewares.homepage-wo-www.redirectregex.permanent=true' \
-              -p8080 --name homepage arm32v7/alpine /tmp/run_homepage.sh"
-
+            cat \<<EOF >/tmp/deploy_script.sh
+            scp -o StrictHostKeyChecking=no /tmp/homepage.yml $SSH_USER@$SSH_HOST:~/k3s/
+            ssh $SSH_USER@$SSH_HOST -- "sudo kubectl apply -f k3s/homepage.yml"
             EOF
 
-
-            chmod u+x deploy_script.sh
+            chmod u+x /tmp/deploy_script.sh
 
 workflows:
   build-deploy:
