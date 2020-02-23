@@ -30,6 +30,8 @@ jobs:
       - run:
           name: "Build & push docker image"
           command: |
+            which go
+            go version
             packr2
             env GOOS=linux GOARCH=arm GOARM=7 go build -o homepage
 
