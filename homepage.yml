@@ -61,6 +61,8 @@ spec:
     - secure
   routes:
   - match: Host(`{{HOMEPAGE_HOSTNAME}}`)
+#   middlewares:
+#    - name: real-ip
     kind: Rule
     services:
     - name: homepage
