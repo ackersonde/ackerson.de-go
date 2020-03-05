@@ -16,8 +16,6 @@ import (
 	"github.com/danackerson/ackerson.de-go/baseball"
 	"github.com/danackerson/ackerson.de-go/structures"
 	"github.com/gobuffalo/packr/v2"
-	sessions "github.com/goincremental/negroni-sessions"
-	"github.com/goincremental/negroni-sessions/cookiestore"
 	"github.com/gorilla/mux"
 	"github.com/mssola/user_agent"
 	"github.com/shurcooL/httpgzip"
@@ -75,9 +73,6 @@ func main() {
 	r := mux.NewRouter()
 	setUpRoutes(r)
 	n := negroni.Classic()
-
-	store := cookiestore.New([]byte(secret))
-	n.Use(sessions.Sessions("gurkherpaderp", store))
 	n.UseHandler(r)
 
 	http.ListenAndServe(httpPort, n)
@@ -112,18 +107,6 @@ func setUpRoutes(router *mux.Router) {
 	router.HandleFunc("/weather", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == post {
 			WeatherHandler(w, r)
-		}
-	})
-	router.HandleFunc("/poems", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == "GET" {
-			session := sessions.GetSession(r)
-			pass := session.Get("pass")
-
-			if pass == nil && r.FormValue("sesam") != poem {
-				http.NotFound(w, r)
-			} else if r.FormValue("sesam") == poem || pass != nil {
-				session.Set("pass", "true")
-			}
 		}
 	})
 
