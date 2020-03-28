@@ -237,7 +237,7 @@ function mvvRoute(origin, destination) {
                 </div>\
                 ";
           }
-          else if (command == 'whomai') {
+          else if (command == 'whoami') {
             clientPublicIP4 = "";
             clientPublicIP6 = "";
             $.getJSON("https://api.ipify.org?format=jsonp&callback=?",
