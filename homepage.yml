@@ -40,6 +40,7 @@ spec:
                 name: homepage-env-secrets
 
 ---
+
 apiVersion: v1
 kind: Secret
 metadata:
@@ -51,64 +52,7 @@ data:
   CTX_JOIN_API_KEY: {{CTX_JOIN_API_KEY_B64}}
 
 ---
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: homepage-secure-ingress
-  namespace: default
-spec:
-  entryPoints:
-    - secure
-  routes:
-  - match: Host(`{{HOMEPAGE_HOSTNAME}}`)
-#   middlewares:
-#    - name: real-ip
-    kind: Rule
-    services:
-    - name: homepage
-      port: 8080
-  tls:
-    certResolver: letsencrypt
 
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: homepage-unsecure-ingress
-  namespace: default
-spec:
-  entryPoints:
-    - web
-  routes:
-  - match: Host(`{{HOMEPAGE_HOSTNAME}}`,`www.{{HOMEPAGE_HOSTNAME}}`)
-    middlewares:
-    - name: tls-redirect
-    kind: Rule
-    services:
-    - name: homepage
-      port: 8080
-
----
-apiVersion: traefik.containo.us/v1alpha1
-kind: IngressRoute
-metadata:
-  name: www-secure-redirect
-  namespace: default
-spec:
-  entryPoints:
-    - secure
-  routes:
-  - match: Host(`www.{{HOMEPAGE_HOSTNAME}}`)
-    middlewares:
-    - name: www-redirect
-    kind: Rule
-    services:
-    - name: homepage
-      port: 8080
-  tls:
-    certResolver: letsencrypt
-
----
 apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
@@ -118,3 +62,24 @@ spec:
     regex: ^https://www.{{HOMEPAGE_HOSTNAME}}/(.*)
     replacement: https://{{HOMEPAGE_HOSTNAME}}/${1}
     permanent: true
+
+---
+
+apiVersion: traefik.containo.us/v1alpha1
+kind: IngressRoute
+metadata:
+  name: homepage-ingress
+  namespace: default
+spec:
+  entryPoints:
+    - web
+    - secure
+  routes:
+  - match: Host(`{{HOMEPAGE_HOSTNAME}}`,`www.{{HOMEPAGE_HOSTNAME}}`)
+    middlewares:
+    - name: tls-redirect
+    - name: www-redirect
+    kind: Rule
+    services:
+    - name: homepage
+      port: 8080

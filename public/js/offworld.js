@@ -236,7 +236,23 @@ function mvvRoute(origin, destination) {
                     </div>\
                 </div>\
                 ";
-          } else term.echo(responseText[command]);       // data set
+          }
+          else if (command == 'whomai') {
+            clientPublicIP4 = "";
+            clientPublicIP6 = "";
+            $.getJSON("https://api.ipify.org?format=jsonp&callback=?",
+              function(json) {
+                clientPublicIP4 = json.ip;
+              }
+            );
+            $.getJSON("https://api6.ipify.org?format=jsonp&callback=?",
+              function(json) {
+                clientPublicIP6 = json.ip;
+              }
+            );
+            term.echo(`${clientPublicIP4}[${clientPublicIP6}]\\n${responseText[command]}`);
+          }
+          else term.echo(responseText[command]);       // data set
         }
       },
       function(xhr, status, error) {
