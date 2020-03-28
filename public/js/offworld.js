@@ -161,6 +161,16 @@ function mvvRoute(origin, destination) {
   month[10] = "Nov";
   month[11] = "Dec";
 
+  var clientPublicIP4 = ""
+  var clientPublicIP6 = ""
+
+  function getIP4(json) {
+    clientPublicIP4 = json.ip;
+  }
+  function getIP6(json) {
+    clientPublicIP6 = json.ip;
+  }
+
   /* simple ajax call where typed cmd string is SAME as remote URI AND data set */
   function simpleAjaxCall(command, query_param) {
     term.pause();
@@ -238,15 +248,6 @@ function mvvRoute(origin, destination) {
                 ";
           }
           else if (command == 'whoami') {
-            var xhr = new XMLHttpRequest();
-            xhr.open("GET", "https://api.ipify.org", false);  // synchronous request
-            xhr.send(null);
-            var clientPublicIP4 = xhr.responseText;
-
-            xhr.open("GET", "https://api6.ipify.org", false);  // synchronous request
-            xhr.send(null);
-            var clientPublicIP6 = xhr.responseText;
-
             var publicIP = "[[g;#FFFF00;]Your IP:] ";
             if (clientPublicIP4 == clientPublicIP6) {
               publicIP += clientPublicIP4
