@@ -268,7 +268,7 @@ func GetIP(r *http.Request) string {
 
 // WhoAmIHandler now commented
 func WhoAmIHandler(w http.ResponseWriter, req *http.Request) {
-	s := []string{"[[g;#FFFF00;]Your IP:] " + GetIP(req), "[[g;#FFFF00;]Your Browser:] " + req.UserAgent()}
+	s := []string{"[[g;#FFFF00;]Your Browser:] " + req.UserAgent()}
 	rawData := strings.Join(s, "\r\n")
 	rawDataJSON := map[string]string{"whoami": rawData}
 	for header, value := range req.Header {

@@ -238,19 +238,22 @@ function mvvRoute(origin, destination) {
                 ";
           }
           else if (command == 'whoami') {
-            clientPublicIP4 = "";
-            clientPublicIP6 = "";
-            $.getJSON("https://api.ipify.org?format=jsonp&callback=?",
-              function(json) {
-                clientPublicIP4 = json.ip;
-              }
-            );
-            $.getJSON("https://api6.ipify.org?format=jsonp&callback=?",
-              function(json) {
-                clientPublicIP6 = json.ip;
-              }
-            );
-            term.echo(`${clientPublicIP4}[${clientPublicIP6}]\\n${responseText[command]}`);
+            var xhr = new XMLHttpRequest();
+            xhr.open("GET", "https://api.ipify.org", false);  // synchronous request
+            xhr.send(null);
+            var clientPublicIP4 = xhr.responseText;
+
+            xhr.open("GET", "https://api6.ipify.org", false);  // synchronous request
+            xhr.send(null);
+            var clientPublicIP6 = xhr.responseText;
+
+            var publicIP = "[[g;#FFFF00;]Your IP:] ";
+            if (clientPublicIP4 == clientPublicIP6) {
+              publicIP += clientPublicIP4
+            } else {
+              publicIP += `${clientPublicIP4} [${clientPublicIP6}]`
+            }
+            term.echo(`${publicIP}\n${responseText[command]}`);
           }
           else term.echo(responseText[command]);       // data set
         }
