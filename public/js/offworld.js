@@ -25,6 +25,15 @@ function mvvRoute(origin, destination) {
   win.focus();
 }
 
+var clientPublicIP4 = "";
+var clientPublicIP6 = "";
+function getIP4(json) {
+  clientPublicIP4 = json.ip;
+}
+function getIP6(json) {
+  clientPublicIP6 = json.ip;
+}
+
 (function($) {
   var id = 1;
   var greeting = "Welcome Off World (type help)";
@@ -160,16 +169,6 @@ function mvvRoute(origin, destination) {
   month[9] = "Oct";
   month[10] = "Nov";
   month[11] = "Dec";
-
-  var clientPublicIP4 = ""
-  var clientPublicIP6 = ""
-
-  function getIP4(json) {
-    clientPublicIP4 = json.ip;
-  }
-  function getIP6(json) {
-    clientPublicIP6 = json.ip;
-  }
 
   /* simple ajax call where typed cmd string is SAME as remote URI AND data set */
   function simpleAjaxCall(command, query_param) {
