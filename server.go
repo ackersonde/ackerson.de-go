@@ -285,7 +285,7 @@ func VersionHandler(w http.ResponseWriter, req *http.Request) {
 	if strings.HasPrefix(version, "vg") {
 		version = strings.TrimLeft(version, "vg")
 	}
-	buildURL := "https://github.com/ackersonde/ackerson.de-go/runs/" + version
+	buildURL := "https://github.com/ackersonde/ackerson.de-go/runs/" + version + "?check_suite_focus=true"
 	v := map[string]string{"version": buildURL, "build": version}
 
 	data, _ := json.Marshal(v)
