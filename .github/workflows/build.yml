@@ -17,6 +17,7 @@ jobs:
           go get -u github.com/jstemmer/go-junit-report
           mkdir -p /tmp/test-results
 
+          export `go env | grep GOPATH`
           go get -t -d -v ./...
           go test -v ./... | $GOPATH/bin/go-junit-report > /tmp/test-results/unit-tests.xml
       - name: Upload & archive test results
