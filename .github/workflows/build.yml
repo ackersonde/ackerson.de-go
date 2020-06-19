@@ -15,10 +15,11 @@ jobs:
           go mod init ackerson.de-go
           go get -u github.com/gobuffalo/packr/v2/packr2
           go get -u github.com/jstemmer/go-junit-report
-          mkdir -p /tmp/test-results
 
-          export `go env | grep GOPATH | tr -d \"`
           go get -t -d -v ./...
+
+          mkdir -p /tmp/test-results
+          export `go env | grep GOPATH | tr -d \"`
           go test -v ./... | $GOPATH/bin/go-junit-report > /tmp/test-results/unit-tests.xml
       - name: Upload & archive test results
         uses: actions/upload-artifact@v1
@@ -27,6 +28,7 @@ jobs:
           path: /tmp/test-results/unit-tests.xml
       - name: Build application and docker image
         run: |
+          export `go env | grep GOPATH | tr -d \"`
           $GOPATH/bin/packr2
           env GOOS=linux GOARCH=arm GOARM=7 go build -o homepage
 
