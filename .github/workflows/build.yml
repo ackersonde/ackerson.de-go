@@ -10,6 +10,28 @@ jobs:
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
-#        with:
-#          go-version: '^1.13.1' # The Go version to download (if necessary) and use.
-      - run: go version
+      - name: Test application
+        run: |
+          go mod init
+          go get -u github.com/gobuffalo/packr/v2/packr2
+          go get -u github.com/jstemmer/go-junit-report
+          mkdir -p /tmp/test-results
+
+          go get -t -d -v ./...
+          go test -v ./... | go-junit-report > /tmp/test-results/unit-tests.xml
+      - name: Upload & archive test results
+        uses: actions/upload-artifact@v1
+        with:
+          name: code-coverage-report
+          path: /tmp/test-results/unit-tests.xml
+      - name: Build application and docker image
+        run: |
+          packr2
+          env GOOS=linux GOARCH=arm GOARM=7 go build -o homepage
+
+          docker run --rm --privileged multiarch/qemu-user-static:register
+          docker build --compress -t danackerson/ackerson.de:vc$GITHUB_RUN_NUMBER .
+          docker login -u ${{ secrets.CTX_DOCKER_USER }} -p ${{ secrets.CTX_DOCKER_PASS }}
+          docker tag danackerson/ackerson.de:vc$GITHUB_RUN_NUMBER danackerson/ackerson.de:latest
+          docker push danackerson/ackerson.de:vc$GITHUB_RUN_NUMBER
+          docker push danackerson/ackerson.de:latest
