@@ -1,4 +1,4 @@
-![Deploy ackerson.de homepage(https://github.com/ackersonde/ackerson.de-go/workflows/Deploy%20ackerson.de%20homepage/badge.svg)
+![Deploy ackerson.de homepage](https://github.com/ackersonde/ackerson.de-go/workflows/Deploy%20ackerson.de%20homepage/badge.svg)
 
 # Description
 This is my homepage. I primarily use it to watch [baseball games](https://ackerson.de/bb)
@@ -11,4 +11,4 @@ This is my homepage. I primarily use it to watch [baseball games](https://ackers
 0. http://localhost:8080 (now code and fresh builds in the background)
 
 # Building & Running
-See [CircleCI config](.github/workflows/build.yml)
+See [github action workflow](.github/workflows/build.yml)
