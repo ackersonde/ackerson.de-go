@@ -41,9 +41,9 @@ jobs:
 
       - name: Prepare K8S bundle config
         run: |
-          export GITHUB_RUN_ID_B64=`echo -n ${{ GITHUB_RUN_ID }} | base64`
+          export GITHUB_RUN_ID_B64=`echo -n $GITHUB_RUN_ID | base64`
           sed -i -e "s@{{GITHUB_RUN_ID_B64}}@$GITHUB_RUN_ID_B64@" homepage.yml
-          sed -i -e "s@{{GITHUB_RUN_ID}}@${{ GITHUB_RUN_ID }}@" homepage.yml
+          sed -i -e "s@{{GITHUB_RUN_ID}}@$GITHUB_RUN_ID@" homepage.yml
 
           echo -n "${{ secrets.COOKIE_SECRET }}" | base64 | tr -d \\n > .base64_enc
           export COOKIE_SECRET_B64=`cat .base64_enc`
