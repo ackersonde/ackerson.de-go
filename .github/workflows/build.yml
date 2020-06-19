@@ -33,8 +33,57 @@ jobs:
           env GOOS=linux GOARCH=arm GOARM=7 go build -o homepage
 
           docker run --rm --privileged multiarch/qemu-user-static:register
-          docker build --compress -t danackerson/ackerson.de:vc$GITHUB_RUN_NUMBER .
+          docker build --compress -t danackerson/ackerson.de:vg$GITHUB_RUN_ID .
           docker login -u ${{ secrets.CTX_DOCKER_USER }} -p ${{ secrets.CTX_DOCKER_PASS }}
-          docker tag danackerson/ackerson.de:vc$GITHUB_RUN_NUMBER danackerson/ackerson.de:latest
-          docker push danackerson/ackerson.de:vc$GITHUB_RUN_NUMBER
+          docker tag danackerson/ackerson.de:vg$GITHUB_RUN_ID danackerson/ackerson.de:latest
+          docker push danackerson/ackerson.de:vg$GITHUB_RUN_ID
           docker push danackerson/ackerson.de:latest
+
+      - name: Prepare K8S bundle config
+        run: |
+          export GITHUB_RUN_ID_B64=`echo -n ${{ GITHUB_RUN_ID }} | base64`
+          sed -i -e "s@{{GITHUB_RUN_ID_B64}}@$GITHUB_RUN_ID_B64@" homepage.yml
+          sed -i -e "s@{{GITHUB_RUN_ID}}@${{ GITHUB_RUN_ID }}@" homepage.yml
+
+          echo -n "${{ secrets.COOKIE_SECRET }}" | base64 | tr -d \\n > .base64_enc
+          export COOKIE_SECRET_B64=`cat .base64_enc`
+          sed -i -e "s@{{COOKIE_SECRET_B64}}@$COOKIE_SECRET_B64@" homepage.yml
+
+          echo -n "${{ secrets.CTX_DARKSKY_API_KEY }}" | base64 | tr -d \\n > .base64_enc
+          export DARKSKY_API_KEY_B64=`cat .base64_enc`
+          sed -i -e "s@{{DARKSKY_API_KEY_B64}}@$DARKSKY_API_KEY_B64@" homepage.yml
+
+          echo -n "${{ secrets.CTX_JOIN_API_KEY }}" | base64 | tr -d \\n > .base64_enc
+          export CTX_JOIN_API_KEY_B64=`cat .base64_enc`
+          sed -i -e "s@{{CTX_JOIN_API_KEY_B64}}@$CTX_JOIN_API_KEY_B64@" homepage.yml
+
+          sed -i -e "s@{{ secrets.HOMEPAGE_HOSTNAME }}@$HOMEPAGE_HOSTNAME@g" homepage.yml
+          rm .base64_enc
+
+      - name: Create wireguard tunnel configuration
+        run: |
+          sudo apt-get install wireguard
+
+          curl -O https://raw.githubusercontent.com/ackersonde/traefik2_k3s/master/tunnel.conf
+          sed -i -e "s@{{CTX_WIREGUARD_PRIVATE_KEY}}@${{ secrets.CTX_WIREGUARD_PRIVATE_KEY }}@" tunnel.conf
+          sed -i -e "s@{{CTX_WIREGUARD_SERVER_PUBLIC_KEY}}@${{ secrets.CTX_WIREGUARD_SERVER_PUBLIC_KEY }}@" tunnel.conf
+          sed -i -e "s@{{CTX_WIREGUARD_PRESHARED_KEY}}@${{ secrets.CTX_WIREGUARD_PRESHARED_KEY }}@" tunnel.conf
+          sed -i -e "s@{{CTX_WIREGUARD_SERVER_ENDPOINT}}@${{ secrets.CTX_WIREGUARD_SERVER_ENDPOINT }}@" tunnel.conf
+          sudo mv tunnel.conf /etc/wireguard/
+
+      - name: Prepare ssh key for remote login
+        run: |
+          mkdir ~/.ssh/
+          echo "${{ secrets.CTX_SERVER_DEPLOY_SECRET }}" | base64 -d > ~/.ssh/id_rsa
+          chmod 600 ~/.ssh/id_rsa
+
+      - name: Deploy to K8S
+        env:
+          SSH_CXN: ${{ secrets.CTX_K8S_SSH_USER }}@${{ secrets.CTX_K8S_SSH_HOST }}
+        run: |
+          wg-quick up tunnel
+
+          scp -o StrictHostKeyChecking=no homepage.yml $SSH_CXN:~/k3s/
+          ssh $SSH_CXN -- "sudo kubectl apply -f k3s/homepage.yml"
+
+          wg-quick down tunnel

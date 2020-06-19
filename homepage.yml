@@ -31,7 +31,7 @@ spec:
       restartPolicy: Always
       containers:
         - name: homepage
-          image: danackerson/ackerson.de:vc{{CIRCLE_BUILD_NUM}}
+          image: danackerson/ackerson.de:vg{{GITHUB_RUN_ID}}
           ports:
             - name: homepage
               containerPort: 8080
@@ -46,9 +46,9 @@ kind: Secret
 metadata:
   name: homepage-env-secrets
 data:
-  CIRCLE_BUILD_NUM: {{CIRCLE_BUILD_NUM_B64}}
-  ackSecret: {{ACK_SECRET_B64}}
-  ackWunder: {{ACK_WUNDER_B64}}
+  GITHUB_RUN_ID: {{GITHUB_RUN_ID_B64}}
+  COOKIE_SECRET: {{COOKIE_SECRET_B64}}
+  DARKSKY_API_KEY: {{DARKSKY_API_KEY_B64}}
   CTX_JOIN_API_KEY: {{CTX_JOIN_API_KEY_B64}}
 
 ---

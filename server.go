@@ -26,7 +26,7 @@ var httpPort = ":8080"
 var downloadDir = "bender/"
 
 var mongo string
-var secret string
+var cookieSecret string
 var joinAPIKey string
 var poem string
 var darksky string
@@ -79,10 +79,10 @@ func main() {
 }
 
 func parseEnvVariables() {
-	secret = os.Getenv("ackSecret")
+	cookieSecret = os.Getenv("COOKIE_SECRET")
 	joinAPIKey = os.Getenv("CTX_JOIN_API_KEY")
-	darksky = os.Getenv("ackWunder")
-	version = os.Getenv("CIRCLE_BUILD_NUM")
+	darksky = os.Getenv("DARKSKY_API_KEY")
+	version = os.Getenv("GITHUB_RUN_ID")
 }
 
 func setUpRoutes(router *mux.Router) {
@@ -282,10 +282,10 @@ func WhoAmIHandler(w http.ResponseWriter, req *http.Request) {
 
 // VersionHandler now commenteds
 func VersionHandler(w http.ResponseWriter, req *http.Request) {
-	if strings.HasPrefix(version, "vc") {
-		version = strings.TrimLeft(version, "vc")
+	if strings.HasPrefix(version, "vg") {
+		version = strings.TrimLeft(version, "vg")
 	}
-	buildURL := "https://circleci.com/gh/danackerson/ackerson.de-go/" + version
+	buildURL := "https://github.com/ackersonde/ackerson.de-go/runs/" + version
 	v := map[string]string{"version": buildURL, "build": version}
 
 	data, _ := json.Marshal(v)
