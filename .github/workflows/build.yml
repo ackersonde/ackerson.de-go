@@ -12,7 +12,7 @@ jobs:
       - uses: actions/setup-go@v2
       - name: Test application
         run: |
-          go mod init
+          go mod init ackerson.de-go
           go get -u github.com/gobuffalo/packr/v2/packr2
           go get -u github.com/jstemmer/go-junit-report
           mkdir -p /tmp/test-results
