@@ -1,4 +1,7 @@
-[![Circle CI](https://circleci.com/gh/danackerson/ackerson.de-go.svg?style=shield&circle-token=3ad6694a5592b15aef77eeb7051a7b6c61d1c56f)](https://circleci.com/gh/danackerson/ackerson.de-go)
+![Deploy ackerson.de homepage(https://github.com/ackersonde/ackerson.de-go/workflows/Deploy%20ackerson.de%20homepage/badge.svg)
+
+# Description
+This is my homepage. I primarily use it to watch [baseball games](https://ackerson.de/bb)
 
 # Installation and Development
 0. go get github.com/gravityblast/fresh
@@ -8,4 +11,4 @@
 0. http://localhost:8080 (now code and fresh builds in the background)
 
 # Building & Running
-See [CircleCI config](.circleci/config.yml)
+See [CircleCI config](.github/workflows/build.yml)

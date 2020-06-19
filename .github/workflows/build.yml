@@ -1,4 +1,4 @@
-name: Deploy K3s + Traefik v2
+name: Deploy ackerson.de homepage
 
 on:
   push:
@@ -41,7 +41,7 @@ jobs:
 
       - name: Prepare K8S bundle config
         run: |
-          export GITHUB_RUN_ID_B64=`echo -n $GITHUB_RUN_ID | base64`
+          export GITHUB_RUN_ID_B64=`echo -n $GITHUB_ACTION | base64`
           sed -i -e "s@{{GITHUB_RUN_ID_B64}}@$GITHUB_RUN_ID_B64@" homepage.yml
           sed -i -e "s@{{GITHUB_RUN_ID}}@$GITHUB_RUN_ID@" homepage.yml
 
