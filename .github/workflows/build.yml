@@ -18,7 +18,7 @@ jobs:
           mkdir -p /tmp/test-results
 
           go get -t -d -v ./...
-          go test -v ./... | go-junit-report > /tmp/test-results/unit-tests.xml
+          go test -v ./... | $GOPATH/bin/go-junit-report > /tmp/test-results/unit-tests.xml
       - name: Upload & archive test results
         uses: actions/upload-artifact@v1
         with:
@@ -26,7 +26,7 @@ jobs:
           path: /tmp/test-results/unit-tests.xml
       - name: Build application and docker image
         run: |
-          packr2
+          $GOPATH/bin/packr2
           env GOOS=linux GOARCH=arm GOARM=7 go build -o homepage
 
           docker run --rm --privileged multiarch/qemu-user-static:register
