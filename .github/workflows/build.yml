@@ -57,7 +57,7 @@ jobs:
           export CTX_JOIN_API_KEY_B64=`cat .base64_enc`
           sed -i -e "s@{{CTX_JOIN_API_KEY_B64}}@$CTX_JOIN_API_KEY_B64@" homepage.yml
 
-          sed -i -e "s@{{ secrets.HOMEPAGE_HOSTNAME }}@$HOMEPAGE_HOSTNAME@g" homepage.yml
+          sed -i -e "s@{{HOMEPAGE_HOSTNAME}}@${{ secrets.HOMEPAGE_HOSTNAME }}@g" homepage.yml
           rm .base64_enc
 
       - name: Create wireguard tunnel configuration
