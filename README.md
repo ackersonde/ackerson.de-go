@@ -5,7 +5,7 @@ This is my homepage. I primarily use it to watch [baseball games](https://ackers
 
 # Installation and Development
 0. go get github.com/gravityblast/fresh
-0. cd ~/dev/danackerson/ackerson.de-go/
+0. cd ~/dev/ackersonde/ackerson.de-go/
 0. go get ./...
 0. `fresh` (launch app refresher for dev)
 0. http://localhost:8080 (now code and fresh builds in the background)
