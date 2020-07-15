@@ -79,6 +79,7 @@ spec:
     middlewares:
     - name: tls-redirect
     - name: www-redirect
+    - name: careful-ratelimit
     kind: Rule
     services:
     - name: homepage

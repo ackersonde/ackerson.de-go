@@ -13,8 +13,8 @@ import (
 	"strings"
 	"time"
 
-	"github.com/danackerson/ackerson.de-go/baseball"
-	"github.com/danackerson/ackerson.de-go/structures"
+	"github.com/ackersonde/ackerson.de-go/baseball"
+	"github.com/ackersonde/ackerson.de-go/structures"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/gorilla/mux"
 	"github.com/mssola/user_agent"
