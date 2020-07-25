@@ -170,8 +170,6 @@ type FavGames struct {
 var homePageMap map[int]baseball.Team
 
 func bbDownload(w http.ResponseWriter, req *http.Request) {
-	// ?gameTitle=147-120__Thu,%20Jul%2023%202020
-	// &gameURL=https://cuts.diamond.mlb.com/FORGE/2020/2020-07/23/d8db2829-bcb3df1a-19e7398f-csvm-diamondx64-asset_1280x720_59_4000K.mp4
 	mlbTitle := req.URL.Query().Get("gameTitle")
 	mlbURL := req.URL.Query().Get("gameURL")
 
