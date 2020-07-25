@@ -9,12 +9,14 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"os"
+	"regexp"
 	"strconv"
 	"strings"
 	"time"
 
 	"github.com/ackersonde/ackerson.de-go/baseball"
 	"github.com/ackersonde/ackerson.de-go/structures"
+	"github.com/ackersonde/bender-slackbot/commands"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/gorilla/mux"
 	"github.com/mssola/user_agent"
@@ -137,6 +139,9 @@ func setUpRoutes(router *mux.Router) {
 	// play a single game
 	router.HandleFunc("/bbStream", bbStream)
 
+	// download a single game to phone
+	router.HandleFunc("/bb_download", bbDownload)
+
 	// play all games of the day
 	router.HandleFunc("/bbAll", bbAll)
 
@@ -163,6 +168,61 @@ type FavGames struct {
 }
 
 var homePageMap map[int]baseball.Team
+
+func bbDownload(w http.ResponseWriter, req *http.Request) {
+	// ?gameTitle=147-120__Thu,%20Jul%2023%202020
+	// &gameURL=https://cuts.diamond.mlb.com/FORGE/2020/2020-07/23/d8db2829-bcb3df1a-19e7398f-csvm-diamondx64-asset_1280x720_59_4000K.mp4
+	mlbTitle := req.URL.Query().Get("gameTitle")
+	mlbURL := req.URL.Query().Get("gameURL")
+
+	gameTitle := translateGameTitleToFileName(mlbTitle)
+	commands.DownloadFileToPhone(mlbURL, gameTitle)
+}
+
+func translateGameTitleToFileName(mlbTitle string) string {
+	re := regexp.MustCompile(
+		`(?P<away>[0-9]{3})-(?P<home>[0-9]{3})__(?P<dow>[A-Za-z]{3}),%20(?P<month>[A-Za-z]{3})%20(?P<day>[0-9]{2})%20(?P<year>[0-9]{4})`)
+	matches := re.FindAllStringSubmatch(mlbTitle, -1)
+	names := re.SubexpNames()
+
+	m := map[string]string{}
+	for i, n := range matches[0] {
+		m[names[i]] = n
+	}
+	awayTeamID := m["away"]
+	homeTeamID := m["home"]
+
+	awayTeam := baseball.LookupTeamInfo(homePageMap, awayTeamID)
+	homeTeam := baseball.LookupTeamInfo(homePageMap, homeTeamID)
+	date := m["dow"] + "-" + m["month"] + m["day"] + "-" + m["year"]
+
+	return awayTeam.Abbreviation + "@" + homeTeam.Abbreviation + "_" + date + ".mp4"
+}
+
+func bbDownloadStatus(w http.ResponseWriter, req *http.Request) {
+	var size int64
+
+	title := req.URL.Query().Get("title")
+
+	filepath := downloadDir + title
+	file, err := os.Open(filepath)
+	if err != nil {
+		log.Printf("%s\n", err)
+	}
+	fi, err := file.Stat()
+	if err != nil {
+		log.Printf("%s\n", err)
+		size = -10
+	} else {
+		size = fi.Size()
+	}
+	v := map[string]int64{"size": size}
+
+	data, _ := json.Marshal(v)
+	w.Header().Set("Content-Type", "application/json; charset=utf-8")
+
+	w.Write(data)
+}
 
 func bbHome(w http.ResponseWriter, r *http.Request) {
 	date1 := r.URL.Query().Get("date1")
