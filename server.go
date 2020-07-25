@@ -16,7 +16,7 @@ import (
 
 	"github.com/ackersonde/ackerson.de-go/baseball"
 	"github.com/ackersonde/ackerson.de-go/structures"
-	"github.com/ackersonde/bender-slackbot/commands"
+	"github.com/ackersonde/bender-slackbot/filemanager"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/gorilla/mux"
 	"github.com/mssola/user_agent"
@@ -176,7 +176,7 @@ func bbDownload(w http.ResponseWriter, req *http.Request) {
 	mlbURL := req.URL.Query().Get("gameURL")
 
 	gameTitle := translateGameTitleToFileName(mlbTitle)
-	commands.DownloadFileToPhone(mlbURL, gameTitle)
+	filemanager.DownloadFileToPhone(mlbURL, gameTitle)
 }
 
 func translateGameTitleToFileName(mlbTitle string) string {
