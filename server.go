@@ -164,40 +164,17 @@ type FavGames struct {
 
 var homePageMap map[int]baseball.Team
 
-func bbDownloadStatus(w http.ResponseWriter, req *http.Request) {
-	var size int64
-
-	title := req.URL.Query().Get("title")
-
-	filepath := downloadDir + title
-	file, err := os.Open(filepath)
-	if err != nil {
-		log.Printf("%s\n", err)
-	}
-	fi, err := file.Stat()
-	if err != nil {
-		log.Printf("%s\n", err)
-		size = -10
-	} else {
-		size = fi.Size()
-	}
-	v := map[string]int64{"size": size}
-
-	data, _ := json.Marshal(v)
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-
-	w.Write(data)
-}
-
 func bbHome(w http.ResponseWriter, r *http.Request) {
 	date1 := r.URL.Query().Get("date1")
 	offset := r.URL.Query().Get("offset")
 
 	if date1 == "" {
 		// from https://en.wikipedia.org/wiki/2020_Major_League_Baseball_season
-		//2019 is over - make default /bb goto Game 1, 2019 World Series
-		date1 = "year_2019/month_10/day_22"
-		offset = "0"
+		// date1 = "year_2020/month_10/day_23" // Day 1 of World Series 2020
+		year, month, day := time.Now().Date()
+		date1 = "year_" + strconv.Itoa(year) + "/month_" +
+			strconv.Itoa(int(month)) + "/day_" + strconv.Itoa(day)
+		offset = "-1"
 	}
 	gameDayListing := baseball.GameDayListingHandler(date1, offset, homePageMap)
 
