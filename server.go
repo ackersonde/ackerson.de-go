@@ -179,7 +179,7 @@ func bbDownload(w http.ResponseWriter, req *http.Request) {
 
 func translateGameTitleToFileName(mlbTitle string) string {
 	re := regexp.MustCompile(
-		`(?P<away>[0-9]{3})-(?P<home>[0-9]{3})__(?P<dow>[A-Za-z]{3}),%20(?P<month>[A-Za-z]{3})%20(?P<day>[0-9]{2})%20(?P<year>[0-9]{4})`)
+		`(?P<away>[0-9]{3})-(?P<home>[0-9]{3})__(?P<dow>[A-Za-z]{3}), (?P<month>[A-Za-z]{3}) (?P<day>[0-9]{2}) (?P<year>[0-9]{4})`)
 	matches := re.FindAllStringSubmatch(mlbTitle, -1)
 	names := re.SubexpNames()
 
