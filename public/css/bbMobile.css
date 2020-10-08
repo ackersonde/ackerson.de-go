@@ -1,28 +1,38 @@
 img.ui-datepicker-trigger {
-  vertical-align: center;
+  vertical-align: middle;
   cursor: pointer !important;
 }
 
 #searchDate {
-  vertical-align:bottom;
+  width: 115px;
+  vertical-align:middle;
   margin-top:5px;
   text-align:center;
-  font-size:1em;
   font-weight:bold;
+  font-size: 14px;
   font-family:none;
   border:none;
   cursor: pointer !important;
 }
-#ui-datepicker-div { font-size:12px; }
+
+#ui-datepicker-div {
+  font-size:12px;
+  font-family: none;
+}
+
 #responseBB {
   margin-top: 10px;
 }
 
 #gamepanel {
   display: table;
-  background-color: white;
   text-align:center;
   width: 100%;
+  padding: 10px;
+}
+
+.gamepanelbottom {
+  background-color: coral;
 }
 
 #panel {
@@ -31,8 +41,6 @@ img.ui-datepicker-trigger {
   background-color: #f3f3f3
 }
 .selectors {
-  width: 320px;
-  height: 157px;
   background-image: url(../images/prevNext.png);
   background-position: 0px 0px;
   background-repeat:no-repeat;
@@ -42,12 +50,12 @@ img.ui-datepicker-trigger {
 .prev-resized{
   width:16px;
   height:16px;
-  background-position:0px 0px;
+  background-position:5px 0px;
   background-size:32px 16px;
 }
 .next-resized{
   width:16px;
   height:16px;
-  background-position:-16px 0px;
+  background-position:-21px 0px;
   background-size:32px 16px;
 }

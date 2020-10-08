@@ -6,14 +6,14 @@ html {
   background-size: cover;
 }
 img.ui-datepicker-trigger {
-  vertical-align: center;
+  vertical-align: middle;
   cursor: pointer !important;
 }
 #cookieBanner {
     font-family: FreeMono, monospace;
     color: #fff;
     display: none;
-    font-size: 14px;
+    font-size: 16px;
     width: 900px;
     margin: 0px auto;
     padding: 12px;
@@ -31,16 +31,22 @@ img.ui-datepicker-trigger {
     padding-top: 4px;
 }
 #searchDate {
-  vertical-align:bottom;
+  width: 140px;
+  vertical-align:middle;
   margin-top:5px;
   text-align:center;
-  font-size:1em;
   font-weight:bold;
+  font-size: 18px;
   font-family:none;
   border:none;
   cursor: pointer !important;
 }
-#ui-datepicker-div { font-size:12px; }
+
+#ui-datepicker-div {
+  font-size:18px;
+  font-family: none;
+}
+
 #responseBB {
   margin-top: 50px;
 }
@@ -56,17 +62,18 @@ img.ui-datepicker-trigger {
 }
 .gamepaneltop {
   border-top-right-radius:15px;
-  border-top-left-radius:15px
+  border-top-left-radius:15px;
+  background-color: white;
 }
 
 .gamepanelbottom {
   border-bottom-right-radius:15px;
-  border-bottom-left-radius:15px
+  border-bottom-left-radius:15px;
+  background-color: coral;
 }
 
 #gamepanel {
   display: table;
-  background-color: white;
   text-align:center;
   position: relative;
   top: 0;
@@ -76,6 +83,8 @@ img.ui-datepicker-trigger {
   width: 25%;
   height: 50%;
   margin: auto;
+  padding: 10px;
+  font-size: 22px;
 }
 
 #panel {

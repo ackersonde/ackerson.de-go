@@ -1,5 +1,37 @@
 {{define "headerMobile"}}
-<!DOCTYPE HTML>
+<!doctype html>
+<style>
+* {
+  box-sizing: border-box;
+}
+body {
+  display: flex;
+  min-height: 100vh;
+  flex-direction: column;
+  margin: 0;
+}
+#main {
+  display: flex;
+  flex: 1;
+}
+#main > article {
+  flex: 1;
+}
+#main > nav,
+#main > aside {
+  flex: 0 0 20vw;
+  background: beige;
+}
+#main > nav {
+  order: -1;
+}
+header, footer {
+  height: 25vh;
+}
+header, footer, article, nav, aside {
+  padding: 0.5em;
+}
+</style>
 <html>
   <head>
       <meta charset="UTF-8" />
@@ -13,7 +45,7 @@
       <link rel="shortcut icon" href="/bb_favico/favicon.ico">
       <meta name="msapplication-config" content="/bb_favico/browserconfig.xml">
       <meta name="theme-color" content="#ffffff">
-      <meta name="viewport" content="initial-scale=1.25, maximum-scale=2.0, minimum-scale=1.5">
+      <meta name="viewport" content="initial-scale=1.0, maximum-scale=2.0, minimum-scale=1.5">
 
       <link rel="stylesheet" href="/css/bbMobile.css"/>
       <link rel="stylesheet" href="/css/logos.css"/>

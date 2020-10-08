@@ -1,20 +1,21 @@
 {{ template "headerMobile" }}
 <div id="responseBB">
   <section id="gamepanel" class="gamepaneltop">
-    <div style="display: table-row; padding:10px;">
-      <div style="display: table-cell;padding:5px;"><a href="javascript:fetchGames(prepareDate('{{$.Date}}'), -1);"><img class="selectors prev-resized" alt="Prev" title="Prev" src="images/img_trans.gif"></a></div>
-      <div style="display: table-cell;padding:5px;"><a href="https://www.mlb.com/standings">MLB</a> Games from<br><input type='text' id='searchDate' value='{{ $.ReadableDate }}'></div>
-      <div style="display: table-cell;padding:5px;"><a href="javascript:fetchGames(prepareDate('{{$.Date}}'), 1);"><img class="selectors next-resized" alt="Next" title="Next" src="images/img_trans.gif"></a></div>
+    <div style="display: table-row;">
+      <div style="display: table-cell;"><a href="javascript:fetchGames(prepareDate('{{$.Date}}'), -1);"><img class="selectors prev-resized" alt="Prev" title="Prev" src="images/img_trans.gif"></a></div>
+      <div style="display: table-cell;text-align:center;"><a href="https://www.mlb.com/standings">MLB</a> Games from<input type='text' id='searchDate' value='{{ $.ReadableDate }}'></div>
+      <div style="display: table-cell;"><a href="javascript:fetchGames(prepareDate('{{$.Date}}'), 1);"><img class="selectors next-resized" alt="Next" title="Next" src="images/img_trans.gif"></a></div>
     </div>
-    <div style="display: table-row; padding:5px;">
-      <div style="display: table-cell;padding:5px;">&nbsp;</div>
-      <div style="display: table-cell;padding:5px;"><a href="/bbAll?date1={{ $.Date }}"><img id="ball" src="images/pokemon.jpg" width="32px" alt="Gotta Catch 'Em All!" title="Gotta Catch 'Em All!" /></a></div>
-      <div style="display: table-cell;padding:5px;">&nbsp;</div>
+    <div style="display: table-row;">
+      <div style="display: table-cell;">&nbsp;</div>
+      <div style="display: table-cell;text-align:center;"><a href="/bbAll?date1={{ $.Date }}"><img id="ball" src="images/pokemon.jpg" width="32px" alt="Gotta Catch 'Em All!" title="Gotta Catch 'Em All!" /></a></div>
+      <div style="display: table-cell;">&nbsp;</div>
     </div>
   </section>
   <section id="gamepanel" class="gamepanelbottom">
+    {{if not .Games}} No games on this day {{end}}
     {{ range $key, $value := .Games }}
-    <div style="display: table-row; margin-top: 20px;">
+    <div style="display: table-row;">
       {{ $away_team := index $value 0}}
       {{ $away_hp := index $value 1}}
       {{ $away_id := index $value 2}}
@@ -25,13 +26,13 @@
       {{ $home_abbrev := index $value 7}}
       {{ $id := index $value 8}}
       {{ $game_url := index $value 10}}
-      <div style="display: table-cell;padding:5px;">
+      <div style="display: table-cell;padding:10px;">
         <a href="/bbFavoriteTeam?id={{ $away_id }}" title="{{ $away_team }}"><img class="logo logo-small logo{{ $away_id }}" src="images/img_trans.gif"></a>
       </div>
-      <div style="display:table-cell;padding:5px;text-align:center;vertical-align:middle;">
+      <div style="display:table-cell;text-align:center;vertical-align:middle;padding:10px;">
         <a href="/bbStream?url={{ $game_url }}">{{ $away_abbrev }}@{{ $home_abbrev }}</a>
       </div>
-      <div style="display:table-cell;padding:9px;">
+      <div style="display:table-cell;padding:10px;">
         <a href="/bbFavoriteTeam?id={{ $home_id }}" title="{{ $home_team }}"><img class="logo logo-small logo{{ $home_id }}" src="images/img_trans.gif"></a>
       </div>
       <!--
