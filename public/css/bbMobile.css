@@ -27,8 +27,8 @@ img.ui-datepicker-trigger {
 #gamepanel {
   display: table;
   text-align:center;
+  border-collapse: collapse;
   width: 100%;
-  padding: 10px;
 }
 
 .gamepanelbottom {

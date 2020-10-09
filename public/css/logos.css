@@ -1,3 +1,15 @@
+.logo-desktop {
+  vertical-align:text-bottom;
+  width: 48px;
+  height: 48px;
+}
+
+.logo-mobile {
+  vertical-align:text-bottom;
+  width: 32px;
+  height: 32px;
+}
+
 .logo {
   width: 1205px;
   height: 840px;

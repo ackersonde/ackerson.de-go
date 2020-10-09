@@ -1,9 +1,10 @@
 {{ template "headerMobile" }}
 <div id="responseBB">
+  <div id="header" style="padding:10px;">
   <section id="gamepanel" class="gamepaneltop">
     <div style="display: table-row;">
       <div style="display: table-cell;"><a href="javascript:fetchGames(prepareDate('{{$.Date}}'), -1);"><img class="selectors prev-resized" alt="Prev" title="Prev" src="images/img_trans.gif"></a></div>
-      <div style="display: table-cell;text-align:center;"><a href="https://www.mlb.com/standings">MLB</a> Games from<input type='text' id='searchDate' value='{{ $.ReadableDate }}'></div>
+      <div style="display: table-cell;text-align:center;">&nbsp;&nbsp;<a href="https://www.mlb.com/standings">MLB</a> Games from <br><input type='text' id='searchDate' value='{{ $.ReadableDate }}'></div>
       <div style="display: table-cell;"><a href="javascript:fetchGames(prepareDate('{{$.Date}}'), 1);"><img class="selectors next-resized" alt="Next" title="Next" src="images/img_trans.gif"></a></div>
     </div>
     <div style="display: table-row;">
@@ -12,10 +13,11 @@
       <div style="display: table-cell;">&nbsp;</div>
     </div>
   </section>
+  </div>
   <section id="gamepanel" class="gamepanelbottom">
     {{if not .Games}} No games on this day {{end}}
     {{ range $key, $value := .Games }}
-    <div style="display: table-row;">
+    <div style="display: table-row;border-top: 1px dashed brown;">
       {{ $away_team := index $value 0}}
       {{ $away_hp := index $value 1}}
       {{ $away_id := index $value 2}}
@@ -27,13 +29,13 @@
       {{ $id := index $value 8}}
       {{ $game_url := index $value 10}}
       <div style="display: table-cell;padding:10px;">
-        <a href="/bbFavoriteTeam?id={{ $away_id }}" title="{{ $away_team }}"><img class="logo logo-small logo{{ $away_id }}" src="images/img_trans.gif"></a>
+        <a href="/bbFavoriteTeam?id={{ $away_id }}" title="{{ $away_team }}"><img class="logo-mobile" src="images/mlb-logos-2020/{{ $away_id }}_96x96.png"></a>
       </div>
       <div style="display:table-cell;text-align:center;vertical-align:middle;padding:10px;">
         <a href="/bbStream?url={{ $game_url }}">{{ $away_abbrev }}@{{ $home_abbrev }}</a>
       </div>
       <div style="display:table-cell;padding:10px;">
-        <a href="/bbFavoriteTeam?id={{ $home_id }}" title="{{ $home_team }}"><img class="logo logo-small logo{{ $home_id }}" src="images/img_trans.gif"></a>
+        <a href="/bbFavoriteTeam?id={{ $home_id }}" title="{{ $home_team }}"><img class="logo-mobile" src="images/mlb-logos-2020/{{ $home_id }}_96x96.png"></a>
       </div>
       <!--
       <div style="display:table-cell;padding:5px;text-align:center;vertical-align:middle;">
