@@ -230,6 +230,8 @@ func bbHome(w http.ResponseWriter, r *http.Request) {
 		// from https://en.wikipedia.org/wiki/2020_Major_League_Baseball_season
 		date1 = "year_2020/month_10/day_20" // Day 1 of World Series 2020
 		offset = "0"
+
+		// this is for regular season operations
 		/*year, month, day := time.Now().Date()
 		date1 = "year_" + strconv.Itoa(year) + "/month_" +
 			strconv.Itoa(int(month)) + "/day_" + strconv.Itoa(day)
