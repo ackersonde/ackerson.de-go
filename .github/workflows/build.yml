@@ -78,14 +78,15 @@ jobs:
       - name: Prepare ssh key for remote login
         run: |
           mkdir ~/.ssh/
-          echo "${{ secrets.CTX_SERVER_DEPLOY_SECRET_B64 }}" | base64 -d > ~/.ssh/id_rsa
-          chmod 600 ~/.ssh/id_rsa
-          echo "${{ secrets.CTX_SERVER_DEPLOY_CACERT_B64 }}" | base64 -d > ~/.ssh/id_rsa-cert.pub
+          echo "${{ secrets.CTX_SERVER_DEPLOY_SECRET_B64 }}" | base64 -d > ~/.ssh/id_ed25519
+          echo "${{ secrets.CTX_SERVER_DEPLOY_CACERT_B64 }}" | base64 -d > ~/.ssh/id_ed25519-cert.pub
+          chmod 600 ~/.ssh/id_ed25519
 
       - name: Deploy to K8S
         env:
           SSH_CXN: ${{ secrets.CTX_K8S_SSH_USER }}@${{ secrets.CTX_K8S_SSH_HOST }}
         run: |
+          ssh-keygen -L -f ~/.ssh/id_ed25519-cert.pub
           wg-quick up tunnel
 
           scp -o StrictHostKeyChecking=no homepage.yml $SSH_CXN:~/k3s/
@@ -96,3 +97,5 @@ jobs:
           curl -s -o /dev/null -X POST -d token=${{ secrets.CTX_SLACK_NOTIFICATIONS_TOKEN }} -d channel=C092UE0H4 \
             -d text="<https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID | $GITHUB_REPOSITORY @ $GITHUB_RUN_ID>" \
             https://slack.com/api/chat.postMessage
+
+          rm -Rf ~/.ssh
