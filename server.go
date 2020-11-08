@@ -174,7 +174,7 @@ func bbDownload(w http.ResponseWriter, req *http.Request) {
 	mlbURL := req.URL.Query().Get("gameURL")
 
 	gameTitle := translateGameTitleToFileName(mlbTitle)
-	if gameTitle != nil {
+	if gameTitle != "" {
 		filemanager.DownloadFileToPhone(mlbURL, gameTitle)
 	} else {
 		w.WriteHeader(http.StatusNotFound)
