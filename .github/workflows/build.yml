@@ -66,7 +66,7 @@ jobs:
 
       - name: Create wireguard tunnel configuration
         run: |
-          sudo apt-get install wireguard
+          sudo apt-get install wireguard resolvconf
           echo "${{ secrets.CTX_WIREGUARD_GITHUB_ACTIONS_CLIENT_CONFIG }}" | sudo tee /etc/wireguard/tunnel.conf
 
       - name: Prepare ssh key for remote login
