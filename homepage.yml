@@ -30,6 +30,8 @@ spec:
         app: homepage
     spec:
       restartPolicy: Always
+      nodeSelector:
+        traefik: proxy
       containers:
         - name: homepage
           image: danackerson/ackerson.de:vg{{GITHUB_RUN_ID}}
