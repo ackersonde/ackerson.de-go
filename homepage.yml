@@ -30,8 +30,6 @@ spec:
         app: homepage
     spec:
       restartPolicy: Always
-      nodeSelector:
-        traefik: proxy
       containers:
         - name: homepage
           image: danackerson/ackerson.de:vg{{GITHUB_RUN_ID}}
@@ -43,7 +41,6 @@ spec:
                 name: homepage-env-secrets
 
 ---
-
 apiVersion: v1
 kind: Secret
 metadata:
@@ -56,7 +53,6 @@ data:
   CTX_DROPBOX_ACCESS_TOKEN: {{CTX_DROPBOX_ACCESS_TOKEN_B64}}
 
 ---
-
 apiVersion: traefik.containo.us/v1alpha1
 kind: Middleware
 metadata:
@@ -68,7 +64,6 @@ spec:
     permanent: true
 
 ---
-
 apiVersion: traefik.containo.us/v1alpha1
 kind: IngressRoute
 metadata:
