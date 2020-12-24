@@ -152,7 +152,7 @@ func searchMLBGames(dates string, games map[int][]string, homePageMap map[int]Te
 // FetchGameURLFromID is now commented
 func FetchGameURLFromID(contentURL string) string {
 	gameURL := "http://baseball.theater"
-	startX1 := time.Now()
+	//startX1 := time.Now()
 	resp, err := http.Get("https://statsapi.mlb.com" + contentURL)
 	if err != nil {
 		log.Print(err)
@@ -177,8 +177,8 @@ func FetchGameURLFromID(contentURL string) string {
 		video = gjson.Get(mediaJSON, `media.epg.#[title="Extended Highlights"].items.#.playbacks.#[name="FLASH_2500K_1280X720"].url`)
 	}
 
-	elapsedX1 := time.Since(startX1)
-	log.Printf("JSON parsing of subsection %s took %s", contentURL, elapsedX1)
+	//elapsedX1 := time.Since(startX1)
+	//log.Printf("JSON parsing of subsection %s took %s", contentURL, elapsedX1)
 
 	if len(video.Array()) > 0 {
 		gameURL = video.Array()[0].String()
