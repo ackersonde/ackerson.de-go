@@ -178,7 +178,7 @@ func bbDownload(w http.ResponseWriter, req *http.Request) {
 		filemanager.DownloadFileToPhone(mlbURL, gameTitle)
 	} else {
 		w.WriteHeader(http.StatusNotFound)
-   		w.Write([]byte("404 - Unable to find that file for downloading"))
+		w.Write([]byte("404 - Unable to find that file for downloading"))
 	}
 }
 
@@ -189,7 +189,7 @@ func translateGameTitleToFileName(mlbTitle string) string {
 	if matches == nil {
 		return ""
 	}
-	
+
 	names := re.SubexpNames()
 	m := map[string]string{}
 	for i, n := range matches[0] {
@@ -271,6 +271,10 @@ func bbStream(w http.ResponseWriter, r *http.Request) {
 
 func bbAll(w http.ResponseWriter, r *http.Request) {
 	date1 := r.URL.Query().Get("date1")
+	// time for GottaCatchEmAll isn't formatted how we expect
+	date1Formatted, _ := time.Parse("01/02/2006", date1)
+	date1 = date1Formatted.Format("year_2006/month_01/day_02")
+
 	offset := r.URL.Query().Get("offset")
 	allGames := baseball.PlayAllGamesOfDayHandler(date1, offset, homePageMap)
 
