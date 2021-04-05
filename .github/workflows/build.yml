@@ -2,21 +2,25 @@ name: Deploy ackerson.de homepage
 
 on:
   push:
-    branches: [ master ]
+    branches: [ docker ]
 
 jobs:
   build:
     runs-on: ubuntu-20.04
+    env:
+      CTX_DIGITALOCEAN_DROPLET_PROXY_TOKEN: ${{ secrets.CTX_DIGITALOCEAN_DROPLET_PROXY_TOKEN }}
+      CTX_DIGITALOCEAN_FIREWALL: ${{ secrets.CTX_DIGITALOCEAN_FIREWALL }}
+      CTX_SSH_DEPLOY_FINGERPRINT: ${{ secrets.CTX_SSH_DEPLOY_FINGERPRINT }}
+      CTX_RASPBERRYPI_SSH_PRIVKEY: "${{ secrets.CTX_RASPBERRYPI_SSH_PRIVKEY }}"
+      SSH_CXN: ${{ secrets.CTX_IPV6_MASTER_HOME }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
       - name: Test application
         run: |
-          go mod init ackerson.de-go
+          go mod tidy
           go get -u github.com/gobuffalo/packr/v2/packr2
           go get -u github.com/jstemmer/go-junit-report
-
-          go get -t -d -v ./...
 
           mkdir -p /tmp/test-results
           export `go env | grep GOPATH | tr -d \"`
@@ -26,6 +30,7 @@ jobs:
         with:
           name: code-coverage-report
           path: /tmp/test-results/unit-tests.xml
+
       - name: Build application and docker image
         run: |
           export `go env | grep GOPATH | tr -d \"`
@@ -39,57 +44,50 @@ jobs:
           docker push danackerson/ackerson.de:vg$GITHUB_RUN_ID
           docker push danackerson/ackerson.de:latest
 
-      - name: Prepare K8S bundle config
+      - name: Deploy to Pi
         run: |
-          export GITHUB_RUN_ID_B64=`echo -n $GITHUB_RUN_ID | base64`
-          sed -i -e "s@{{GITHUB_RUN_ID_B64}}@$GITHUB_RUN_ID_B64@" homepage.yml
-          sed -i -e "s@{{GITHUB_RUN_ID}}@$GITHUB_RUN_ID@" homepage.yml
+          git clone https://github.com/ackersonde/digitaloceans.git
+          cd digitaloceans
+          go get -t -d -v ./...
+          go build do.go
+          cd ../
 
-          echo -n "${{ secrets.COOKIE_SECRET }}" | base64 | tr -d \\n > .base64_enc
-          export COOKIE_SECRET_B64=`cat .base64_enc`
-          sed -i -e "s@{{COOKIE_SECRET_B64}}@$COOKIE_SECRET_B64@" homepage.yml
+          cat <<DEPLOY_EOF >deploy.sh
+          #!/usr/bin/bash
+          ssh -o StrictHostKeyChecking=no ubuntu@$SSH_CXN "\
+            docker rm -f homepage || true && \
+            docker run -d --restart=always --network='web' \
+              -e DARKSKY_API_KEY=${{ secrets.CTX_DARKSKY_API_KEY }} \
+              -e GITHUB_RUN_ID=$GITHUB_RUN_ID \
+              -e COOKIE_SECRET=${{ secrets.COOKIE_SECRET }} \
+              -e CTX_JOIN_API_KEY=${{ secrets.CTX_JOIN_API_KEY }} \
+              --label='traefik.docker.network=web' \
+              --label='traefik.enable=true' \
+              --label='traefik.http.routers.homepage.tls.certResolver=letsencrypt' \
+              --label='traefik.http.routers.homepage.tls.domains=ackerson.de' \
+              --label='traefik.http.routers.homepage.rule=Host(\\\`ackerson.de\\\`) || Host(\\\`www.ackerson.de\\\`)' \
+              --name homepage danackerson/ackerson.de:vg$GITHUB_RUN_ID"
+          DEPLOY_EOF
+          chmod u+x deploy.sh
 
-          echo -n "${{ secrets.CTX_DARKSKY_API_KEY }}" | base64 | tr -d \\n > .base64_enc
-          export DARKSKY_API_KEY_B64=`cat .base64_enc`
-          sed -i -e "s@{{DARKSKY_API_KEY_B64}}@$DARKSKY_API_KEY_B64@" homepage.yml
+          envsubst < digitaloceans/do_ubuntu_userdata.sh > digitalocean_ubuntu_userdata.sh
+          mkdir ~/.ssh
+          ./digitaloceans/do -fn=createNewServer
 
-          echo -n "${{ secrets.CTX_JOIN_API_KEY }}" | base64 | tr -d \\n > .base64_enc
-          export CTX_JOIN_API_KEY_B64=`cat .base64_enc`
-          sed -i -e "s@{{CTX_JOIN_API_KEY_B64}}@$CTX_JOIN_API_KEY_B64@" homepage.yml
+          public_ip_address=$(curl -s https://checkip.amazonaws.com)
+          echo PUBLIC_IP=${public_ip_address} >> /tmp/new_digital_ocean_droplet_params
+          source /tmp/new_digital_ocean_droplet_params
 
-          echo -n "${{ secrets.CTX_DROPBOX_ACCESS_TOKEN }}" | base64 | tr -d \\n > .base64_enc
-          export CTX_DROPBOX_ACCESS_TOKEN_B64=`cat .base64_enc`
-          sed -i -e "s@{{CTX_DROPBOX_ACCESS_TOKEN_B64}}@$CTX_DROPBOX_ACCESS_TOKEN_B64@" homepage.yml
+          ./digitaloceans/do -fn=firewallSSH -allow=true -ip=$public_ip_address
+          sleep 30
 
-          sed -i -e "s@{{HOMEPAGE_HOSTNAME}}@${{ secrets.HOMEPAGE_HOSTNAME }}@g" homepage.yml
-          rm .base64_enc
-
-      - name: Create wireguard tunnel configuration
-        run: |
-          sudo apt-get install wireguard resolvconf
-          echo "${{ secrets.CTX_WIREGUARD_GITHUB_ACTIONS_CLIENT_CONFIG }}" | sudo tee /etc/wireguard/tunnel.conf
-
-      - name: Prepare ssh key for remote login
-        run: |
-          mkdir ~/.ssh/
-          echo "${{ secrets.CTX_SERVER_DEPLOY_SECRET_B64 }}" | base64 -d > ~/.ssh/id_ed25519
-          echo "${{ secrets.CTX_SERVER_DEPLOY_CACERT_B64 }}" | base64 -d > ~/.ssh/id_ed25519-cert.pub
-          chmod 600 ~/.ssh/id_ed25519
-
-      - name: Deploy to K8S
-        env:
-          SSH_CXN: ${{ secrets.CTX_K8S_SSH_USER }}@${{ secrets.CTX_K8S_SSH_HOST }}
-        run: |
-          ssh-keygen -L -f ~/.ssh/id_ed25519-cert.pub
-          wg-quick up tunnel
-
-          scp -o StrictHostKeyChecking=no homepage.yml $SSH_CXN:~/k3s/
-          ssh $SSH_CXN -- "sudo kubectl apply -f k3s/homepage.yml"
-
-          wg-quick down tunnel
+          scp -q -o StrictHostKeyChecking=no deploy.sh root@$NEW_SERVER_IPV4:~/
+          ssh root@$NEW_SERVER_IPV4 ./deploy.sh
 
           curl -s -o /dev/null -X POST -d token=${{ secrets.CTX_SLACK_NOTIFICATIONS_TOKEN }} -d channel=C092UE0H4 \
             -d text="<https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID | $GITHUB_REPOSITORY @ $GITHUB_RUN_ID>" \
             https://slack.com/api/chat.postMessage
 
-          rm -Rf ~/.ssh
+          rm -Rf ~/.ssh/id_rsa digitalocean_ubuntu_userdata.sh /tmp/new_digital_ocean_droplet_params
+          ./digitaloceans/do -fn=firewallSSH -allow=false -ip=$PUBLIC_IP
+          ./digitaloceans/do -fn=deleteServer -dropletID=$NEW_DROPLET_ID -keyID=$NEW_SSH_KEY_ID
