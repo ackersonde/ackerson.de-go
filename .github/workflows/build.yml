@@ -18,11 +18,9 @@ jobs:
       - uses: actions/setup-go@v2
       - name: Test application
         run: |
-          go mod init ackerson.de-go
+          go mod tidy
           go get -u github.com/gobuffalo/packr/v2/packr2
           go get -u github.com/jstemmer/go-junit-report
-
-          go get -t -d -v ./...
 
           mkdir -p /tmp/test-results
           export `go env | grep GOPATH | tr -d \"`
