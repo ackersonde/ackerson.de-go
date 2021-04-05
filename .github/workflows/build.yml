@@ -55,18 +55,14 @@ jobs:
           cat <<DEPLOY_EOF >deploy.sh
           #!/usr/bin/bash
           ssh -o StrictHostKeyChecking=no ubuntu@$SSH_CXN "\
-            docker run -d --restart=always --network='web' \
+            docker run -d --restart=always \
               -e DARKSKY_API_KEY=${{ secrets.CTX_DARKSKY_API_KEY }} \
               -e GITHUB_RUN_ID=$GITHUB_RUN_ID \
               -e COOKIE_SECRET=${{ secrets.COOKIE_SECRET }} \
               -e CTX_JOIN_API_KEY=${{ secrets.CTX_JOIN_API_KEY }} \
-              --label='traefik.backend=homepage' \
               --label='traefik.docker.network=web' \
-              --label='traefik.frontend.passHostHeader=true' \
-              --label='traefik.frontend.rule=Host:ackerson.de,www.ackerson.de' \
               --label='traefik.enable=true' \
-              --label='traefik.port=8080' \
-              -v data-volume:/app/public/downloads \
+              --label='traefik.http.routers.homepage.rule=Host(\\\`ackerson.de\\\`) || Host(\\\`www.ackerson.de\\\`)' \
               --name homepage danackerson/ackerson.de:vg$GITHUB_RUN_ID"
           DEPLOY_EOF
           chmod u+x deploy.sh
