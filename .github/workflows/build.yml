@@ -55,6 +55,7 @@ jobs:
           cat <<DEPLOY_EOF >deploy.sh
           #!/usr/bin/bash
           ssh -o StrictHostKeyChecking=no ubuntu@$SSH_CXN "\
+            docker rm -f homepage || true && \
             docker run -d --restart=always \
               -e DARKSKY_API_KEY=${{ secrets.CTX_DARKSKY_API_KEY }} \
               -e GITHUB_RUN_ID=$GITHUB_RUN_ID \
