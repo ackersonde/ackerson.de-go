@@ -63,6 +63,8 @@ jobs:
               -e CTX_JOIN_API_KEY=${{ secrets.CTX_JOIN_API_KEY }} \
               --label='traefik.docker.network=web' \
               --label='traefik.enable=true' \
+              --label='traefik.http.routers.homepage.tls.certResolver=letsencrypt' \
+              --label='traefik.http.routers.homepage.tls.domains=ackerson.de' \
               --label='traefik.http.routers.homepage.rule=Host(\\\`ackerson.de\\\`) || Host(\\\`www.ackerson.de\\\`)' \
               --name homepage danackerson/ackerson.de:vg$GITHUB_RUN_ID"
           DEPLOY_EOF
