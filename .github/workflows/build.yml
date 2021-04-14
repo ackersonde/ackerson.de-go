@@ -19,7 +19,6 @@ jobs:
       - name: Test application
         run: |
           go mod tidy
-          go get -u github.com/gobuffalo/packr/v2/packr2
           go get -u github.com/jstemmer/go-junit-report
 
           mkdir -p /tmp/test-results
@@ -33,6 +32,9 @@ jobs:
 
       - name: Build application and docker image
         run: |
+          go get -u github.com/gobuffalo/packr/v2/packr2
+          go mod tidy
+
           export `go env | grep GOPATH | tr -d \"`
           $GOPATH/bin/packr2
           env GOOS=linux GOARCH=amd64 go build -o homepage
