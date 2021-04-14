@@ -35,16 +35,15 @@ jobs:
         run: |
           export `go env | grep GOPATH | tr -d \"`
           $GOPATH/bin/packr2
-          env GOOS=linux GOARCH=arm GOARM=7 go build -o homepage
+          env go build -o homepage
 
-          docker run --rm --privileged multiarch/qemu-user-static:register
           docker build --compress -t danackerson/ackerson.de:vg$GITHUB_RUN_ID .
           docker login -u ${{ secrets.CTX_DOCKER_USER }} -p ${{ secrets.CTX_DOCKER_PASS }}
           docker tag danackerson/ackerson.de:vg$GITHUB_RUN_ID danackerson/ackerson.de:latest
           docker push danackerson/ackerson.de:vg$GITHUB_RUN_ID
           docker push danackerson/ackerson.de:latest
 
-      - name: Deploy to Pi
+      - name: Deploy to DO
         run: |
           git clone https://github.com/ackersonde/digitaloceans.git
           cd digitaloceans
@@ -52,42 +51,31 @@ jobs:
           go build do.go
           cd ../
 
-          cat <<DEPLOY_EOF >deploy.sh
-          #!/usr/bin/bash
-          ssh -o StrictHostKeyChecking=no ubuntu@$SSH_CXN "\
+          public_ip_address=$(curl -s https://checkip.amazonaws.com)
+          ./digitaloceans/do -fn=firewallSSH -allow=true -ip=$public_ip_address -tag=traefik
+
+          mkdir ~/.ssh
+          cat <<EOF >~/.ssh/id_rsa
+          ${{ secrets.CTX_DIGITALOCEAN_SSH_PRIVKEY }}
+          EOF
+          chmod 400 ~/.ssh/id_rsa
+
+          ssh -o StrictHostKeyChecking=no root@ackerson.de "\
             docker rm -f homepage || true && \
-            docker run -d --restart=always --network='web' \
+            docker run -d --restart=always \
               -e DARKSKY_API_KEY=${{ secrets.CTX_DARKSKY_API_KEY }} \
               -e GITHUB_RUN_ID=$GITHUB_RUN_ID \
               -e COOKIE_SECRET=${{ secrets.COOKIE_SECRET }} \
               -e CTX_JOIN_API_KEY=${{ secrets.CTX_JOIN_API_KEY }} \
-              --label='traefik.docker.network=web' \
               --label='traefik.enable=true' \
               --label='traefik.http.routers.homepage.tls.certResolver=letsencrypt' \
               --label='traefik.http.routers.homepage.tls.domains=ackerson.de' \
-              --label='traefik.http.routers.homepage.rule=Host(\\\`ackerson.de\\\`) || Host(\\\`www.ackerson.de\\\`)' \
+              --label='traefik.http.routers.homepage.rule=Host(\`ackerson.de\`) || Host(\`www.ackerson.de\`)' \
               --name homepage danackerson/ackerson.de:vg$GITHUB_RUN_ID"
-          DEPLOY_EOF
-          chmod u+x deploy.sh
 
-          envsubst < digitaloceans/do_ubuntu_userdata.sh > digitalocean_ubuntu_userdata.sh
-          mkdir ~/.ssh
-          ./digitaloceans/do -fn=createNewServer
-
-          public_ip_address=$(curl -s https://checkip.amazonaws.com)
-          echo PUBLIC_IP=${public_ip_address} >> /tmp/new_digital_ocean_droplet_params
-          source /tmp/new_digital_ocean_droplet_params
-
-          ./digitaloceans/do -fn=firewallSSH -allow=true -ip=$public_ip_address
-          sleep 30
-
-          scp -q -o StrictHostKeyChecking=no deploy.sh root@$NEW_SERVER_IPV4:~/
-          ssh root@$NEW_SERVER_IPV4 ./deploy.sh
+          rm -Rf ~/.ssh /tmp/new_digital_ocean_droplet_params
+          ./digitaloceans/do -fn=firewallSSH -allow=false -ip=$public_ip_address
 
           curl -s -o /dev/null -X POST -d token=${{ secrets.CTX_SLACK_NOTIFICATIONS_TOKEN }} -d channel=C092UE0H4 \
             -d text="<https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID | $GITHUB_REPOSITORY @ $GITHUB_RUN_ID>" \
             https://slack.com/api/chat.postMessage
-
-          rm -Rf ~/.ssh/id_rsa digitalocean_ubuntu_userdata.sh /tmp/new_digital_ocean_droplet_params
-          ./digitaloceans/do -fn=firewallSSH -allow=false -ip=$PUBLIC_IP
-          ./digitaloceans/do -fn=deleteServer -dropletID=$NEW_DROPLET_ID -keyID=$NEW_SSH_KEY_ID

@@ -36,7 +36,7 @@ img.ui-datepicker-trigger {
   margin-top:5px;
   text-align:center;
   font-weight:bold;
-  font-size: 18px;
+  font-size: 14px;
   font-family:none;
   border:none;
   cursor: pointer !important;
@@ -120,4 +120,5 @@ img.ui-datepicker-trigger {
   height:16px;
   background-position:-16px 0px;
   background-size:32px 16px;
+  padding-right: 10px;
 }
