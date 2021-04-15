@@ -37,7 +37,7 @@ jobs:
 
           export `go env | grep GOPATH | tr -d \"`
           $GOPATH/bin/packr2
-          env GOOS=linux GOARCH=amd64 go build -o homepage
+          CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o homepage
 
           docker build --compress -t danackerson/ackerson.de:vg$GITHUB_RUN_ID .
           docker login -u ${{ secrets.CTX_DOCKER_USER }} -p ${{ secrets.CTX_DOCKER_PASS }}
