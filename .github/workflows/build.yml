@@ -3,6 +3,11 @@ name: Deploy ackerson.de homepage
 on:
   push:
     branches: [ master ]
+  workflow_dispatch:
+    inputs:
+      ca_pub_fingerprint:
+        description: fingerprint of CA signed user cert
+        required: false
 
 jobs:
   build:
@@ -11,7 +16,6 @@ jobs:
       CTX_DIGITALOCEAN_DROPLET_PROXY_TOKEN: ${{ secrets.CTX_DIGITALOCEAN_DROPLET_PROXY_TOKEN }}
       CTX_DIGITALOCEAN_FIREWALL: ${{ secrets.CTX_DIGITALOCEAN_FIREWALL }}
       CTX_SSH_DEPLOY_FINGERPRINT: ${{ secrets.CTX_SSH_DEPLOY_FINGERPRINT }}
-      CTX_RASPBERRYPI_SSH_PRIVKEY: "${{ secrets.CTX_RASPBERRYPI_SSH_PRIVKEY }}"
       SSH_CXN: ${{ secrets.CTX_IPV6_MASTER_HOME }}
     steps:
       - uses: actions/checkout@v2
