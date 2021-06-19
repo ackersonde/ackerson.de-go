@@ -78,7 +78,7 @@ function getIP6(json) {
             break;
 
           case 'rw':
-            oberhatzkofen_weather = '//darksky.net/forecast/48.3,11.357/ca24/en#week';
+            oberhatzkofen_weather = '//openweathermap.org/city/2860447';
             window.open(oberhatzkofen_weather);
             break;
 
