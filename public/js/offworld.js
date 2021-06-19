@@ -14,12 +14,12 @@ function mvvRoute(origin, destination) {
   var hour = d.getHours();
   var minute = d.getMinutes();
 
-  var url = "https://efa.mvv-muenchen.de/index.html?&language=en"+
-    "&anyObjFilter_origin=0&sessionID=0&itdTripDateTimeDepArr=dep&type_destination=any"+
-    "&itdDateMonth="+month+"&itdTimeHour="+hour+"&anySigWhenPerfectNoOtherMatches=1"+
-    "&locationServerActive=1&name_origin="+origin+"&itdDateDay="+day+"&type_origin=any"+
-    "&name_destination="+destination+"&itdTimeMinute="+minute+"&Session=0&stateless=1"+
-    "&SpEncId=0&itdDateYear="+year+"#trip@origdest";
+  // origin = "Oberhatzkofen%20Kirche%2C%20Rottenburg%20a.d.%20Laaber"
+  // destination = "M%C3%BCnchen"
+  date = day+"."+month+"."+year
+  time = hour+"%3A"+minute
+  var url = "https://reiseauskunft.bahn.de/bin/query.exe/dn?S="+origin+
+    "&Z="+destination+"&date="+date+"&time="+time+"&start=1"
 
   var win = window.open(url, '_blank');
   win.focus();
@@ -41,7 +41,7 @@ function getIP6(json) {
   var whoami_msg = "[[g;#FFFF00;]whoami]: your browser info and IP address\r\n";
   var date_msg = "[[g;#FFFF00;]date]: my server date/time\r\n";
   var version_msg = "[[g;#FFFF00;]version]: build of this website\r\n";
-  var sw_msg = "[[g;#FFFF00;]sw]: Schwabhausen weather \r\n";
+  var sw_msg = "[[g;#FFFF00;]rw]: Oberhatzkofen weather \r\n";
   var clear_msg = "[[g;#FFFF00;]clear]: clear this terminal screen\r\n";
   var help = weather_msg + whoami_msg + date_msg + sw_msg + version_msg + clear_msg;
 
@@ -77,9 +77,9 @@ function getIP6(json) {
             simpleAjaxCall(command, "query-param");
             break;
 
-          case 'sw':
-            schwabhausen_weather = '//darksky.net/forecast/48.3,11.357/ca24/en#week';
-            window.open(schwabhausen_weather);
+          case 'rw':
+            oberhatzkofen_weather = '//darksky.net/forecast/48.3,11.357/ca24/en#week';
+            window.open(oberhatzkofen_weather);
             break;
 
           case 'weather':
