@@ -76,6 +76,7 @@ jobs:
               -e COOKIE_SECRET=${{ secrets.COOKIE_SECRET }} \
               -e CTX_JOIN_API_KEY=${{ secrets.CTX_JOIN_API_KEY }} \
               --label='traefik.enable=true' \
+              --label='traefik.http.routers.homepage.middlewares=secHeaders@file' \
               --label='traefik.http.routers.homepage.tls.certResolver=letsencrypt' \
               --label='traefik.http.routers.homepage.tls.domains=ackerson.de' \
               --label='traefik.http.routers.homepage.rule=Host(\`ackerson.de\`) || Host(\`www.ackerson.de\`)' \
