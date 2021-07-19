@@ -78,7 +78,6 @@ jobs:
               --label='traefik.enable=true' \
               --label='traefik.http.routers.homepage.tls.certResolver=letsencrypt' \
               --label='traefik.http.routers.homepage.tls.domains=ackerson.de' \
-              --label='traefik.http.routers.homepage.tls.options.default.minVersion=VersionTLS12' \
               --label='traefik.http.routers.homepage.rule=Host(\`ackerson.de\`) || Host(\`www.ackerson.de\`)' \
               --name homepage danackerson/ackerson.de:vg$GITHUB_RUN_ID"
 
