@@ -16,7 +16,6 @@ import (
 
 	"github.com/ackersonde/ackerson.de-go/baseball"
 	"github.com/ackersonde/ackerson.de-go/structures"
-	"github.com/ackersonde/bender-slackbot/filemanager"
 	"github.com/gobuffalo/packr/v2"
 	"github.com/gorilla/mux"
 	"github.com/mssola/user_agent"
@@ -139,9 +138,6 @@ func setUpRoutes(router *mux.Router) {
 	// play a single game
 	router.HandleFunc("/bbStream", bbStream)
 
-	// download a single game to phone
-	router.HandleFunc("/bb_download", bbDownload)
-
 	// play all games of the day
 	router.HandleFunc("/bbAll", bbAll)
 
@@ -168,19 +164,6 @@ type FavGames struct {
 }
 
 var homePageMap map[int]baseball.Team
-
-func bbDownload(w http.ResponseWriter, req *http.Request) {
-	mlbTitle := req.URL.Query().Get("gameTitle")
-	mlbURL := req.URL.Query().Get("gameURL")
-
-	gameTitle := translateGameTitleToFileName(mlbTitle)
-	if gameTitle != "" {
-		filemanager.DownloadFileToPhone(mlbURL, gameTitle)
-	} else {
-		w.WriteHeader(http.StatusNotFound)
-		w.Write([]byte("404 - Unable to find that file for downloading"))
-	}
-}
 
 func translateGameTitleToFileName(mlbTitle string) string {
 	re := regexp.MustCompile(
