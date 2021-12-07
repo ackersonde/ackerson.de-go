@@ -9,7 +9,6 @@ import (
 	"net/http"
 	"net/http/httputil"
 	"os"
-	"regexp"
 	"strconv"
 	"strings"
 	"time"
@@ -24,15 +23,8 @@ import (
 )
 
 var httpPort = ":8080"
-var downloadDir = "bender/"
-
-var mongo string
-var cookieSecret string
-var joinAPIKey string
-var poem string
 var darksky string
 var version string
-var port string
 var post = "POST"
 
 var tmpl = packr.New("templates", "./templates")
@@ -80,8 +72,6 @@ func main() {
 }
 
 func parseEnvVariables() {
-	cookieSecret = os.Getenv("COOKIE_SECRET")
-	joinAPIKey = os.Getenv("CTX_JOIN_API_KEY")
 	darksky = os.Getenv("DARKSKY_API_KEY")
 	version = os.Getenv("GITHUB_RUN_ID")
 }
@@ -164,54 +154,6 @@ type FavGames struct {
 }
 
 var homePageMap map[int]baseball.Team
-
-func translateGameTitleToFileName(mlbTitle string) string {
-	re := regexp.MustCompile(
-		`(?P<away>[0-9]{3})-(?P<home>[0-9]{3})__(?P<dow>[A-Za-z]{3}), (?P<month>[A-Za-z]{3}) (?P<day>[0-9]{2}) (?P<year>[0-9]{4})`)
-	matches := re.FindAllStringSubmatch(mlbTitle, -1)
-	if matches == nil {
-		return ""
-	}
-
-	names := re.SubexpNames()
-	m := map[string]string{}
-	for i, n := range matches[0] {
-		m[names[i]] = n
-	}
-	awayTeamID := m["away"]
-	homeTeamID := m["home"]
-
-	awayTeam := baseball.LookupTeamInfo(homePageMap, awayTeamID)
-	homeTeam := baseball.LookupTeamInfo(homePageMap, homeTeamID)
-	date := m["dow"] + "-" + m["month"] + m["day"] + "-" + m["year"]
-
-	return awayTeam.Abbreviation + "@" + homeTeam.Abbreviation + "_" + date + ".mp4"
-}
-
-func bbDownloadStatus(w http.ResponseWriter, req *http.Request) {
-	var size int64
-
-	title := req.URL.Query().Get("title")
-
-	filepath := downloadDir + title
-	file, err := os.Open(filepath)
-	if err != nil {
-		log.Printf("%s\n", err)
-	}
-	fi, err := file.Stat()
-	if err != nil {
-		log.Printf("%s\n", err)
-		size = -10
-	} else {
-		size = fi.Size()
-	}
-	v := map[string]int64{"size": size}
-
-	data, _ := json.Marshal(v)
-	w.Header().Set("Content-Type", "application/json; charset=utf-8")
-
-	w.Write(data)
-}
 
 func bbHome(w http.ResponseWriter, r *http.Request) {
 	date1 := r.URL.Query().Get("date1")
@@ -314,7 +256,7 @@ func WhoAmIHandler(w http.ResponseWriter, req *http.Request) {
 	w.Write(data)
 }
 
-// VersionHandler now commenteds
+// VersionHandler now commented
 func VersionHandler(w http.ResponseWriter, req *http.Request) {
 	if strings.HasPrefix(version, "vg") {
 		version = strings.TrimLeft(version, "vg")

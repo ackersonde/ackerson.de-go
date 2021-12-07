@@ -7,7 +7,8 @@ import (
 	"testing"
 )
 
-var testDay = "?date1=year_2016%2fmonth_06%2fday_26&offset=0"
+var testDay = "?date1=year_2019%2fmonth_06%2fday_24&offset=0"
+var testCatchAllDay = "?date1=06%2f24%2f2019"
 
 func init() {
 	parseHTMLTemplateFiles()
@@ -24,7 +25,7 @@ func Test_bbHome(t *testing.T) {
 	bbHome(res, req)
 
 	// Verify a list of baseball games for that day is returned
-	exp := "/bbStream?url=https%3a%2f%2fmediadownloads.mlb.com%2fmlbam%2fmp4%2f"
+	exp := "/bbStream?url=https%3a%2f%2fcuts.diamond.mlb.com%2fFORGE%2f"
 	act := res.Body.String()
 	if !strings.Contains(act, exp) {
 		t.Fatalf("Expected %s got %s", exp, act)
@@ -41,7 +42,7 @@ func Test_bbAjaxDay(t *testing.T) {
 	res := httptest.NewRecorder()
 	bbAjaxDay(res, req)
 
-	exp := "/bbStream?url=https%3a%2f%2fmediadownloads.mlb.com%2fmlbam%2fmp4%2f"
+	exp := "/bbStream?url=https%3a%2f%2fcuts.diamond.mlb.com%2fFORGE%2f"
 	act := res.Body.String()
 	if !strings.Contains(act, exp) {
 		t.Fatalf("Expected %s got %s", exp, act)
@@ -50,7 +51,9 @@ func Test_bbAjaxDay(t *testing.T) {
 
 func Test_bbAll(t *testing.T) {
 	t.Parallel()
-	req, err := http.NewRequest("GET", "http://localhost"+getHTTPPort()+"/bbAll"+testDay, nil)
+
+	// time for GottaCatchEmAll isn't formatted how we expect
+	req, err := http.NewRequest("GET", "http://localhost"+getHTTPPort()+"/bbAll"+testCatchAllDay, nil)
 	if err != nil {
 		t.Fatal(err)
 	}
@@ -59,7 +62,7 @@ func Test_bbAll(t *testing.T) {
 	bbAll(res, req)
 
 	// Verify a list of baseball games for that day is returned
-	exp := "video_list = [\"https://mediadownloads.mlb.com/mlbam/mp4/"
+	exp := "video_list = [\"https://cuts.diamond.mlb.com/FORGE/"
 	act := res.Body.String()
 	if !strings.Contains(act, exp) {
 		t.Fatalf("Expected %s got %s", exp, act)
