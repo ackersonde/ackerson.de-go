@@ -82,8 +82,11 @@ func Test_bbStream_redirect(t *testing.T) {
 	res := httptest.NewRecorder()
 	bbStream(res, req)
 
-	// Verify a redirect is returned
+	// Verify redirect and BadRequest is returned
 	location := res.Header()["Location"][0]
+	if res.Result().StatusCode != http.StatusBadRequest {
+		t.Fatalf("Expected %d got %d", http.StatusBadRequest, res.Result().StatusCode)
+	}
 	if location != URL {
 		t.Fatalf("Expected %s got %s", URL, location)
 	}

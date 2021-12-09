@@ -162,7 +162,7 @@ func bbHome(w http.ResponseWriter, r *http.Request) {
 	if date1 == "" {
 		// for out of season, display Day 1 of last World Series
 		// from https://en.wikipedia.org/wiki/2022_Major_League_Baseball_season
-		date1 = "year_2021/month_10/day_26" // Day 1 of World Series 2021
+		date1 = "year_2021/month_10/day_30" // Day 1 of World Series 2021
 		offset = "0"
 
 		/* this is for regular season operations
@@ -186,12 +186,15 @@ func bbHome(w http.ResponseWriter, r *http.Request) {
 
 func bbStream(w http.ResponseWriter, r *http.Request) {
 	URL := r.URL.Query().Get("url")
-	log.Print("render URL: " + URL)
+	log.Print("render BB Game URL: " + URL)
 
-	if strings.Contains(URL, "youtube") {
-		http.Redirect(w, r, URL, http.StatusFound)
-	} else {
+	if strings.HasPrefix(URL, "https%3a%2f%2fmlb-cuts-diamond.mlb.com%2fFORGE%2f") &&
+		strings.HasSuffix(URL, ".mp4") {
+		// take care and check that the incoming URL is what we expect it to be
 		root.ExecuteTemplate(w, "bbPlaySingleGameOfDay", URL)
+	} else {
+		// else send them on their merry way
+		http.Redirect(w, r, URL, http.StatusBadRequest)
 	}
 }
 
