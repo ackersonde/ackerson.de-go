@@ -181,6 +181,11 @@ func FetchGameURLFromID(contentURL string) string {
 
 	if len(video.Array()) > 0 {
 		gameURL = video.Array()[0].String()
+	} else {
+		/* TODO: go grab the video from https://baseball.theater/search/condensed-game/2021-10-30 ?
+		<a href="https://mlb-cuts-diamond.mlb.com/FORGE/2021/2021-10/30/856f2bda-dfe3a2e3-603b1c29-csvm-diamondx64-asset_1280x720_59_4000K.mp4" target="_blank">
+		<div class="..." title="CG: HOU@ATL Gm4 - 10/30/21" ...</a>
+		*/
 	}
 
 	return gameURL

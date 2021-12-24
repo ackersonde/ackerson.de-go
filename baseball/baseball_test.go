@@ -1,6 +1,8 @@
 package baseball
 
-import "testing"
+import (
+	"testing"
+)
 
 func Test_favoriteTeamHandler(t *testing.T) {
 	t.Parallel()
