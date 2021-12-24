@@ -188,7 +188,8 @@ func bbStream(w http.ResponseWriter, r *http.Request) {
 	URL := r.URL.Query().Get("url")
 	log.Print("render BB Game URL: " + URL)
 
-	if strings.HasPrefix(URL, "https://mlb-cuts-diamond.mlb.com/FORGE/") &&
+	if (strings.HasPrefix(URL, "https://mlb-cuts-diamond.mlb.com/FORGE/") ||
+		strings.HasPrefix(URL, "https://mediadownloads.mlb.com")) &&
 		strings.HasSuffix(URL, ".mp4") {
 		// take care and check that the incoming URL is what we expect it to be
 		root.ExecuteTemplate(w, "bbPlaySingleGameOfDay", URL)

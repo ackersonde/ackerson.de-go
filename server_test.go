@@ -7,8 +7,8 @@ import (
 	"testing"
 )
 
-var testDay = "?date1=year_2019%2fmonth_06%2fday_24&offset=0"
-var testCatchAllDay = "?date1=06%2f24%2f2019"
+var testDay = "?date1=year_2021%2fmonth_06%2fday_24&offset=0"
+var testCatchAllDay = "?date1=06%2f24%2f2021"
 
 func init() {
 	parseHTMLTemplateFiles()
@@ -25,7 +25,8 @@ func Test_bbHome(t *testing.T) {
 	bbHome(res, req)
 
 	// Verify a list of baseball games for that day is returned
-	exp := "/bbStream?url=https%3a%2f%2fcuts.diamond.mlb.com%2fFORGE%2f"
+	exp := "/bbStream?url=https%3a%2f%2fmlb-cuts-diamond.mlb.com%2fFORGE%2f"
+
 	act := res.Body.String()
 	if !strings.Contains(act, exp) {
 		t.Fatalf("Expected %s got %s", exp, act)
@@ -42,7 +43,7 @@ func Test_bbAjaxDay(t *testing.T) {
 	res := httptest.NewRecorder()
 	bbAjaxDay(res, req)
 
-	exp := "/bbStream?url=https%3a%2f%2fcuts.diamond.mlb.com%2fFORGE%2f"
+	exp := "/bbStream?url=https%3a%2f%2fmlb-cuts-diamond.mlb.com%2fFORGE%2f"
 	act := res.Body.String()
 	if !strings.Contains(act, exp) {
 		t.Fatalf("Expected %s got %s", exp, act)
@@ -62,7 +63,7 @@ func Test_bbAll(t *testing.T) {
 	bbAll(res, req)
 
 	// Verify a list of baseball games for that day is returned
-	exp := "video_list = [\"https://cuts.diamond.mlb.com/FORGE/"
+	exp := "video_list = [\"https://mlb-cuts-diamond.mlb.com/FORGE/"
 	act := res.Body.String()
 	if !strings.Contains(act, exp) {
 		t.Fatalf("Expected %s got %s", exp, act)

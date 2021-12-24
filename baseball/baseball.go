@@ -131,7 +131,6 @@ func searchMLBGames(dates string, games map[int][]string, homePageMap map[int]Te
 		}
 
 		contentURL := game.Get("content.link").String()
-
 		if contentURL != "" {
 			awayTeam := LookupTeamInfo(homePageMap, awayTeamID)
 			homeTeam := LookupTeamInfo(homePageMap, homeTeamID)
