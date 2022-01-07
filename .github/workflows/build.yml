@@ -48,7 +48,7 @@ jobs:
           docker build --compress -t danackerson/ackerson.de:vg$GITHUB_RUN_ID .
           docker login -u ${{ secrets.CTX_DOCKER_USER }} -p ${{ secrets.CTX_DOCKER_PASS }}
           docker tag danackerson/ackerson.de:vg$GITHUB_RUN_ID danackerson/ackerson.de:latest
-          docker push --all-tags danackerson/ackerson.de:vg$GITHUB_RUN_ID
+          docker push --all-tags danackerson/ackerson.de
 
       - name: Deploy to DO
         run: |
