@@ -72,9 +72,9 @@ jobs:
             docker run -d --restart=always \
               -e DARKSKY_API_KEY=${{ secrets.CTX_DARKSKY_API_KEY }} \
               -e GITHUB_RUN_ID=$GITHUB_RUN_ID \
-              -e ORG_HOW_YOU_LIKE_ME_NOW=$ORG_HOW_YOU_LIKE_ME_NOW \
-              -e ORG_THIS_ONES_FOR_ME=$ORG_THIS_ONES_FOR_ME \
-              -e ORG_NOW_WERE_ROCKING=$ORG_NOW_WERE_ROCKING \
+              -e ORG_HOW_YOU_LIKE_ME_NOW=${{ secrets.ORG_HOW_YOU_LIKE_ME_NOW }}\
+              -e ORG_THIS_ONES_FOR_ME=${{ secrets.ORG_THIS_ONES_FOR_ME }} \
+              -e ORG_NOW_WERE_ROCKING=${{ secrets.ORG_NOW_WERE_ROCKING }} \
               --label='traefik.enable=true' \
               --label='traefik.http.routers.homepage.middlewares=secHeaders@file' \
               --label='traefik.http.routers.homepage.tls.certResolver=letsencrypt' \
