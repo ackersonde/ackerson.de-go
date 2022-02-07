@@ -73,7 +73,7 @@ jobs:
               -e DARKSKY_API_KEY=${{ secrets.CTX_DARKSKY_API_KEY }} \
               -e GITHUB_RUN_ID=$GITHUB_RUN_ID \
               --label='traefik.enable=true' \
-              --label='traefik.http.routers.homepage.middlewares=secHeaders@file' \
+              --label='traefik.http.routers.homepage.middlewares=http-ratelimit@file,secHeaders@file' \
               --label='traefik.http.routers.homepage.tls.certResolver=letsencrypt' \
               --label='traefik.http.routers.homepage.tls.domains=ackerson.de' \
               --label='traefik.http.routers.homepage.rule=Host(\`ackerson.de\`) || Host(\`www.ackerson.de\`)' \
