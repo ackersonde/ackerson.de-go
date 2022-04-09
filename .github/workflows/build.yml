@@ -25,11 +25,11 @@ jobs:
       - name: Test application
         run: |
           go mod tidy
-          go get -u github.com/jstemmer/go-junit-report
+          go install github.com/jstemmer/go-junit-report@latest
 
           mkdir -p /tmp/test-results
           export `go env | grep GOPATH | tr -d \"`
-          go test -v ./... | $GOPATH/bin/go-junit-report > /tmp/test-results/unit-tests.xml
+          go test -v ./... | go-junit-report > /tmp/test-results/unit-tests.xml
       - name: Upload & archive test results
         uses: actions/upload-artifact@v1
         with:
