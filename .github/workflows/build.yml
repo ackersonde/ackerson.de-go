@@ -38,6 +38,7 @@ jobs:
 
       - name: Build application and docker image
         run: |
+          go get github.com/gobuffalo/packr/v2/packr2/cmd@v2.8.3
           go install github.com/gobuffalo/packr/v2/packr2
           go mod tidy
 
