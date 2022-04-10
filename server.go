@@ -86,6 +86,9 @@ func setUpRoutes(router *mux.Router) {
 	router.HandleFunc("/whoami", func(w http.ResponseWriter, r *http.Request) {
 		WhoAmIHandler(w, r)
 	})
+	router.HandleFunc("/ip", func(w http.ResponseWriter, r *http.Request) {
+		w.Write([]byte(r.Header.Get("X-Forwarded-For")))
+	})
 	router.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == post {
 			VersionHandler(w, r)
