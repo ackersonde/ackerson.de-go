@@ -5,9 +5,7 @@ import (
 	"html/template"
 	"io/ioutil"
 	"log"
-	"net"
 	"net/http"
-	"net/http/httputil"
 	"os"
 	"strconv"
 	"strings"
@@ -86,9 +84,7 @@ func setUpRoutes(router *mux.Router) {
 		}
 	})
 	router.HandleFunc("/whoami", func(w http.ResponseWriter, r *http.Request) {
-		if r.Method == post {
-			WhoAmIHandler(w, r)
-		}
+		WhoAmIHandler(w, r)
 	})
 	router.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == post {
@@ -232,29 +228,13 @@ func bbAjaxDay(w http.ResponseWriter, r *http.Request) {
 	}
 }
 
-// GetIP now commented
-func GetIP(r *http.Request) string {
-	requestDump, _ := httputil.DumpRequest(r, false)
-	log.Printf("GetIP Request: %s\n", requestDump)
-
-	ip := r.Header.Get("X-Real-Ip")
-
-	if len(ip) <= 0 {
-		ipRemote, _, _ := net.SplitHostPort(r.RemoteAddr)
-		return ipRemote
-	}
-
-	return ip
-}
-
 // WhoAmIHandler now commented
 func WhoAmIHandler(w http.ResponseWriter, req *http.Request) {
-	s := []string{"[[g;#FFFF00;]Your Browser:] " + req.UserAgent()}
+	s := []string{"[[g;#FFFF00;]Your Browser:] " + req.UserAgent(),
+		"[[g;#FFFF00;]Your IP:] " + req.Header.Get("X-Forwarded-For")}
 	rawData := strings.Join(s, "\r\n")
+
 	rawDataJSON := map[string]string{"whoami": rawData}
-	for header, value := range req.Header {
-		log.Printf("%s: %s\n", header, value)
-	}
 	data, _ := json.Marshal(rawDataJSON)
 	w.Header().Set("Content-Type", "application/json; charset=utf-8")
 

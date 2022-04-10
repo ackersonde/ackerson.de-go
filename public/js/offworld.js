@@ -25,15 +25,6 @@ function mvvRoute(origin, destination) {
   win.focus();
 }
 
-var clientPublicIP4 = "";
-var clientPublicIP6 = "";
-function getIP4(json) {
-  clientPublicIP4 = json.ip;
-}
-function getIP6(json) {
-  clientPublicIP6 = json.ip;
-}
-
 (function($) {
   var id = 1;
   var greeting = "Welcome Off World (type help)";
@@ -247,13 +238,7 @@ function getIP6(json) {
                 ";
           }
           else if (command == 'whoami') {
-            var publicIP = "[[g;#FFFF00;]Your IP:] ";
-            if (clientPublicIP4 == clientPublicIP6) {
-              publicIP += clientPublicIP4
-            } else {
-              publicIP += `${clientPublicIP4} [${clientPublicIP6}]`
-            }
-            term.echo(`${publicIP}\n${responseText[command]}`);
+            term.echo(`${responseText[command]}`);
           }
           else term.echo(responseText[command]);       // data set
         }
