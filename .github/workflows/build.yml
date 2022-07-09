@@ -86,6 +86,7 @@ jobs:
           rm -Rf ~/.ssh ~/.docker/config.json
           ./digitaloceans/do -fn=firewallSSH -allow=false -ip=$public_ip_address
 
-          curl -s -o /dev/null -X POST -d token=${{ secrets.ORG_SLACK_NOTIFICATIONS_TOKEN }} -d channel=C092UE0H4 \
+          export SLACK_NOTIFY_TOKEN=$(echo ${{ secrets.ORG_SLACK_NOTIFICATIONS_TOKEN }} | base64 -d)
+          curl -s -o /dev/null -X POST -d token=$SLACK_NOTIFY_TOKEN -d channel=C092UE0H4 \
             -d text="<https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|$GITHUB_REPOSITORY @ $GITHUB_RUN_ID>" \
             https://slack.com/api/chat.postMessage
