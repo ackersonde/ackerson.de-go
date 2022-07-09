@@ -12,11 +12,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-20.04
-    env:
-      CTX_DIGITALOCEAN_DROPLET_PROXY_TOKEN: ${{ secrets.CTX_DIGITALOCEAN_DROPLET_PROXY_TOKEN }}
-      CTX_DIGITALOCEAN_FIREWALL: ${{ secrets.CTX_DIGITALOCEAN_FIREWALL }}
-      CTX_SSH_DEPLOY_FINGERPRINT: ${{ secrets.CTX_SSH_DEPLOY_FINGERPRINT }}
-      SSH_CXN: ${{ secrets.CTX_IPV6_MASTER_HOME }}
     steps:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
@@ -47,12 +42,19 @@ jobs:
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o homepage
 
           docker build --compress -t danackerson/ackerson.de:vg$GITHUB_RUN_ID .
-          docker login -u ${{ secrets.CTX_DOCKER_USER }} -p ${{ secrets.CTX_DOCKER_PASS }}
+
+          export DUSER=$(echo ${{ secrets.ORG_DOCKER_USER }} | base64 -d)
+          export DPASS=$(echo ${{ secrets.ORG_DOCKER_PASS }} | base64 -d)
+          docker login -u $DUSER -p $DPASS
+
           docker tag danackerson/ackerson.de:vg$GITHUB_RUN_ID danackerson/ackerson.de:latest
           docker push --all-tags danackerson/ackerson.de
 
       - name: Deploy to DO
         run: |
+          export CTX_DIGITALOCEAN_DROPLET_PROXY_TOKEN=$(echo ${{ secrets.ORG_DIGITALOCEAN_DROPLET_PROXY_TOKEN }} | base64 -d)
+          export CTX_DIGITALOCEAN_FIREWALL=$(echo ${{ secrets.ORG_DIGITALOCEAN_FIREWALL }} | base64 -d)
+
           git clone https://github.com/ackersonde/digitaloceans.git
           cd digitaloceans
           go get -t -d -v ./...
@@ -64,14 +66,15 @@ jobs:
 
           mkdir ~/.ssh
           cat <<EOF >~/.ssh/id_rsa
-          ${{ secrets.CTX_DIGITALOCEAN_SSH_PRIVKEY }}
+          ${{ secrets.ORG_DIGITALOCEAN_SSH_PRIVKEY }}
           EOF
           chmod 400 ~/.ssh/id_rsa
 
+          export DARKSKY_API_KEY=$(echo ${{ secrets.ORG_DARKSKY_API_KEY }} | base64 -d)
           ssh -o StrictHostKeyChecking=no root@ackerson.de "\
             docker rm -f homepage || true && \
             docker run -d --restart=always \
-              -e DARKSKY_API_KEY=${{ secrets.CTX_DARKSKY_API_KEY }} \
+              -e DARKSKY_API_KEY=$DARKSKY_API_KEY \
               -e GITHUB_RUN_ID=$GITHUB_RUN_ID \
               --label='traefik.enable=true' \
               --label='traefik.http.routers.homepage.middlewares=http-ratelimit@file,secHeaders@file' \
@@ -83,6 +86,6 @@ jobs:
           rm -Rf ~/.ssh ~/.docker/config.json
           ./digitaloceans/do -fn=firewallSSH -allow=false -ip=$public_ip_address
 
-          curl -s -o /dev/null -X POST -d token=${{ secrets.CTX_SLACK_NOTIFICATIONS_TOKEN }} -d channel=C092UE0H4 \
+          curl -s -o /dev/null -X POST -d token=${{ secrets.ORG_SLACK_NOTIFICATIONS_TOKEN }} -d channel=C092UE0H4 \
             -d text="<https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|$GITHUB_REPOSITORY @ $GITHUB_RUN_ID>" \
             https://slack.com/api/chat.postMessage
