@@ -53,7 +53,9 @@ jobs:
 
       - name: Deploy to DO
         run: |
-          export HETZNER_API_TOKEN=$(echo ${{ secrets.HETZNER_API_TOKEN }} | base64 -d)
+          export HETZNER_API_TOKEN=$(echo ${{ secrets.ORG_HETZNER_CLOUD_API_TOKEN }} | base64 -d)
+          #export HETZNER_FIREWALL=$(echo ${{ secrets.ORG_HETZNER_HOME_FIREWALL }} | base64 -d)
+          #export HETZNER_VAULT_VOLUME_ID=$(echo ${{ secrets.ORG_HETZNER_VAULT_VOLUME_ID }} | base64 -d)
 
           git clone https://github.com/ackersonde/hetzner_home.git
           cd hetzner_home
