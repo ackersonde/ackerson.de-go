@@ -51,7 +51,7 @@ jobs:
           docker tag danackerson/ackerson.de:vg$GITHUB_RUN_ID danackerson/ackerson.de:latest
           docker push --all-tags danackerson/ackerson.de
 
-      - name: Deploy to DO
+      - name: Deploy to Hetzner
         run: |
           export HETZNER_API_TOKEN=$(echo ${{ secrets.ORG_HETZNER_CLOUD_API_TOKEN }} | base64 -d)
           #export HETZNER_FIREWALL=$(echo ${{ secrets.ORG_HETZNER_HOME_FIREWALL }} | base64 -d)
@@ -73,7 +73,7 @@ jobs:
           chmod 400 ~/.ssh/id_rsa
 
           export DARKSKY_API_KEY=$(echo ${{ secrets.ORG_DARKSKY_API_KEY }} | base64 -d)
-          ssh -o StrictHostKeyChecking=no root@ackerson.de "\
+          ssh -o StrictHostKeyChecking=no root@78.46.208.157 "\
             docker rm -f homepage || true && \
             docker run -d --restart=always \
               -e DARKSKY_API_KEY=$DARKSKY_API_KEY \
