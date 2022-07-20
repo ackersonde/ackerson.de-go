@@ -75,6 +75,7 @@ jobs:
             docker run -d --restart=always \
               -e DARKSKY_API_KEY=$DARKSKY_API_KEY \
               -e GITHUB_RUN_ID=$GITHUB_RUN_ID \
+              -e CA_FINGER=${{ inputs.ca_pub_fingerprint }} \
               --label='traefik.enable=true' \
               --label='traefik.http.routers.homepage.middlewares=http-ratelimit@file,secHeaders@file' \
               --label='traefik.http.routers.homepage.tls.certResolver=letsencrypt' \
