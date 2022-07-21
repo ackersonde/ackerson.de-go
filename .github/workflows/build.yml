@@ -53,6 +53,10 @@ jobs:
 
       - name: Deploy to Hetzner
         run: |
+          # Needed for DNS update as long as it's on DO!
+          export CTX_DIGITALOCEAN_DROPLET_PROXY_TOKEN=$(echo ${{ secrets.ORG_DIGITALOCEAN_DROPLET_PROXY_TOKEN }} | base64 -d)
+          export CTX_DIGITALOCEAN_FIREWALL=$(echo ${{ secrets.ORG_DIGITALOCEAN_FIREWALL }} | base64 -d)
+
           export HETZNER_API_TOKEN=$(echo ${{ secrets.ORG_HETZNER_CLOUD_API_TOKEN }} | base64 -d)
           #export HETZNER_FIREWALL=$(echo ${{ secrets.ORG_HETZNER_HOME_FIREWALL }} | base64 -d)
           #export HETZNER_VAULT_VOLUME_ID=$(echo ${{ secrets.ORG_HETZNER_VAULT_VOLUME_ID }} | base64 -d)
