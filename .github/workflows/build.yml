@@ -91,7 +91,7 @@ jobs:
               --label='traefik.http.middlewares.home-redirectregex.redirectregex.regex=^https://www.ackerson.de/(.*)' \
               --label='traefik.http.middlewares.home-redirectregex.redirectregex.replacement=https://ackerson.de/${1}' \
               --label='traefik.http.middlewares.home-redirectregex.redirectregex.permanent=true' \
-              --label='traefik.http.routers.homepage.middlewares=http-ratelimit@file,secHeaders@file,home-redirectregex' \
+              --label='traefik.http.routers.homepage.middlewares=http-ratelimit@file,secHeaders@file' \
               --name homepage danackerson/ackerson.de:vg$GITHUB_RUN_ID"
 
           rm -Rf ~/.ssh ~/.docker/config.json
