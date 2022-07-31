@@ -46,7 +46,7 @@ jobs:
 
           export DUSER=$(echo ${{ secrets.ORG_DOCKER_USER }} | base64 -d)
           export DPASS=$(echo ${{ secrets.ORG_DOCKER_PASS }} | base64 -d)
-          docker login -u $DUSER -p $DPASS
+          echo $DPASS | docker login -u $DUSER --password-stdin
 
           docker tag danackerson/ackerson.de:vg$GITHUB_RUN_ID danackerson/ackerson.de:latest
           docker push --all-tags danackerson/ackerson.de
