@@ -1,0 +1,56 @@
+<!DOCTYPE HTML>
+<html>
+  <head>
+    <meta charset="UTF-8" />
+    <title>MLB Games from {{ $.Date }}</title>
+    <style type="text/css">
+      .responsive-video {
+        max-width: 100%;
+        height: auto;
+      }
+    </style>
+    <script type="text/javascript">
+        var video_count;
+        var storage_key = "video_count_{{ $.VideoCountStorage }}";
+        if (!localStorage.getItem(storage_key)) {
+          localStorage.setItem(storage_key, 1);
+          video_count = 1;
+        } else {
+          video_count = localStorage.getItem(storage_key)
+        }
+
+        video_list = {{ $.BallgameVideoURLs }}
+
+        function init_video_player() {
+          load_video(video_count);
+        }
+
+        function run(){
+          localStorage.setItem(storage_key, parseInt(localStorage.getItem(storage_key)) + 1);
+          video_count = localStorage.getItem(storage_key)
+
+          if (video_count >= {{ $.BallgameCount }} ) {
+            localStorage.setItem(storage_key, 1);
+            video_count = 1
+          }
+
+          load_video(video_count);
+       }
+
+       function load_video(index) {
+          videoPlayer = document.getElementById("ss");
+          videoPlayer.setAttribute("src", video_list[index - 1]);
+
+          video=document.getElementById("myVideo");
+          video.load();
+          video.play();
+        }
+    </script>
+  </head>
+  <body onload="init_video_player()">
+    <video class="responsive-video" id="myVideo" poster="images/zombieBall.jpg" controls onended="run();">
+      <source id="ss" type="video/mp4">
+    </video>
+    <h1>Back to <a href="/bb">Games</a></h1>
+  </body>
+</html>
