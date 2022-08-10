@@ -4,11 +4,9 @@
 This is my homepage. I primarily use it to watch [baseball games](https://ackerson.de/bb) <img src="https://ackerson.de/images/baseballSmall.png" width="16">
 
 # Installation and Development
-0. go get github.com/gravityblast/fresh
-0. cd ~/dev/ackersonde/ackerson.de-go/
-0. go get ./...
-0. `fresh` (launch app refresher for dev)
-0. http://localhost:8080 (now code and fresh builds in the background)
+0. go get github.com/cosmtrek/air && go install github.com/cosmtrek/air
+0. `air` (launch app refresher for dev)
+0. http://buildoor.ackerson.de:8080 (now code and fresh builds in the background)
 
 # Building & Running
 See [github action workflow](.github/workflows/build.yml)

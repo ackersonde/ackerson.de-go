@@ -1,8 +1,10 @@
 package main
 
 import (
+	"embed"
 	"encoding/json"
 	"html/template"
+	"io/fs"
 	"io/ioutil"
 	"log"
 	"net/http"
@@ -13,45 +15,21 @@ import (
 
 	"github.com/ackersonde/ackerson.de-go/baseball"
 	"github.com/ackersonde/ackerson.de-go/structures"
-	"github.com/gobuffalo/packr/v2"
-	"github.com/gorilla/mux"
 	"github.com/mssola/user_agent"
-	"github.com/shurcooL/httpgzip"
 	"github.com/urfave/negroni"
 )
 
-var httpPort = ":8080"
-var darksky string
-var version string
-var post = "POST"
-
-var tmpl = packr.New("templates", "./templates")
-var static = packr.New("static", "./public")
-var root = template.New("root")
-
-func parseHTMLTemplateFiles() {
-	// Go thru ./templates dir and load them for rendering
-	for _, path := range tmpl.List() {
-		//files = append(files, path)
-
-		bytes, err := tmpl.Find(path)
-		if err != nil || len(bytes) == 0 {
-			log.Printf("Couldn't find %s: %s", path, err.Error())
-		}
-
-		// most important line in the whole goddamn program :(
-		path := strings.TrimSuffix(path, ".tmpl")
-		t, err2 := template.New(path).Parse(string(bytes))
-		if err2 != nil {
-			log.Printf("WTF? %s", err.Error())
-		}
-		root, err = root.AddParseTree(path, t.Tree)
-
-		if err != nil {
-			panic("OHH NOEESSS: " + err.Error())
-		}
-	}
-}
+var (
+	//go:embed templates/index.html templates/*.gohtml templates/layouts/bb.gohtml
+	tmpl         embed.FS
+	templates    map[string]*template.Template
+	templatesDir = "templates"
+	layoutsDir   = "templates/layouts"
+	post         = "POST"
+	httpPort     = ":8080"
+	darksky      string
+	version      string
+)
 
 func getHTTPPort() string {
 	return httpPort
@@ -59,14 +37,19 @@ func getHTTPPort() string {
 
 func main() {
 	parseEnvVariables()
-	parseHTMLTemplateFiles()
+	err := parseTemplates()
+	if err != nil {
+		log.Fatalf("ARRGGH: %v", err)
+	}
 
-	r := mux.NewRouter()
+	r := http.NewServeMux()
 	setUpRoutes(r)
 	n := negroni.Classic()
 	n.UseHandler(r)
 
-	http.ListenAndServe(httpPort, n)
+	if err := http.ListenAndServe(httpPort, n); err != nil {
+		log.Printf("HANDLER ERR: %v", err)
+	}
 }
 
 func parseEnvVariables() {
@@ -74,7 +57,31 @@ func parseEnvVariables() {
 	version = os.Getenv("GITHUB_RUN_ID")
 }
 
-func setUpRoutes(router *mux.Router) {
+func parseTemplates() error {
+	if templates == nil {
+		templates = make(map[string]*template.Template)
+	}
+	tmplFiles, err := fs.ReadDir(tmpl, templatesDir)
+	if err != nil {
+		return err
+	}
+
+	for _, file := range tmplFiles {
+		if file.IsDir() {
+			continue
+		}
+
+		pt, err := template.ParseFS(tmpl, templatesDir+"/"+file.Name(), layoutsDir+"/bb.gohtml")
+		if err != nil {
+			return err
+		}
+
+		templates[file.Name()] = pt
+	}
+	return nil
+}
+
+func setUpRoutes(router *http.ServeMux) {
 	homePageMap = baseball.InitHomePageMap()
 
 	// handlers
@@ -100,24 +107,6 @@ func setUpRoutes(router *mux.Router) {
 		}
 	})
 
-	// favTeamGameListing shows all games of selected team for last 30 days
-	router.HandleFunc("/bbFavoriteTeam", func(w http.ResponseWriter, r *http.Request) {
-		id := r.URL.Query().Get("id")
-		favTeamGameListing := baseball.FavoriteTeamGameListHandler(id, homePageMap)
-
-		w.Header().Set("Cache-Control", "max-age=10800")
-
-		teamID, _ := strconv.Atoi(id)
-		favTeam := homePageMap[teamID]
-
-		ua := user_agent.New(r.UserAgent())
-		if ua.Mobile() {
-			root.ExecuteTemplate(w, "bbFavoriteTeamGameListMobile", FavGames{FavGamesList: favTeamGameListing, FavTeam: favTeam})
-		} else {
-			root.ExecuteTemplate(w, "bbFavoriteTeamGameList", FavGames{FavGamesList: favTeamGameListing, FavTeam: favTeam})
-		}
-	})
-
 	// gameDayListing for yesterday (default 'homepage')
 	router.HandleFunc("/bb", bbHome)
 
@@ -130,26 +119,44 @@ func setUpRoutes(router *mux.Router) {
 	// play all games of the day
 	router.HandleFunc("/bbAll", bbAll)
 
-	// catch all static file requests
+	// favTeamGameListing shows all games of selected team for last 30 days
+	router.HandleFunc("/bbFavoriteTeam", bbFavorite)
+
+	// homepage
 	router.HandleFunc("/", handleIndex)
-	router.PathPrefix("/").Handler(httpgzip.FileServer(
-		static,
-		httpgzip.FileServerOptions{
-			IndexHTML: true,
-		}))
+}
+
+func bbFavorite(w http.ResponseWriter, r *http.Request) {
+	id := r.URL.Query().Get("id")
+	favTeamGameListing := baseball.FavoriteTeamGameListHandler(id, homePageMap)
+
+	w.Header().Set("Cache-Control", "max-age=10800")
+
+	teamID, _ := strconv.Atoi(id)
+	favTeam := homePageMap[teamID]
+
+	ua := user_agent.New(r.UserAgent())
+	if err := templates["bbFavoriteTeamGameList.gohtml"].Execute(w, FavGames{Mobile: ua.Mobile(), FavGamesList: favTeamGameListing, FavTeam: favTeam}); err != nil {
+		log.Printf("Failed to parse bbHome page: %v", err)
+	}
 }
 
 func handleIndex(w http.ResponseWriter, r *http.Request) {
-	indexPage, _ := static.Find("index.html")
 	w.Header().Set("Cache-Control", "max-age=30800")
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
-	w.Write(indexPage)
+
+	ua := user_agent.New(r.UserAgent())
+	data := struct{ Mobile bool }{Mobile: ua.Mobile()}
+	if err := templates["index.html"].Execute(w, data); err != nil {
+		log.Printf("Failed to parse index page: %v", err)
+	}
 }
 
 // FavGames is now commented
 type FavGames struct {
 	FavGamesList []baseball.GameDay
 	FavTeam      baseball.Team
+	Mobile       bool
 }
 
 var homePageMap map[int]baseball.Team
@@ -166,21 +173,19 @@ func bbHome(w http.ResponseWriter, r *http.Request) {
 		*/
 
 		// this is for regular season operations
-		year, month, day := time.Now().Date()
-		date1 = "year_" + strconv.Itoa(year) + "/month_" +
-			strconv.Itoa(int(month)) + "/day_" + strconv.Itoa(day)
+		t := time.Now()
+		date1 = t.Format("year_2006/month_01/day_02")
 		offset = "-1"
 	}
-	gameDayListing := baseball.GameDayListingHandler(date1, offset, homePageMap)
 
+	gameDayListing := baseball.GameDayListingHandler(date1, offset, homePageMap)
 	w.Header().Set("Cache-Control", "max-age=10800")
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
 	ua := user_agent.New(r.UserAgent())
-	if ua.Mobile() {
-		root.ExecuteTemplate(w, "bbGameDayListingMobile", gameDayListing)
-	} else {
-		root.ExecuteTemplate(w, "bbGameDayListing", gameDayListing)
+	gameDayListing.Mobile = ua.Mobile()
+	if err := templates["bbGameDayListing.gohtml"].Execute(w, gameDayListing); err != nil {
+		log.Printf("Failed to parse bbHome page: %v", err)
 	}
 }
 
@@ -188,11 +193,12 @@ func bbStream(w http.ResponseWriter, r *http.Request) {
 	URL := r.URL.Query().Get("url")
 	log.Print("render BB Game URL: " + URL)
 
-	if (strings.HasPrefix(URL, "https://mlb-cuts-diamond.mlb.com/FORGE/") ||
-		strings.HasPrefix(URL, "https://mediadownloads.mlb.com")) &&
-		strings.HasSuffix(URL, ".mp4") {
+	if strings.HasPrefix(URL, "/api/v1/game") {
 		// take care and check that the incoming URL is what we expect it to be
-		root.ExecuteTemplate(w, "bbPlaySingleGameOfDay", URL)
+		URL = baseball.FetchGameURLFromID(URL)
+		if err := templates["bbPlaySingleGameOfDay.gohtml"].Execute(w, URL); err != nil {
+			log.Printf("Failed to parse bbStream page: %v", err)
+		}
 	} else {
 		// else send them on their merry way
 		http.Redirect(w, r, URL, http.StatusBadRequest)
@@ -211,7 +217,11 @@ func bbAll(w http.ResponseWriter, r *http.Request) {
 	// prepare response page
 	w.Header().Set("Cache-Control", "max-age=10800")
 	w.Header().Set("Content-Type", "text/html;charset=utf-8")
-	root.ExecuteTemplate(w, "bbPlayAllGamesOfDay", allGames)
+	ua := user_agent.New(r.UserAgent())
+	allGames.Mobile = ua.Mobile()
+	if err := templates["bbPlayAllGamesOfDay.gohtml"].Execute(w, allGames); err != nil {
+		log.Printf("Failed to parse bbAll page: %v", err)
+	}
 }
 
 func bbAjaxDay(w http.ResponseWriter, r *http.Request) {
@@ -224,10 +234,9 @@ func bbAjaxDay(w http.ResponseWriter, r *http.Request) {
 	w.Header().Set("Content-Type", "text/html;charset=utf-8")
 
 	ua := user_agent.New(r.UserAgent())
-	if ua.Mobile() {
-		root.ExecuteTemplate(w, "bbGameDayListingMobile", gameDayListing)
-	} else {
-		root.ExecuteTemplate(w, "bbGameDayListing", gameDayListing)
+	gameDayListing.Mobile = ua.Mobile()
+	if err := templates["bbGameDayListing.gohtml"].Execute(w, gameDayListing); err != nil {
+		log.Printf("Failed to parse bbAjax page: %v", err)
 	}
 }
 

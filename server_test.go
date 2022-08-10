@@ -11,7 +11,7 @@ var testDay = "?date1=year_2021%2fmonth_06%2fday_24&offset=0"
 var testCatchAllDay = "?date1=06%2f24%2f2021"
 
 func init() {
-	parseHTMLTemplateFiles()
+	parseTemplates()
 }
 
 func Test_bbHome(t *testing.T) {
@@ -25,7 +25,7 @@ func Test_bbHome(t *testing.T) {
 	bbHome(res, req)
 
 	// Verify a list of baseball games for that day is returned
-	exp := "/bbStream?url=https%3a%2f%2fmlb-cuts-diamond.mlb.com%2fFORGE%2f"
+	exp := "/bbStream?url=%2fapi%2fv1%2fgame%2f"
 
 	act := res.Body.String()
 	if !strings.Contains(act, exp) {
@@ -43,7 +43,7 @@ func Test_bbAjaxDay(t *testing.T) {
 	res := httptest.NewRecorder()
 	bbAjaxDay(res, req)
 
-	exp := "/bbStream?url=https%3a%2f%2fmlb-cuts-diamond.mlb.com%2fFORGE%2f"
+	exp := "/bbStream?url=%2fapi%2fv1%2fgame%2f"
 	act := res.Body.String()
 	if !strings.Contains(act, exp) {
 		t.Fatalf("Expected %s got %s", exp, act)
@@ -63,7 +63,7 @@ func Test_bbAll(t *testing.T) {
 	bbAll(res, req)
 
 	// Verify a list of baseball games for that day is returned
-	exp := "video_list = [\"https://mlb-cuts-diamond.mlb.com/FORGE/"
+	exp := "video_list = [\"/api/v1/game"
 	act := res.Body.String()
 	if !strings.Contains(act, exp) {
 		t.Fatalf("Expected %s got %s", exp, act)
@@ -97,7 +97,7 @@ func Test_bbStream_normal(t *testing.T) {
 	t.Parallel()
 
 	// normal case
-	MLB := "https%3a%2f%2fmediadownloads.mlb.com%2fmlbam%2fmp4%2f2016%2f06%2f24%2f849350983%2f1466728732779%2fasset_2500K.mp4"
+	MLB := "%2fapi%2fv1%2fgame%2f661182%2fcontent"
 	req, err := http.NewRequest("GET", "http://localhost"+getHTTPPort()+"/bbStream?url="+MLB, nil)
 	if err != nil {
 		t.Fatal(err)
@@ -107,7 +107,7 @@ func Test_bbStream_normal(t *testing.T) {
 	bbStream(res, req)
 
 	// Verify a MLB game is played
-	exp := "<source src=\"https://mediadownloads.mlb.com/mlbam/mp4/2016/06/24/849350983/1466728732779/asset_2500K.mp4\" type=\"video/mp4\">"
+	exp := "<source src=\"https://mlb-cuts-diamond.mlb.com/FORGE/2022/2022-08/09/7336868f-a25c598f-946a8f60-csvm-diamondx64-asset_1280x720_59_4000K.mp4\" type=\"video/mp4\">"
 	act := res.Body.String()
 	if !strings.Contains(act, exp) {
 		t.Fatalf("Expected %s got %s", exp, act)
