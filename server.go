@@ -4,11 +4,13 @@ import (
 	"embed"
 	"encoding/json"
 	"html/template"
+	"io"
 	"io/fs"
 	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
+	"path/filepath"
 	"strconv"
 	"strings"
 	"time"
@@ -16,10 +18,11 @@ import (
 	"github.com/ackersonde/ackerson.de-go/baseball"
 	"github.com/ackersonde/ackerson.de-go/structures"
 	"github.com/mssola/user_agent"
-	"github.com/urfave/negroni"
 )
 
 var (
+	//go:embed public
+	staticFiles embed.FS
 	//go:embed templates/index.html templates/*.gohtml templates/layouts/bb.gohtml
 	tmpl         embed.FS
 	templates    map[string]*template.Template
@@ -44,12 +47,19 @@ func main() {
 
 	r := http.NewServeMux()
 	setUpRoutes(r)
-	n := negroni.Classic()
-	n.UseHandler(r)
 
-	if err := http.ListenAndServe(httpPort, n); err != nil {
+	if err := http.ListenAndServe(httpPort, r); err != nil {
 		log.Printf("HANDLER ERR: %v", err)
 	}
+}
+
+func fsHandler() http.Handler {
+	sub, err := fs.Sub(staticFiles, "public")
+	if err != nil {
+		panic(err)
+	}
+
+	return http.FileServer(http.FS(sub))
 }
 
 func parseEnvVariables() {
@@ -84,7 +94,12 @@ func parseTemplates() error {
 func setUpRoutes(router *http.ServeMux) {
 	homePageMap = baseball.InitHomePageMap()
 
-	// handlers
+	staticHandler := fsHandler()
+	router.Handle("/images/", staticHandler)
+	router.Handle("/css/", staticHandler)
+	router.Handle("/js/", staticHandler)
+
+	// dynamic routes
 	router.HandleFunc("/date", func(w http.ResponseWriter, r *http.Request) {
 		if r.Method == post {
 			DateHandler(w, r)
@@ -142,13 +157,42 @@ func bbFavorite(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleIndex(w http.ResponseWriter, r *http.Request) {
+	fp := filepath.Clean(r.URL.Path)
+	log.Printf("fp: %v", fp)
+
 	w.Header().Set("Cache-Control", "max-age=30800")
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
 
-	ua := user_agent.New(r.UserAgent())
-	data := struct{ Mobile bool }{Mobile: ua.Mobile()}
-	if err := templates["index.html"].Execute(w, data); err != nil {
-		log.Printf("Failed to parse index page: %v", err)
+	if fp == "/" || fp == "/index.html" {
+		ua := user_agent.New(r.UserAgent())
+		data := struct{ Mobile bool }{Mobile: ua.Mobile()}
+		if err := templates["index.html"].Execute(w, data); err != nil {
+			log.Printf("Failed to parse index page: %v", err)
+		}
+
+		return
+	}
+
+	// Return a 404 if the template doesn't exist
+	info, err := os.Stat("public/" + fp)
+	if err != nil {
+		if os.IsNotExist(err) {
+			http.NotFound(w, r)
+			return
+		}
+	}
+
+	// Return a 404 if the request is for a directory
+	if info.IsDir() {
+		http.NotFound(w, r)
+		return
+	} else {
+		log.Printf("found %v", info)
+		dat, err := os.Open(info.Name())
+		if err != nil {
+			log.Printf("unable to read file %s: %s", "public/"+info.Name(), err.Error())
+		}
+		io.Copy(w, dat)
 	}
 }
 

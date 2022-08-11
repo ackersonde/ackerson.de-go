@@ -22,10 +22,10 @@
 
     <link href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css"
         rel="stylesheet" />
-    <link href="css/offworld{{if .Mobile}}Mobile{{end}}.css" rel="stylesheet" />
+    <link href="/css/offworld{{if .Mobile}}Mobile{{end}}.css" rel="stylesheet" />
     {{if not .Mobile}}
     <link href="https://cdn.jsdelivr.net/npm/jquery.terminal@2.34.0/css/jquery.terminal.min.css" rel="stylesheet" />
-    <link href="css/jquery.terminal.css" rel="stylesheet" />
+    <link href="/css/jquery.terminal.css" rel="stylesheet" />
     {{end}}
 </head>
 
@@ -36,18 +36,18 @@
         {{end}}
         <div id="links">
             <a href="javascript:mvvRoute('M%C3%BCnchen', 'Oberhatzkofen%20Kirche%2C%20Rottenburg%20a.d.%20Laaber');"><img
-                    src="images/ober.png" width="28px" alt="Coming home" title="Coming home"></a>&nbsp;&nbsp;
+                    src="/images/ober.png" width="28px" alt="Coming home" title="Coming home"></a>&nbsp;&nbsp;
             <a href="javascript:mvvRoute('Oberhatzkofen%20Kirche%2C%20Rottenburg%20a.d.%20Laaber', 'M%C3%BCnchen');"><img
-                    src="images/munich.png" width="28px" height="32px" alt="Going to Munich"
+                    src="/images/munich.png" width="28px" height="32px" alt="Going to Munich"
                     title="Going to Munich"></a>&nbsp;&nbsp;
-            <a href="/bb"><img src="images/baseballSmall.png" width="32px" alt="MLB" title="Condensed MLB games"></a>
+            <a href="/bb"><img src="/images/baseballSmall.png" width="32px" alt="MLB" title="Condensed MLB games"></a>
         </div>
         {{if not .Mobile}}
         <!-- HIDDEN / POP-UP DIVS -->
         <div class="ui-widget-content" id="weatherPopup">
             <p class="border">&nbsp;</p>
             <a class="closePopupButton" href="javascript:popupClose('weatherPopup');"><img class="closePopupIcon"
-                    src="images/close_button.png"></a>
+                    src="/images/close_button.png"></a>
             <div id="weatherreport">
                 <div id="currentweather" style="float:left; clear:both;margin-top:-25px;margin-left:10px;">
                 </div>

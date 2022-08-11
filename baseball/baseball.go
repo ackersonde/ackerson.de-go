@@ -47,8 +47,14 @@ func PlayAllGamesOfDayHandler(date1 string, offset string, homePageMap map[int]T
 	gameDate, _, games := getDatesAndGames(date1, offset, homePageMap, "")
 
 	var gameUrls []string
+	if len(games) > 1 {
+		log.Printf(games[0][0])
+	}
 	for _, stringArray := range games {
-		gameUrls = append(gameUrls, stringArray[10])
+		actualGameURL := FetchGameURLFromID(stringArray[10])
+
+		log.Printf("gameID: %s -> URL: %s", stringArray[10], actualGameURL)
+		gameUrls = append(gameUrls, actualGameURL)
 	}
 	sort.Strings(gameUrls)
 
@@ -129,18 +135,16 @@ func searchMLBGames(dates string, games map[int][]string, homePageMap map[int]Te
 		}
 
 		contentURL := game.Get("content.link").String()
-		if contentURL != "" {
+		if contentURL != "" && contentURL != "http://baseball.theater" {
 			awayTeam := LookupTeamInfo(homePageMap, awayTeamID)
 			homeTeam := LookupTeamInfo(homePageMap, homeTeamID)
 			gameURL := contentURL
-			if !strings.Contains(gameURL, "baseball.theater") {
-				gameID := game.Get("gamePK").String()
-				games[k] = []string{
-					awayTeam.Name, awayTeam.HomePage, strconv.Itoa(awayTeam.ID), awayTeam.Abbreviation,
-					homeTeam.Name, homeTeam.HomePage, strconv.Itoa(homeTeam.ID), homeTeam.Abbreviation,
-					gameID, dates, gameURL}
-				k++
-			}
+			gameID := game.Get("gamePK").String()
+			games[k] = []string{
+				awayTeam.Name, awayTeam.HomePage, strconv.Itoa(awayTeam.ID), awayTeam.Abbreviation,
+				homeTeam.Name, homeTeam.HomePage, strconv.Itoa(homeTeam.ID), homeTeam.Abbreviation,
+				gameID, dates, gameURL}
+			k++
 		}
 	}
 
