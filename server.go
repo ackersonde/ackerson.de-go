@@ -158,7 +158,6 @@ func bbFavorite(w http.ResponseWriter, r *http.Request) {
 
 func handleIndex(w http.ResponseWriter, r *http.Request) {
 	fp := filepath.Clean(r.URL.Path)
-	log.Printf("fp: %v", fp)
 
 	w.Header().Set("Cache-Control", "max-age=30800")
 	w.Header().Set("Content-Type", "text/html; charset=utf-8")
@@ -173,8 +172,9 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 		return
 	}
 
+	relativeFilePath := "./public/" + fp
 	// Return a 404 if the template doesn't exist
-	info, err := os.Stat("public/" + fp)
+	info, err := os.Stat(relativeFilePath)
 	if err != nil {
 		if os.IsNotExist(err) {
 			http.NotFound(w, r)
@@ -187,10 +187,9 @@ func handleIndex(w http.ResponseWriter, r *http.Request) {
 		http.NotFound(w, r)
 		return
 	} else {
-		log.Printf("found %v", info)
-		dat, err := os.Open(info.Name())
+		dat, err := os.Open(relativeFilePath)
 		if err != nil {
-			log.Printf("unable to read file %s: %s", "public/"+info.Name(), err.Error())
+			log.Printf("unable to find file %s: %s", relativeFilePath, err.Error())
 		}
 		io.Copy(w, dat)
 	}
