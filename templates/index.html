@@ -1,4 +1,50 @@
 <!DOCTYPE html>
+{{if .Mobile}}
+<style>
+    * {
+        box-sizing: border-box;
+    }
+
+    body {
+        display: flex;
+        min-height: 100vh;
+        flex-direction: column;
+        margin: 0;
+    }
+
+    #main {
+        display: flex;
+        flex: 1;
+    }
+
+    #main>article {
+        flex: 1;
+    }
+
+    #main>nav,
+    #main>aside {
+        flex: 0 0 20vw;
+        background: beige;
+    }
+
+    #main>nav {
+        order: -1;
+    }
+
+    header,
+    footer {
+        height: 25vh;
+    }
+
+    header,
+    footer,
+    article,
+    nav,
+    aside {
+        padding: 0.5em;
+    }
+</style>
+{{end}}
 <html>
 
 <head>
@@ -34,13 +80,26 @@
         {{if not .Mobile}}
         <div id="term1"></div>
         {{end}}
-        <div id="links">
-            <a href="javascript:mvvRoute('M%C3%BCnchen', 'Oberhatzkofen%20Kirche%2C%20Rottenburg%20a.d.%20Laaber');"><img
-                    src="/images/ober.png" width="28px" alt="Coming home" title="Coming home"></a>&nbsp;&nbsp;
-            <a href="javascript:mvvRoute('Oberhatzkofen%20Kirche%2C%20Rottenburg%20a.d.%20Laaber', 'M%C3%BCnchen');"><img
-                    src="/images/munich.png" width="28px" height="32px" alt="Going to Munich"
-                    title="Going to Munich"></a>&nbsp;&nbsp;
-            <a href="/bb"><img src="/images/baseballSmall.png" width="32px" alt="MLB" title="Condensed MLB games"></a>
+        <div {{if not .Mobile}}id="links" {{end}}>
+            <p>
+                <a href="javascript:mvvRoute('M%C3%BCnchen',
+                    'Oberhatzkofen%20Kirche%2C%20Rottenburg%20a.d.%20Laaber');">
+                    <img id="{{if .Mobile}}big{{else}}small{{end}}" src="/images/ober.png" alt="Coming home"
+                        title="Coming home">
+                </a>&nbsp;&nbsp;
+                <a href="javascript:mvvRoute('Oberhatzkofen%20Kirche%2C%20Rottenburg%20a.d.%20Laaber', 'M&uuml;nchen'
+                    );">
+                    <img id="{{if .Mobile}}big{{else}}small{{end}}" src="/images/munich.png" alt="Going to Munich"
+                        title="Going to Munich"></a>
+            </p>
+            <p>
+                <a
+                    href="javascript:mvvRoute('Oberhatzkofen%20Kirche%2C%20Rottenburg%20a.d.%20Laaber', 'Bahnhof%2C%20Grafenw&ouml;hr');">
+                    <img id="{{if .Mobile}}big{{else}}small{{end}}" src="/images/grafenwoehr.png" alt="Going to Graf"
+                        title="Going to Graf"></a>&nbsp;&nbsp;&nbsp;
+                <a href="/bb"><img id="{{if .Mobile}}big{{else}}small{{end}}" src="/images/baseballSmall.png" alt="MLB"
+                        title="Condensed MLB games"></a>
+            </p>
         </div>
         {{if not .Mobile}}
         <!-- HIDDEN / POP-UP DIVS -->
@@ -59,7 +118,7 @@
     </section>
 
     <footer>
-        <div id="footerLeft">
+        <div id="footer{{if .Mobile}}Right{{else}}Left{{end}}">
             <a href="https://github.com/danackerson">Dan Ackerson</a>&nbsp;&nbsp;&nbsp;&nbsp;
             <a href="impressum.html">Impressum</a>
         </div>
