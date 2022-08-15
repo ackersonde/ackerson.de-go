@@ -98,6 +98,8 @@ func setUpRoutes(router *http.ServeMux) {
 	router.Handle("/images/", staticHandler)
 	router.Handle("/css/", staticHandler)
 	router.Handle("/js/", staticHandler)
+	router.Handle("/manifest.json", staticHandler)
+	router.Handle("/bb_favico/", staticHandler)
 
 	// dynamic routes
 	router.HandleFunc("/date", func(w http.ResponseWriter, r *http.Request) {
