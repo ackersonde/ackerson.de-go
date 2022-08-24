@@ -4,7 +4,7 @@ go 1.18
 
 require (
 	github.com/mssola/user_agent v0.5.3
-	github.com/tidwall/gjson v1.14.2
+	github.com/tidwall/gjson v1.14.3
 )
 
 require (
