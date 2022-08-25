@@ -100,6 +100,7 @@ func setUpRoutes(router *http.ServeMux) {
 	router.Handle("/js/", staticHandler)
 	router.Handle("/manifest.json", staticHandler)
 	router.Handle("/bb_favico/", staticHandler)
+	router.Handle("/ip.html", staticHandler)
 
 	// dynamic routes
 	router.HandleFunc("/date", func(w http.ResponseWriter, r *http.Request) {
