@@ -3,14 +3,20 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
 <script>
     $(document).ready(function() {
+        $("div#current-address").load("https://ackerson.de/ip");
         $("div#ipv4-address").load("https://ipv4.ackerson.de/ip");
         $("div#ipv6-address").load("https://ipv6.ackerson.de/ip");
     });
 </script>
 
-<body>
-    <div id="ipv4-address"></div>
-    <div id="ipv6-address"></div>
+<body style="color: gray">
+    <p>Current address:
+        <div style="color: blue" id="current-address"></div>
+    </p>
+    <p>IPv4:
+        <div style="color: blue" id="ipv4-address"></div> | IPv6:
+        <div style="color: blue" id="ipv6-address"></div>
+    </p>
 </body>
 
 </html>
