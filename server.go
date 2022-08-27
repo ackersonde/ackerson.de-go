@@ -59,7 +59,15 @@ func fsHandler() http.Handler {
 		panic(err)
 	}
 
-	return http.FileServer(http.FS(sub))
+	orig := http.FileServer(http.FS(sub))
+	var wrapped = http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "https://ackerson.de")
+		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+
+		orig.ServeHTTP(w, r)
+	})
+
+	return wrapped
 }
 
 func parseEnvVariables() {
