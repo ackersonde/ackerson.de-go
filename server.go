@@ -120,8 +120,8 @@ func setUpRoutes(router *http.ServeMux) {
 		WhoAmIHandler(w, r)
 	})
 	router.HandleFunc("/ip", func(w http.ResponseWriter, r *http.Request) {
-		w.Header().Set("Access-Control-Allow-Origin", "https://ackerson.de")
-		w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
+		//w.Header().Set("Access-Control-Allow-Origin", "https://ackerson.de")
+		//w.Header().Set("Access-Control-Allow-Headers", "Accept, Content-Type, Content-Length, Accept-Encoding, X-CSRF-Token, Authorization")
 		w.Write([]byte(r.Header.Get("X-Forwarded-For")))
 	})
 	router.HandleFunc("/version", func(w http.ResponseWriter, r *http.Request) {
