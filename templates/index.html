@@ -1,41 +1,40 @@
-<!DOCTYPE html>
-{{if .Mobile}}
+<!DOCTYPE html> {{if .Mobile}}
 <style>
     * {
         box-sizing: border-box;
     }
-
+    
     body {
         display: flex;
         min-height: 100vh;
         flex-direction: column;
         margin: 0;
     }
-
+    
     #main {
         display: flex;
         flex: 1;
     }
-
+    
     #main>article {
         flex: 1;
     }
-
+    
     #main>nav,
     #main>aside {
         flex: 0 0 20vw;
         background: beige;
     }
-
+    
     #main>nav {
         order: -1;
     }
-
+    
     header,
     footer {
         height: 25vh;
     }
-
+    
     header,
     footer,
     article,
@@ -60,19 +59,18 @@
     <link rel="shortcut icon" href="/favicon.ico?v=3eKo6zvPQw">
     <meta name="theme-color" content="#ffffff">
 
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.slim.min.js" integrity="sha512-yBpuflZmP5lwMzZ03hiCLzA94N0K2vgBtJgqQ2E1meJzmIBfjbb7k4Y23k2i2c/rIeSUGc7jojyIY5waK3ZxCQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/jquery-ui.min.js" integrity="sha512-57oZ/vW8ANMjR/KQ6Be9v/+/h6bq9/l3f0Oc7vn6qMqyhvPd1cvKBRWWpzu0QoneImqr2SkmO4MSqU+RpHom3Q==" crossorigin="anonymous"></script>
     {{if not .Mobile}}
-    <script src="https://cdn.jsdelivr.net/npm/jquery.terminal@2.34.0/js/jquery.terminal.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.34.0/js/jquery.terminal.min.js" integrity="sha512-lfkU/Qku0yOVZEYANlw2mOv7fpHFdS1E62UT7vJ55k22OB+xgRNNa6Cdor4Lugl4jhDjX29lJAG12X/OHFe8JQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
     {{end}}
 
-    <link href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css"
-        rel="stylesheet" />
-    <link href="/css/offworld{{if .Mobile}}Mobile{{end}}.css" rel="stylesheet" />
-    {{if not .Mobile}}
-    <link href="https://cdn.jsdelivr.net/npm/jquery.terminal@2.34.0/css/jquery.terminal.min.css" rel="stylesheet" />
-    <link href="/css/jquery.terminal.css" rel="stylesheet" />
-    {{end}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jqueryui/1.13.2/themes/base/jquery-ui.min.css" integrity="sha512-ELV+xyi8IhEApPS/pSj66+Jiw+sOT1Mqkzlh8ExXihe4zfqbWkxPRi8wptXIO9g73FSlhmquFlUOuMSoXz5IRw==" crossorigin="anonymous" referrerpolicy="no-referrer"
+    />
+    <link href="/css/offworld{{if .Mobile}}Mobile{{end}}.css" rel="stylesheet" /> {{if not .Mobile}}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/jquery.terminal/2.34.0/css/jquery.terminal.min.css" integrity="sha512-/8db3dfA8dw99rERsNxL/lgTXVpDuQfM2gybCmMXRBo0cK/cE/0pVASbrc8rvX6fF5VjnQYdkvn+qGDxzUyBHQ==" crossorigin="anonymous"
+        referrerpolicy="no-referrer" />
+    <link href="/css/jquery.terminal.css" rel="stylesheet" /> {{end}}
 </head>
 
 <body>
@@ -84,29 +82,23 @@
             <p>
                 <a href="javascript:mvvRoute('M%C3%BCnchen',
                     'Oberhatzkofen%20Kirche%2C%20Rottenburg%20a.d.%20Laaber');">
-                    <img id="{{if .Mobile}}big{{else}}small{{end}}" src="/images/ober.png" alt="Coming home"
-                        title="Coming home">
+                    <img id="{{if .Mobile}}big{{else}}small{{end}}" src="/images/ober.png" alt="Coming home" title="Coming home">
                 </a>&nbsp;&nbsp;
                 <a href="javascript:mvvRoute('Oberhatzkofen%20Kirche%2C%20Rottenburg%20a.d.%20Laaber', 'M&uuml;nchen'
                     );">
-                    <img id="{{if .Mobile}}big{{else}}small{{end}}" src="/images/munich.png" alt="Going to Munich"
-                        title="Going to Munich"></a>
+                    <img id="{{if .Mobile}}big{{else}}small{{end}}" src="/images/munich.png" alt="Going to Munich" title="Going to Munich"></a>
             </p>
             <p>
-                <a
-                    href="javascript:mvvRoute('Oberhatzkofen%20Kirche%2C%20Rottenburg%20a.d.%20Laaber', 'Bahnhof%2C%20Grafenw&ouml;hr');">
-                    <img id="{{if .Mobile}}big{{else}}small{{end}}" src="/images/grafenwoehr.png" alt="Going to Graf"
-                        title="Going to Graf"></a>&nbsp;&nbsp;&nbsp;
-                <a href="/bb"><img id="{{if .Mobile}}big{{else}}small{{end}}" src="/images/baseballSmall.png" alt="MLB"
-                        title="Condensed MLB games"></a>
+                <a href="javascript:mvvRoute('Oberhatzkofen%20Kirche%2C%20Rottenburg%20a.d.%20Laaber', 'Bahnhof%2C%20Grafenw&ouml;hr');">
+                    <img id="{{if .Mobile}}big{{else}}small{{end}}" src="/images/grafenwoehr.png" alt="Going to Graf" title="Going to Graf"></a>&nbsp;&nbsp;&nbsp;
+                <a href="/bb"><img id="{{if .Mobile}}big{{else}}small{{end}}" src="/images/baseballSmall.png" alt="MLB" title="Condensed MLB games"></a>
             </p>
         </div>
         {{if not .Mobile}}
         <!-- HIDDEN / POP-UP DIVS -->
         <div class="ui-widget-content" id="weatherPopup">
             <p class="border">&nbsp;</p>
-            <a class="closePopupButton" href="javascript:popupClose('weatherPopup');"><img class="closePopupIcon"
-                    src="/images/close_button.png"></a>
+            <a class="closePopupButton" href="javascript:popupClose('weatherPopup');"><img class="closePopupIcon" src="/images/close_button.png"></a>
             <div id="weatherreport">
                 <div id="currentweather" style="float:left; clear:both;margin-top:-25px;margin-left:10px;">
                 </div>
