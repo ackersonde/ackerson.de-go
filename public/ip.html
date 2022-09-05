@@ -1,0 +1,34 @@
+<html>
+<meta charset="UTF-8" />
+<title>IP Addresses</title>
+
+<!-- Favicon crap -->
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png?v=3eKo6zvPQw">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png?v=3eKo6zvPQw">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png?v=3eKo6zvPQw">
+<link rel="manifest" href="/manifest.json?v=3eKo6zvPQw">
+<link rel="mask-icon" href="/safari-pinned-tab.svg?v=3eKo6zvPQw" color="#5bbad5">
+<link rel="shortcut icon" href="/favicon.ico?v=3eKo6zvPQw">
+
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.1/jquery.slim.min.js" integrity="sha512-yBpuflZmP5lwMzZ03hiCLzA94N0K2vgBtJgqQ2E1meJzmIBfjbb7k4Y23k2i2c/rIeSUGc7jojyIY5waK3ZxCQ==" crossorigin="anonymous" referrerpolicy="no-referrer"></script>
+
+<script>
+    $(document).ready(function() {
+        $("div#current-address").load("https://ackerson.de/ip");
+        $("div#ipv4-address").load("https://ipv4.ackerson.de/ip");
+        $("div#ipv6-address").load("https://ipv6.ackerson.de/ip");
+    });
+</script>
+
+<body style="color: darkslategray">
+    <div style="display: flex;">Current IP:&nbsp;
+        <div style="color: blue; font-weight: bold;" id="current-address"></div>
+    </div>
+    <p />
+    <div style="display: flex; overflow: hidden;">Your IPv4:&nbsp;
+        <div style="color: blue;" id="ipv4-address"></div>&nbsp;|&nbsp;Your IPv6:&nbsp;
+        <div style="color: blue;" id="ipv6-address"></div>
+    </div>
+</body>
+
+</html>

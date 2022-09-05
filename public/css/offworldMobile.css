@@ -1,9 +1,4 @@
 html {
-    background: url(/images/starryNite.jpg) no-repeat center center fixed;
-    -webkit-background-size: cover;
-    -moz-background-size: cover;
-    -o-background-size: cover;
-    background-size: cover;
     color: white;
     background-color: black;
 }
@@ -13,13 +8,13 @@ a {
     text-decoration: none;
 }
 
-a:hover {
-    color: #E06C1F;
+#big {
+    width: 320px;
+    height: 320px;
 }
 
-#big {
-    width: 28px;
-    height: 32px;
+a:hover {
+    color: #E06C1F;
 }
 
 header,
@@ -57,7 +52,7 @@ input#address {
 
 #footerRight {
     float: right;
-    opacity: 0.2;
+    opacity: 0.8;
 }
 
 #footerRight:hover {
@@ -74,11 +69,6 @@ a.closePopupButton {
     position: relative;
     top: -24px;
     right: -14px;
-}
-
-#small {
-    width: 32px;
-    height: 32px;
 }
 
 #links {

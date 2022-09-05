@@ -1,14 +1,17 @@
-{{ template "header" }}
+{{template "main" .}}
+{{define "content"}}
+{{$platform := "mobile"}}
+{{ if not .Mobile}}{{$platform = "desktop"}}{{end}}
 <div id="responseBB">
   <section id="gamepanel" class="gamepaneltop">
     <div style="display: table-row;">
-      <div style="display: table-cell;padding-left:10px;"><a href="javascript:fetchGames(prepareDate('{{$.Date}}'), -1);"><img class="selectors prev-resized" alt="Prev" title="Prev" src="images/img_trans.gif"></a></div>
+      <div style="display: table-cell;padding-left:10px;"><a href="javascript:fetchGames(prepareDate('{{$.Date}}'), -1);"><img class="selectors prev-resized" alt="Prev" title="Prev" src="/images/img_trans.gif"></a></div>
       <div style="display: table-cell;text-align:center;"><a href="https://www.mlb.com/standings">MLB</a> Games<br><input type='text' id='searchDate' value='{{ $.ReadableDate }}'></div>
-      <div style="display: table-cell;"><a href="javascript:fetchGames(prepareDate('{{$.Date}}'), 1);"><img class="selectors next-resized" alt="Next" title="Next" src="images/img_trans.gif"></a></div>
+      <div style="display: table-cell;"><a href="javascript:fetchGames(prepareDate('{{$.Date}}'), 1);"><img class="selectors next-resized" alt="Next" title="Next" src="/images/img_trans.gif"></a></div>
     </div>
     <div style="display: table-row;">
       <div style="display: table-cell;">&nbsp;</div>
-      <div style="display: table-cell;text-align:center;"><a href="/bbAll?date1={{ $.Date }}"><img id="ball" src="images/pokemon.jpg" width="32px" alt="Gotta Catch 'Em All!" title="Gotta Catch 'Em All!" /></a></div>
+      <div style="display: table-cell;text-align:center;"><a href="/bbAll?date1={{ $.Date }}"><img id="ball" src="/images/pokemon.jpg" width="32px" alt="Gotta Catch 'Em All!" title="Gotta Catch 'Em All!" /></a></div>
       <div style="display: table-cell;">&nbsp;</div>
     </div>
   </section>
@@ -27,20 +30,20 @@
       {{ $id := index $value 8}}
       {{ $game_url := index $value 10}}
       <div style="display: table-cell;padding:10px;">
-        <a href="/bbFavoriteTeam?id={{ $away_id }}" title="{{ $away_team }}"><img class="logo-desktop" src="images/mlb-logos-2020/{{ $away_id }}_96x96.png"></a>
+        <a href="/bbFavoriteTeam?id={{ $away_id }}" title="{{ $away_team }}"><img class="logo-{{$platform}}" width="48px" src="/images/mlb-logos-2020/{{ $away_id }}_96x96.png"></a>
       </div>
       <div style="display:table-cell;padding:10px;text-align:center;vertical-align:middle;">
         <a href="/bbStream?url={{ $game_url }}">{{ $away_abbrev }}@{{ $home_abbrev }}</a>
       </div>
       <div style="display:table-cell;padding:10px;">
-        <a href="/bbFavoriteTeam?id={{ $home_id }}" title="{{ $home_team }}"><img class="logo-desktop" src="images/mlb-logos-2020/{{ $home_id }}_96x96.png"></a>
+        <a href="/bbFavoriteTeam?id={{ $home_id }}" title="{{ $home_team }}"><img class="logo-{{$platform}}" width="48px" src="/images/mlb-logos-2020/{{ $home_id }}_96x96.png"></a>
       </div>
       <!--
       <div style="display:table-cell;padding:5px;text-align:center;vertical-align:middle;">
         <a href="http://m.mlb.com/video/v{{$id}}/condensed-game-{{$away_abbrev}}{{$home_abbrev}}"><img src="images/link_external.png"/></a>
       </div>-->
     </div>
-  {{ end }}
+    {{end}}
   </section>
 </div>
-{{ template "footer" }}
+{{end}}

@@ -2,12 +2,14 @@ name: Deploy ackerson.de homepage
 
 on:
   push:
-    branches: [ master ]
+    branches: [ master, hetzner ]
   workflow_dispatch:
     inputs:
       ca_pub_fingerprint:
         description: fingerprint of CA signed user cert
+        default: 'No value supplied'
         required: false
+        type: string
 
 jobs:
   build:
@@ -33,39 +35,42 @@ jobs:
 
       - name: Build application and docker image
         run: |
-          go get github.com/gobuffalo/packr/v2/packr2/cmd@v2.8.3
-          go install github.com/gobuffalo/packr/v2/packr2
           go mod tidy
-
           export `go env | grep GOPATH | tr -d \"`
-          packr2
           CGO_ENABLED=0 GOOS=linux GOARCH=amd64 go build -o homepage
 
           docker build --compress -t danackerson/ackerson.de:vg$GITHUB_RUN_ID .
 
           export DUSER=$(echo ${{ secrets.ORG_DOCKER_USER }} | base64 -d)
           export DPASS=$(echo ${{ secrets.ORG_DOCKER_PASS }} | base64 -d)
-          docker login -u $DUSER -p $DPASS
+          echo $DPASS | docker login -u $DUSER --password-stdin
 
           docker tag danackerson/ackerson.de:vg$GITHUB_RUN_ID danackerson/ackerson.de:latest
           docker push --all-tags danackerson/ackerson.de
 
-      - name: Deploy to DO
+      - name: Deploy to Hetzner
         run: |
+          # Needed for DNS update as long as it's on DO!
           export CTX_DIGITALOCEAN_DROPLET_PROXY_TOKEN=$(echo ${{ secrets.ORG_DIGITALOCEAN_DROPLET_PROXY_TOKEN }} | base64 -d)
           export CTX_DIGITALOCEAN_FIREWALL=$(echo ${{ secrets.ORG_DIGITALOCEAN_FIREWALL }} | base64 -d)
 
-          git clone https://github.com/ackersonde/digitaloceans.git
-          cd digitaloceans
+          export HETZNER_API_TOKEN=$(echo ${{ secrets.ORG_HETZNER_CLOUD_API_TOKEN }} | base64 -d)
+          #export HETZNER_FIREWALL=$(echo ${{ secrets.ORG_HETZNER_HOME_FIREWALL }} | base64 -d)
+          #export HETZNER_VAULT_VOLUME_ID=$(echo ${{ secrets.ORG_HETZNER_VAULT_VOLUME_ID }} | base64 -d)
+
+          git clone https://github.com/ackersonde/hetzner_home.git
+          cd hetzner_home
           go mod tidy
-          go build do.go
+          go build hetzner.go
           cd ../
 
           public_ip_address=$(curl -s https://checkip.amazonaws.com)
-          ./digitaloceans/do -fn=firewallSSH -allow=true -ip=$public_ip_address -tag=traefik
+          ./hetzner_home/hetzner -fn=firewallSSH -tag=homepage -ip=$public_ip_address
 
           mkdir ~/.ssh
-          echo "${{ secrets.ORG_DIGITALOCEAN_SSH_PRIVKEY }}" | tee ~/.ssh/id_rsa
+          cat <<EOF >~/.ssh/id_rsa
+          $(echo ${{ secrets.HETZNER_SSH_PRIVKEY }} | base64 -d)
+          EOF
           chmod 400 ~/.ssh/id_rsa
 
           export DARKSKY_API_KEY=$(echo ${{ secrets.ORG_DARKSKY_API_KEY }} | base64 -d)
@@ -74,15 +79,16 @@ jobs:
             docker run -d --restart=always \
               -e DARKSKY_API_KEY=$DARKSKY_API_KEY \
               -e GITHUB_RUN_ID=$GITHUB_RUN_ID \
+              -e CA_FINGER=${{ inputs.ca_pub_fingerprint }} \
               --label='traefik.enable=true' \
-              --label='traefik.http.routers.homepage.middlewares=http-ratelimit@file,secHeaders@file' \
-              --label='traefik.http.routers.homepage.tls.certResolver=letsencrypt' \
-              --label='traefik.http.routers.homepage.tls.domains=ackerson.de' \
-              --label='traefik.http.routers.homepage.rule=Host(\`ackerson.de\`) || Host(\`www.ackerson.de\`)' \
+              --label='traefik.http.routers.homepage.tls.domains[0].main=ackerson.de' \
+              --label='traefik.http.routers.homepage.tls.domains[0].sans=*.ackerson.de' \
+              --label='traefik.http.routers.homepage.rule=Host(\`ackerson.de\`, \`www.ackerson.de\`, \`ipv4.ackerson.de\`, \`ipv6.ackerson.de\`)' \
+              --label='traefik.http.routers.homepage.middlewares=http-ratelimit@file,secHeaders@file,home-redirectregex@file' \
               --name homepage danackerson/ackerson.de:vg$GITHUB_RUN_ID"
 
           rm -Rf ~/.ssh ~/.docker/config.json
-          ./digitaloceans/do -fn=firewallSSH -allow=false -ip=$public_ip_address
+          ./hetzner_home/hetzner -fn=cleanupDeploy -tag=homepage
 
           export SLACK_NOTIFY_TOKEN=$(echo ${{ secrets.ORG_SLACK_NOTIFICATIONS_TOKEN }} | base64 -d)
           curl -s -o /dev/null -X POST -d token=$SLACK_NOTIFY_TOKEN -d channel=C092UE0H4 \

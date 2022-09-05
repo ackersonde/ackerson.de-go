@@ -39,6 +39,7 @@ type AllGames struct {
 	VideoCountStorage string
 	BallgameVideoURLs []string
 	BallgameCount     int
+	Mobile            bool
 }
 
 // PlayAllGamesOfDayHandler is now commented
@@ -46,8 +47,14 @@ func PlayAllGamesOfDayHandler(date1 string, offset string, homePageMap map[int]T
 	gameDate, _, games := getDatesAndGames(date1, offset, homePageMap, "")
 
 	var gameUrls []string
+	if len(games) > 1 {
+		log.Printf(games[0][0])
+	}
 	for _, stringArray := range games {
-		gameUrls = append(gameUrls, stringArray[10])
+		actualGameURL := FetchGameURLFromID(stringArray[10])
+
+		log.Printf("gameID: %s -> URL: %s", stringArray[10], actualGameURL)
+		gameUrls = append(gameUrls, actualGameURL)
 	}
 	sort.Strings(gameUrls)
 
@@ -63,6 +70,7 @@ type GameDay struct {
 	Date         string
 	ReadableDate string
 	Games        map[int][]string
+	Mobile       bool
 }
 
 // GameDayListingHandler is now commented
@@ -79,7 +87,7 @@ func getDatesAndGames(date1 string, offset string, homePageMap map[int]Team, fav
 		location, _ := time.LoadLocation("UTC")
 		monthDayString, err := time.ParseInLocation("2006/month_01/day_02", date1, location)
 		if err != nil {
-			log.Print(err)
+			log.Print("HERE: " + err.Error())
 		} else {
 			i, _ := strconv.Atoi(offset)
 			gameDate = monthDayString.AddDate(0, 0, i)
@@ -102,7 +110,6 @@ func searchMLBGames(dates string, games map[int][]string, homePageMap map[int]Te
 	var awayTeamID, homeTeamID string
 	k := 0
 
-	startW1 := time.Now()
 	resp, err := http.Get(URL)
 	if err != nil {
 		log.Print(err)
@@ -117,9 +124,6 @@ func searchMLBGames(dates string, games map[int][]string, homePageMap map[int]Te
 
 	scheduleJSON := string(raw)
 
-	elapsedW1 := time.Since(startW1)
-	log.Printf("%s took %s", URL, elapsedW1)
-
 	gamesJSON := gjson.Get(scheduleJSON, "dates.0.games")
 	for _, game := range gamesJSON.Array() {
 		awayTeamID = game.Get("teams.away.team.id").String()
@@ -131,27 +135,25 @@ func searchMLBGames(dates string, games map[int][]string, homePageMap map[int]Te
 		}
 
 		contentURL := game.Get("content.link").String()
-		if contentURL != "" {
+		if contentURL != "" && contentURL != "http://baseball.theater" {
 			awayTeam := LookupTeamInfo(homePageMap, awayTeamID)
 			homeTeam := LookupTeamInfo(homePageMap, homeTeamID)
-			gameURL := FetchGameURLFromID(contentURL)
-			if !strings.Contains(gameURL, "baseball.theater") {
-				gameID := game.Get("gamePK").String()
-				games[k] = []string{
-					awayTeam.Name, awayTeam.HomePage, strconv.Itoa(awayTeam.ID), awayTeam.Abbreviation,
-					homeTeam.Name, homeTeam.HomePage, strconv.Itoa(homeTeam.ID), homeTeam.Abbreviation,
-					gameID, dates, gameURL}
-				k++
-			}
+			gameURL := contentURL
+			gameID := game.Get("gamePK").String()
+			games[k] = []string{
+				awayTeam.Name, awayTeam.HomePage, strconv.Itoa(awayTeam.ID), awayTeam.Abbreviation,
+				homeTeam.Name, homeTeam.HomePage, strconv.Itoa(homeTeam.ID), homeTeam.Abbreviation,
+				gameID, dates, gameURL}
+			k++
 		}
 	}
+
 	return games
 }
 
 // FetchGameURLFromID is now commented
 func FetchGameURLFromID(contentURL string) string {
 	gameURL := "http://baseball.theater"
-	//startX1 := time.Now()
 	resp, err := http.Get("https://statsapi.mlb.com" + contentURL)
 	if err != nil {
 		log.Print(err)
