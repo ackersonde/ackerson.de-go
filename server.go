@@ -6,7 +6,6 @@ import (
 	"html/template"
 	"io"
 	"io/fs"
-	"io/ioutil"
 	"log"
 	"net/http"
 	"os"
@@ -341,7 +340,7 @@ func DateHandler(w http.ResponseWriter, req *http.Request) {
 func WeatherHandler(w http.ResponseWriter, req *http.Request) {
 	// handle JSON POST request
 	//body := string(structures.TestGeoLocationPost) // in case you are testing :)
-	body, err := ioutil.ReadAll(req.Body)
+	body, err := io.ReadAll(req.Body)
 	if err != nil {
 		log.Printf("err: %s\n", err)
 	} else {
@@ -365,7 +364,7 @@ func WeatherHandler(w http.ResponseWriter, req *http.Request) {
 		log.Printf("darksky ERR: %s\n", err)
 	} else {
 		defer currentWeatherResp.Body.Close()
-		currentWeatherJSON, err2 := ioutil.ReadAll(currentWeatherResp.Body)
+		currentWeatherJSON, err2 := io.ReadAll(currentWeatherResp.Body)
 		if err2 != nil {
 			log.Printf("darksky ERR2: %s\n", err2)
 		}
