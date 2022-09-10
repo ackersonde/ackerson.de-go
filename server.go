@@ -103,6 +103,9 @@ func setUpRoutes(router *http.ServeMux) {
 	homePageMap = baseball.InitHomePageMap()
 
 	staticHandler := fsHandler()
+	router.Handle("/favicon-32x32.png", staticHandler)
+	router.Handle("/favicon-16x16.png", staticHandler)
+	router.Handle("/favicon.ico", staticHandler)
 	router.Handle("/images/", staticHandler)
 	router.Handle("/css/", staticHandler)
 	router.Handle("/js/", staticHandler)
