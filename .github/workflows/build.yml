@@ -88,11 +88,8 @@ jobs:
               --name homepage danackerson/ackerson.de:vg$GITHUB_RUN_ID"
 
           # Test gitlab access
-          export HSMPLANB_PIPELINE_TRIGGER_DEPLOY=$(echo ${{ secrets.ORG_GITLAB_DEPLOY_HSMPLANB }} | base64 -d);
-          curl -Ss -X POST --fail -F token=$HSMPLANB_PIPELINE_TRIGGER_DEPLOY -F "ref=main" -F "variables[RUN_NIGHTLY_BUILD]=true" \
-            https://gitlab.com/api/v4/projects/39645086/trigger/pipeline;
-          ls -lrt /home/runner/.ssh/id_rsa;
-          curl -o /dev/null --request PUT --header "PRIVATE-TOKEN: ${{ secrets.ORG_GITLAB_WRITE_GLOBAL_VARS }}" \
+          export GITLAB_WRITE_GLOBAL_VARS=$(echo ${{ secrets.ORG_GITLAB_WRITE_GLOBAL_VARS }} | base64 -d)
+          curl -Ss -o /dev/null --request PUT --header "PRIVATE-TOKEN: $GITLAB_WRITE_GLOBAL_VARS" \
             -F "key=HETZNER_SSH_DEPLOY_PRIVATE_KEY" \
             -F "variable_type=file" \
             -F "protected=true" \
@@ -103,6 +100,6 @@ jobs:
           ./hetzner_home/hetzner -fn=cleanupDeploy -tag=homepage
 
           export SLACK_NOTIFY_TOKEN=$(echo ${{ secrets.ORG_SLACK_NOTIFICATIONS_TOKEN }} | base64 -d)
-          curl -s -o /dev/null -X POST -d token=$SLACK_NOTIFY_TOKEN -d channel=C092UE0H4 \
+          curl -Ss -o /dev/null -X POST -d token=$SLACK_NOTIFY_TOKEN -d channel=C092UE0H4 \
             -d text="<https://github.com/$GITHUB_REPOSITORY/actions/runs/$GITHUB_RUN_ID|$GITHUB_REPOSITORY @ $GITHUB_RUN_ID>" \
             https://slack.com/api/chat.postMessage
