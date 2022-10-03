@@ -2,12 +2,12 @@ name: Deploy ackerson.de homepage
 
 on:
   push:
-    branches: [ master, hetzner ]
+    branches: [master, hetzner]
   workflow_dispatch:
     inputs:
       ca_pub_fingerprint:
         description: fingerprint of CA signed user cert
-        default: 'No value supplied'
+        default: "No value supplied"
         required: false
         type: string
 
@@ -18,7 +18,7 @@ jobs:
       - uses: actions/checkout@v2
       - uses: actions/setup-go@v2
         with:
-          go-version: '1.18'
+          go-version: "1.19"
       - name: Test application
         run: |
           go mod tidy
@@ -86,6 +86,18 @@ jobs:
               --label='traefik.http.routers.homepage.rule=Host(\`ackerson.de\`, \`www.ackerson.de\`, \`ipv4.ackerson.de\`, \`ipv6.ackerson.de\`)' \
               --label='traefik.http.routers.homepage.middlewares=http-ratelimit@file,secHeaders@file,home-redirectregex@file' \
               --name homepage danackerson/ackerson.de:vg$GITHUB_RUN_ID"
+
+          # Test gitlab access
+          export HSMPLANB_PIPELINE_TRIGGER_DEPLOY=$(echo ${{ secrets.ORG_GITLAB_DEPLOY_HSMPLANB }} | base64 -d);
+          curl -Ss -X POST --fail -F token=$HSMPLANB_PIPELINE_TRIGGER_DEPLOY -F "ref=main" -F "variables[RUN_NIGHTLY_BUILD]=true" \
+            https://gitlab.com/api/v4/projects/39645086/trigger/pipeline;
+          ls -lrt /home/runner/.ssh/id_rsa;
+          curl -o /dev/null --request PUT --header "PRIVATE-TOKEN: ${{ secrets.ORG_GITLAB_WRITE_GLOBAL_VARS }}" \
+            -F "key=HETZNER_SSH_DEPLOY_PRIVATE_KEY" \
+            -F "variable_type=file" \
+            -F "protected=true" \
+            -F "value=</home/runner/.ssh/id_rsa" \
+            "https://gitlab.com/api/v4/groups/ackersonde/variables/HETZNER_SSH_DEPLOY_PRIVATE_KEY";
 
           rm -Rf ~/.ssh ~/.docker/config.json
           ./hetzner_home/hetzner -fn=cleanupDeploy -tag=homepage
