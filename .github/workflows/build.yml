@@ -87,15 +87,6 @@ jobs:
               --label='traefik.http.routers.homepage.middlewares=http-ratelimit@file,secHeaders@file,home-redirectregex@file' \
               --name homepage danackerson/ackerson.de:vg$GITHUB_RUN_ID"
 
-          # Test gitlab access
-          export GITLAB_WRITE_GLOBAL_VARS=$(echo ${{ secrets.ORG_GITLAB_WRITE_GLOBAL_VARS }} | base64 -d)
-          curl -Ss -o /dev/null --request PUT --header "PRIVATE-TOKEN: $GITLAB_WRITE_GLOBAL_VARS" \
-            -F "key=HETZNER_SSH_DEPLOY_PRIVATE_KEY" \
-            -F "variable_type=file" \
-            -F "protected=true" \
-            -F "value=</home/runner/.ssh/id_rsa" \
-            "https://gitlab.com/api/v4/groups/ackersonde/variables/HETZNER_SSH_DEPLOY_PRIVATE_KEY";
-
           rm -Rf ~/.ssh ~/.docker/config.json
           ./hetzner_home/hetzner -fn=cleanupDeploy -tag=homepage
 
